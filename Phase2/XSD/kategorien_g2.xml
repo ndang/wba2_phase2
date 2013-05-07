@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kategorien xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kategorien.xsd">
+  <kategorie kategorie_id="k0">
+    <kategorie_titel>Jesu Geburtstag! Gottesdienst</kategorie_titel>
+    <kategorie_beschreibung>Jesus von Nazareth ist die zentrale Figur des christlichen Glaubens. Das Neue Testament beschreibt ihn als den Sohn Gottes und erzählt von seinen wundersamen Taten und Gleichnissen. Dabei ist über den tatsächlichen Menschen Jesus nicht viel bekannt. Erst viele Jahre nach seinem Tod wurden seine Geschichte niedergeschrieben. So viel ist allerdings sicher: Der jüdische Wanderprediger muss eine unbeschreibliche Faszination auf die Bevölkerung ausgeübt haben.</kategorie_beschreibung>
+  </kategorie>
+</kategorien>

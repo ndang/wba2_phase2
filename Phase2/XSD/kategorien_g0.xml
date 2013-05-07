@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kategorien xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kategorien.xsd">
-  <kategorie kategorie_id="idvalue0">
+  <kategorie kategorie_id="k0">
     <kategorie_titel>Diamantene Hochzeit</kategorie_titel>
     <kategorie_beschreibung>Die Diamantene Hochzeit ist ein sehr besonderes und außergewöhnliches Familienfest. Der 60. Hochzeitstag ist Anlass für eine Jubiläumsfeier mit Kindern, Enkeln, Urenkeln und allen Menschen, die dem Diamantpaar wichtig sind. Das Paar hat in der Jugend schwierige und harte Zeiten durchlebt, maßgeblich zur Entwicklung unseres heutigen Lebens beigetragen und all dies nur durch Liebe, Treue und Zusammenhalt erreichen können.</kategorie_beschreibung>
   </kategorie>
-  <kategorie kategorie_id="idvalue1">
+  <kategorie kategorie_id="k1">
     <kategorie_titel>Platine Hochzeit</kategorie_titel>
     <kategorie_beschreibung>Da 45 Ehejahre eine lange Zeit sind, hat man dem 45. Hochzeitstag eines der Edelmetalle zugesprochen. Zum Anlass des 45. Ehejahres feiert man nämlich die Platinhochzeit. Oft auch als Messinghochzeit bezeichnet trägt dieses Ehejubiläum seinen Namen wegen der Eigenschaften des Platins. Es ist schwer, schmiedbar, dehnbar und weist eine hohe Haltbarkeit auf.</kategorie_beschreibung>
   </kategorie>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genres xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="genres.xsd">
+  <genre genre_id="g0">
+    <genre_titel>Hochzeit</genre_titel>
+    <genre_beschreibung>Fest zur Eheschließung mit vorher stattfindendem Polterabend, Ringtausch während der Zeremonie, festliche Kleidung, Festmahl; bei der Hochzeit schreitet das Brautpaar vor den Standesbeamten oder vor den Traualtar, um auch vor Gott ewige Liebe zu schwören; während der Hochzeitsfeier gibt es verschiedene Bräuche, zum Beispiel die Entführung der Braut, den Brauttanz, usw.; es gibt die standesamtliche und die kirchliche Hochzeit; früher wurden als Hochzeit vor allem christliche Feste wie Ostern, Pfingsten, Allerheiligen oder Weihnachten bezeichnet; heute ist nur noch das Fest der Vermählung damit gemeint.</genre_beschreibung>
+  </genre>
+  <genre genre_id="g1">
+    <genre_titel>Geburstag</genre_titel>
+    <genre_beschreibung>Der Geburtstag bezeichnet den Jahrestag der Geburt oder den tatsächlichen Tag der Geburt einer Person. Mit dem ersten Geburtstag ist der erste Jahrestag der Geburt gemeint.
+
+Ein weit verbreiteter Brauch ist es, seinen Geburtstag mit Freunden und Verwandten zu feiern. Bei Kindern sind zusätzlich zu der Feier mit Verwandten Kindergeburtstage üblich. In vielen Ländern ist es außerdem verbreitet, die Person zu beschenken. Genauso gibt es auch den Brauch, dass eine Person an ihrem Geburtstag anderen etwas schenkt. Ein weiterer stark verbreiteter Geburtstagsbrauch ist, einen Kuchen oder eine Torte mit genau der dem Geburtstag entsprechenden Anzahl an Kerzen zu verzieren.
+
+Es ist üblich, einer Person zum Geburtstag zu gratulieren oder ein Geburtstags-Ständchen zu singen. Eines der bekanntesten dürfte das englische Happy Birthday sein. Sollte es nicht möglich sein, persönlich zu gratulieren, ist es als Geste der Aufmerksamkeit üblich, per Post, Telefonat, E-Mail oder SMS-Nachricht einen Geburtstagsgruß zu übermitteln. Während es in Deutschland angeblich Unglück bringt, vor dem Geburtstag zu gratulieren, ist in manchen Regionen Österreichs der Glückwunsch und die Feier am Vorabend üblich.</genre_beschreibung>
+  </genre>
+  <genre genre_id="g2">
+    <genre_titel>Weihnachten</genre_titel>
+    <genre_beschreibung>Weihnachten, auch (heiliges) Christfest, Heilige(r) Christ oder Weihnacht genannt, ist das Fest der Geburt Jesu Christi. Festtag ist der 25. Dezember, der Christtag, auch Hochfest der Geburt des Herrn, dessen Feierlichkeiten am Vorabend, am Heiligen Abend (Heiligabend) (auch Heilige Nacht, Christnacht, Weihnachtsabend, 24. Dezember), beginnen. Er ist in vielen Staaten ein gesetzlich geschützter Feiertag. In Deutschland, Österreich, der Schweiz und vielen anderen Ländern kommt als zweiter Weihnachtsfeiertag der 26. Dezember hinzu, der auch als Stephanstag (auch: Stefanitag) begangen wird.</genre_beschreibung>
+  </genre>
+  <genre genre_id="g3">
+    <genre_titel>Konzert</genre_titel>
+    <genre_beschreibung>Konzert (über ital. concerto von lat. concertare „wetteifern“, später und seltener auch ital. conserto, von lat. conserere „zusammenfügen“[1]) im Sinne einer Musikveranstaltung nennt man den Vortrag von Musik vor einer eigens zu diesem Zweck versammelten Hörerschaft. Dies kann öffentlich oder privat sein. Der Begriff grenzt sich ab von Veranstaltungen, bei denen die Musik nicht die Hauptsache ist.</genre_beschreibung>
+  </genre>
+</genres>

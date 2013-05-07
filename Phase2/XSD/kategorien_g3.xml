@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kategorien xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kategorien.xsd">
+  <kategorie kategorie_id="k0">
+    <kategorie_titel>Querflötenkonzert</kategorie_titel>
+    <kategorie_beschreibung>Die Querflöte ist ein Holzblasinstrument mit einer, im Unterschied zur Längsflöte, seitlich am Rohr angebrachten Anblaskante, das aus der mittelalterlichen Querpfeife beziehungsweise Schwegelpfeife hervorgegangen ist. Um 1750 (gegen Ende des Barock) verdrängte sie die Blockflöte und wurde ein bedeutendes Solo- und Orchesterinstrument. Auch im Jazz und der Rockmusik wird die Querflöte eingesetzt.</kategorie_beschreibung>
+  </kategorie>
+   <kategorie kategorie_id="k1">
+    <kategorie_titel>Worship Night</kategorie_titel>
+    <kategorie_beschreibung>Wir wollen mit der Worship Night einen Raum schaffen, in dem Gott uns Menschen begegnen kann. Dabei erwarten wir, dass seine Nähe uns anrührt und verändert. Wir wollen Ihm die Ehre geben, persönlich und gemeinsam mit anderen. Als Rahmen dienen Anbetungslieder, ein kurzer inhaltlicher Input und die Möglichkeit zu Gebet und Gesprächen. 
+Wir wollen als Gummersbacher Christen Zeichen setzen: Jesus verbindet über die Kirchenmauern hinaus Menschen, die Ihn gemeinsam loben und ehren. Suchen wir "der Stadt Bestes" (Jer.29,7) so wollen wir auf Jesus hinweisen und seine rettende Liebe den Menschen vorstellen.</kategorie_beschreibung>
+  </kategorie>
+   <kategorie kategorie_id="k2">
+    <kategorie_titel>Rockkonzert</kategorie_titel>
+    <kategorie_beschreibung>Wenn Sie den Besuch eines Rock-Konzerts planen, sollten Sie sich gut darauf vorbereiten. Ins Gepäck gehören auf jeden Fall ein bis zwei Paar Ohropax, um die Ohren vor einer Schädigung zu schützen. Gerade wenn man in der ersten Reihe steht, ist die Lautstärke oft kaum auszuhalten. Fehlen dann die Ohrstöpsel, kann dies dauerhafte Schädigungen des Gehörs zur Folge haben. Wenn die Ohrstöpsel vergessen wurden, können Sie vor Ort einfach nachfragen, ob Sie welche bekommen können. Bei Open-Air-Veranstaltungen ist das Rote Kreuz anwesend, die verschiedene Dinge zur Verfügung stellen. Wenn es trotz der Ohrstöpsel zu laut sein sollte, ist auf jeden Fall ein anderer Standort zu wählen, damit das Gehör auf keinen Fall Schaden nimmt. Wenn Sie auf ein Open-Air-Konzert gehen, ist neben der Campingausrüstung auch noch ausreichend Verpflegung einzupacken. Besteck und Messer dürfen nicht mit auf das abgesicherte Gelände genommen werden. Eventuell sollten Sie Plastikbesteck als Ersatz einpacken oder einfach vor Ort an den Imbissständen essen gehen.</kategorie_beschreibung>
+  </kategorie>
+</kategorien>
