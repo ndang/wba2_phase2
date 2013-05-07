@@ -1,0 +1,70 @@
+XSD
+
+
+Was: Theme
+Inhalt:
+- Allgemeine Daten
+	- Titel
+	- Genre
+	- Kategorien
+	- Autor
+	(- Kosten )
+
+- Module
+- Deko
+	- Titel
+	- Bilder (URL)
+	- Bastelbeschreibung
+		- Schritte
+- Outfits
+	- Titel
+	- Bilder (URL)
+	- Beschreibung
+		- Schritte
+- Musik
+	- Titel
+	- Interpret
+	- ggf. Youtubelink
+
+- Rezepte/ Catering
+	- Getränke
+		- Titel
+		- Bilder (URL)
+		- Rezept
+			- Schritte
+	- Essen
+		- Titel
+		- Bilder (URL)
+		- Rezept
+			- Schritte
+
+- Location
+
+- Interaktion
+	- Abonennten
+		- User
+	- Bewertung/ Likes
+	- Kommentare
+		- User
+		- Zeit
+		- Nachricht
+
+
+Was: Genres
+Inhalt:
+ - Genres
+	- Titel
+	- Kurzbeschreibung
+
+
+Was: Kategorien
+Inhalt:
+- Kategorien
+	- Titel
+	- Kurzbeschreibung
+
+*optional
+Was: Kosten
+Inhalt:
+- Produkt
+- Kosten
