@@ -137,7 +137,7 @@
         <xs:sequence>
             <xs:element name="titel" minOccurs="1" maxOccurs="1"/>
             <xs:element name="bild" maxOccurs="unbounded" minOccurs="0"/>
-            <xs:element name="beschreibung" minOccurs="1" maxOccurs="1">
+            <xs:element name="text" minOccurs="1" maxOccurs="1">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element name="schritt" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
