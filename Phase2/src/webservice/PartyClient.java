@@ -10,7 +10,7 @@ public class PartyClient {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		 String url = ( args.length > 0 ) ? args[0] : "http://localhost:4434/schlagzeuge"; // Wenn eine übergeben wurde, dann wird die aufgerufen, wenn nicht die hier angegebene 
+		 String url = ( args.length > 0 ) ? args[0] : "http://localhost:4434/users"; // Wenn eine übergeben wurde, dann wird die aufgerufen, wenn nicht die hier angegebene 
 	      System.out.println( "URL: " + url ); //einfache Ausgabe
 
 	      WebResource wrs = Client.create().resource( url ); //es wird erst ein Client instanziiert, welcher dann mit der methode resource ein Webressouce instanziiert
