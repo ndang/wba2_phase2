@@ -1,13 +1,15 @@
 package webservice;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-//import app.*;
+
 import app.Genres;
+import app.Kategorien;
 import app.Themes;
 import app.Themes.Theme;
 import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
@@ -25,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -36,9 +39,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class ThemesService {
 		
 	/**
-	 * Unmarshallt "theme.xml" zum Bearbeiten zu einem Java-Objekt.
+	 * Unmarshallt "themes.xml" zum Bearbeiten zu einem Java-Objekt.
 	 * 
-	 * @return gibt das die unmarshallte "theme.xml" als Typ Themes zurück
+	 * @return gibt das die unmarshallte "themes.xml" als Typ Themes zurück
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
@@ -51,49 +54,86 @@ public class ThemesService {
 	}
 	
 	/**
-	 * Marshallt (speichert) die evtl. veränderte "theme.xml".
+	 * Marshallt (speichert) die evtl. veränderte "themes.xml".
 	 * 
 	 * @param t veränderte Liste der Themes als Java Objekt, welches gemarshallt werden soll
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	private void setzeThemeDaten(Themes t) throws JAXBException, FileNotFoundException
+	private void setzeThemeDaten(Themes t) throws JAXBException
 	{
 		JAXBContext context = JAXBContext.newInstance(Themes.class);
 		Marshaller m = context.createMarshaller();
 	    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-	    //m.marshal(b, System.out);
-		m.marshal(t, new FileOutputStream("XSD/themes.xml"));
+		try {
+			m.marshal(t, new FileOutputStream("XSD/themes.xml"));
+		} catch (FileNotFoundException e) {
+			System.out.println("Theme(s) konnte(n) nicht gespeichert werden.");
+		}
 	}
 	
 	/**
+	 * Hilfsfunktion zur Überprüfung der Korrektheit der Theme-ID.
 	 * 
-	 * @param id falls in einem Query nach einem Theme gefragt wird
-	 * @return gibt eine Liste von allen Themes als ein String zurück
+	 * @param id theme-id
+	 * @return boolean Wert, ob ID gültig ist
+	 * @throws JAXBException
+	 * @throws FileNotFoundException 
+	 */
+	private boolean gueltigID(int id) throws JAXBException, FileNotFoundException 
+	{
+		if ( (id < 0) || (id>gibThemeDaten().getTheme().size()))
+		{
+			System.out.println("Diese Theme-ID ist nicht zulässig.");
+			return false;
+		}
+		return true;
+	}
+	
+	@Path("/a")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getAbonnenten() throws JAXBException, FileNotFoundException
+	{
+		
+		return "hate";
+	}
+	
+	/**
+	 * Gibt eine Liste von allen Theme-Titel als ein String zurück.
+	 * 
+	 * @param id falls in einem Query nach einem Theme gefragt wird, wird die Theme-ID übergeben
+	 * @return Liste aller Theme-Titel
 	 * @throws FileNotFoundException
 	 * @throws JAXBException
 	 */
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getThemes(@QueryParam("id") String id) throws FileNotFoundException, JAXBException
-	{
-		if(id==null)
-		{
-			String themes_list = "";
-			Themes themes_data = gibThemeDaten();
-		    
-		    for (int i=0; i<themes_data.getTheme().size(); i ++)
-		    	themes_list += themes_data.getTheme().get(i).getAllgemeines().getThemeTitel() + "\n";
-		    
-			return themes_list;
-		}
-		return getTheme(id);
+	public String getThemes(@QueryParam("theme_id") String theme_id) throws FileNotFoundException, JAXBException
+	{	
+		Themes themes_daten = gibThemeDaten();
+		String string = String.valueOf(themes_daten.getTheme().size());
+		return string;
+//		if(theme_id==null)
+//		{
+//			String themes_liste = "";
+//			Themes themes_daten = gibThemeDaten();
+//			
+//			System.out.println(themes_daten.getTheme().get(0).getAllgemeines().getBewertung()+" man ey");
+//		    
+//		    for (int i=0; i<themes_daten.getTheme().size(); i ++)
+//		    	themes_liste += themes_daten.getTheme().get(i).getAllgemeines().getThemeTitel() + "\n";
+//		    
+//			return themes_liste;
+//		}
+//		return getTheme(theme_id);
 	}
 	
 	/**
+	 * Gibt Titel und Beschreibung eines Themes als String aus.
 	 * 
-	 * @param theme_id
-	 * @return gibt ein einziges Theme als String aus
+	 * @param theme_id identifiziert ein Theme eindeutig in der Theme-Liste
+	 * @return Theme Titel und Beschreibung
 	 * @throws FileNotFoundException
 	 * @throws JAXBException
 	 */
@@ -102,25 +142,37 @@ public class ThemesService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getTheme(@PathParam("theme_id") String theme_id) throws FileNotFoundException, JAXBException
 	{
-		String theme_info = ""; 
-		int nr = Integer.parseInt(theme_id.substring(1));
-		Themes themes_data = gibThemeDaten();
-	    
-		theme_info = "Titel:" + themes_data.getTheme().get(nr).getAllgemeines().getThemeTitel()+ "\n";
-		theme_info += "Bewertung:" + themes_data.getTheme().get(nr).getAllgemeines().getBewertung()+ "\n";
-		theme_info += "Genre(s):\n";
-		for(int i=0; i<themes_data.getTheme().get(nr).getAllgemeines().getGenres().getGenre().size(); i++)
-			theme_info += themes_data.getTheme().get(nr).getAllgemeines().getGenres().getGenre().get(i).getValue()+ "\n";
-		theme_info += "Kategorie(n):\n";
-		for(int i=0; i<themes_data.getTheme().get(nr).getAllgemeines().getGenres().getGenre().size(); i++)
-			theme_info += themes_data.getTheme().get(nr).getAllgemeines().getKategorien().getKategorie().get(i).getValue()+ "\n";
-		
-		return theme_info;
+		Themes themes_daten = gibThemeDaten();
+		String string = String.valueOf(themes_daten.getTheme().size());
+		return string;
+//		Themes themes_daten = gibThemeDaten();
+//		int nr = Integer.parseInt(theme_id.substring(1));
+//		
+//		if (!gueltigID(nr))
+//			return "Theme kann nicht zurückgegeben werden.";
+//
+//		else
+//		{
+//			String theme_info = ""; 
+//			Themes.Theme.Allgemeines allg_daten = themes_daten.getTheme().get(nr).getAllgemeines();
+//		    
+//			theme_info = "Titel:" + allg_daten.getThemeTitel()+ "\n";
+//			theme_info += "Bewertung:" + allg_daten.getBewertung()+ "\n";
+//			theme_info += "Genre(s):\n";
+//			for(int i=0; i<allg_daten.getGenres().getGenre().size(); i++)
+//				theme_info += allg_daten.getGenres().getGenre().get(i).getValue()+ "\n";
+//			theme_info += "Kategorie(n):\n";
+//			for(int i=0; i<allg_daten.getGenres().getGenre().size(); i++)
+//				theme_info += allg_daten.getKategorien().getKategorie().get(i).getValue()+ "\n";
+//			
+//			return theme_info;
+//		}
 	}
 	
 	/**
+	 * Löscht ein Theme aus der Liste
 	 * 
-	 * @param theme_id
+	 * @param theme_id identifiziert ein Theme eindeutig in der Theme-Liste
 	 * @return den HTTP-Code 200 ok als "Theme wurde gelöscht", oder 404 wenn Fehler
 	 * @throws FileNotFoundException
 	 * @throws JAXBException
@@ -169,24 +221,99 @@ public class ThemesService {
 //		return null;
 //	}
 	
+	@POST // Überprüfungen fehlen (ob Genre auch existiert, .. etc)
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.TEXT_PLAIN) // erlaubte MIME-types, die diese Methode verarbeiten kann
+	public Response addTheme(String t) throws FileNotFoundException, JAXBException
+	{
+		Themes daten = gibThemeDaten();
+		JAXBContext context = JAXBContext.newInstance(Themes.class);
+	    Unmarshaller um = context.createUnmarshaller();
+	    Theme new_theme = (Theme) um.unmarshal(new FileInputStream(t));
+	    
+	    // Überprüfung, ob ein Genre eingespeichert wurde, welches existiert
+	    
+	    GenresKategorienService gks = new GenresKategorienService();
+	    Genres festgelegte_genres = gks.gibGenreDaten();
+	    Kategorien festgelegte_kategorien;
+	    boolean gueltig = false;
+	    
+	    
+//	    for (int i=0, ii=0 ; i<new_theme.getAllgemeines().getGenres().getGenre().size(), ii<festgelegte_genres.getGenre().size(); i++, ii++)
+//	    {
+//	    	// jedes Genre aus dem neuen Theme wird mit jedem Genre aus der gegebenen Liste verglichen
+//	    	if (new_theme.getAllgemeines().getGenres().getGenre().get(i).equals(festgelegte_genres.getGenre().get(ii).getGenreId()))
+//		    {
+//	    		// wenn es eine Übereinstimmung gibt, dann wird unter jedem Genre die Kategorien verglichen
+//		    	festgelegte_kategorien = gks.gibKategorienDaten(festgelegte_genres.getGenre().get(ii).getGenreId());
+//		    	for (int j=0, jj=0; j<festgelegte_kategorien.getKategorie().size(), jj<new_theme.getAllgemeines().getKategorien().getKategorie().size(); j++, jj++)
+//		    	{
+//		    		// stimmen auch die Kategorien über ein, wird die Eingabe als gültig gesetzt
+//		    		if (new_theme.getAllgemeines().getKategorien().getKategorie().get(j).equals(festgelegte_kategorien.getKategorie().get(jj)))
+//		    			gueltig = true;
+//		    				
+//		    	}
+//		    	
+//	    	}
+//	    	
+//	    }
+//	    		
+//	    // Auswertung der Gültigkeit
+//	    if(!gueltig)
+//	    	return Response.status(402).build(); // 402: In W3C PEP (Working Draft 21. November 1997)[6] wird dieser Code vorgeschlagen, um mitzuteilen, dass eine Bedingung nicht erfüllt wurde.
+	    
+	    
+	    // neue ID wird generiert
+	  	String id = "t"+daten.getTheme().size();		
+	  	new_theme.getAllgemeines().setThemeId(id);
+	    
+	    // Bewertung wird auf 0 gesetzt
+	  	new_theme.getAllgemeines().setBewertung(0);
+	    
+	    // neues Theme wird der Liste angefügt
+	    daten.getTheme().add(new_theme);
+	    
+	    // spersistente Speicherung in einer XML-Datei
+	    setzeThemeDaten(daten);
+	
+		return Response.status(201).build();
+	}
+	
 	/**
 	 * Verändert ein vorhanderes Theme.
 	 * 
-	 * @param newname
-	 * @param number
-	 * @return
-	 * @throws JAXBException 
-	 * @throws FileNotFoundException 
+	 * @param theme_id
+	 * @param v_theme verändertes Theme, welches übergeben wird
+	 * @return OK, wenn Änderungen erfolgreich gespeichert wurden
+	 * 		   XX, wenn nicht erfolgreich
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
 	 */
 	@PUT
 	@Path("/{theme_id}")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
-	public Response replaceTheme(@PathParam("theme_id") String theme_id, String theme) throws FileNotFoundException, JAXBException
+	public Response replaceTheme(@PathParam("theme_id") String theme_id, String v_theme) throws FileNotFoundException, JAXBException
 	{
-//		Themes themes_data = gibThemeDaten();
-//		themes_data.getTheme().get(Integer.parseInt(theme_id.substring(1))).getAllgemeines().setThemeTitel(newtitel);
+		JAXBContext context = JAXBContext.newInstance(Themes.class);
+	    Unmarshaller um = context.createUnmarshaller();
+	    Theme veraendertes_theme = (Theme) um.unmarshal(new FileInputStream(v_theme));
+	    
+		Themes themes_daten = gibThemeDaten();
+		
+		// altes wird gelöscht und neues wirdhinzugefügt.
+//		for (Theme t: themes_daten.getTheme())
+//		{
+//			if (veraendertes_theme.equals(t))
+//				t=veraendertes_theme;
+//		}
+		
+		// themes_daten.getTheme().get(Integer.parseInt(theme_id.substring(1)))=veraendertes_theme; <<-- so müsste das sein
+		themes_daten.getTheme().remove(Integer.parseInt(theme_id.substring(1)));
+		themes_daten.getTheme().add(veraendertes_theme);
 
+		// :c wir müssen alles über den Haufen schmeißen!!
+		// Response falls nicht funktioniert?
 		
 		return Response.ok().build();
 	}
@@ -221,21 +348,17 @@ public class ThemesService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getKommentare(@PathParam("theme_id") String theme_id) throws FileNotFoundException, JAXBException
 	{
-		Themes themes_data = gibThemeDaten();
-		
-		// if (theme_id.equals("t"+themes_data.getTheme().size())) --- richtige theme-id 
-			
-		String kommi_list = "";
+		List<Themes.Theme.Interaktion.Kommentare.Kommentar> old_kommi_list = gibThemeDaten().getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar();			
+		String new_kommi_list = "";
 		   
-		for (int i=0; i<themes_data.getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar().size(); i ++)
+		for (int i=0; i<old_kommi_list.size(); i ++)
 		{
-			String k = // abkürzen
-			kommi_list += "User: "+themes_data.getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar().get(i).getUser();
-			kommi_list += " um: "+themes_data.getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar().get(i).getUhrzeit().toString()+ "\n";
-			kommi_list += "Nachricht: "+themes_data.getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar().get(i).getNachricht()+ "\n\n";
+			new_kommi_list += "User: "+ old_kommi_list.get(i).getUser();
+			new_kommi_list += " um: "+ old_kommi_list.get(i).getUhrzeit().toString()+ "\n";
+			new_kommi_list += "Nachricht: "+ old_kommi_list.get(i).getNachricht()+ "\n\n";
 		}
 	 
-		return kommi_list;
+		return new_kommi_list;
 	}
 	
 	/**
@@ -252,13 +375,11 @@ public class ThemesService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getKommentar(@PathParam("theme_id") String theme_id, @PathParam("kommentar_id") String kommentar_id) throws FileNotFoundException, JAXBException
 	{
-		int t_id = Integer.parseInt(theme_id.substring(1));
-		int k_id = Integer.parseInt(kommentar_id.substring(1));
-		Themes themes_data = gibThemeDaten();
+		Themes.Theme.Interaktion.Kommentare.Kommentar kommi_daten = gibThemeDaten().getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar().get(Integer.parseInt(kommentar_id.substring(1)));
 		
-		String kommentar = themes_data.getTheme().get(t_id).getInteraktion().getKommentare().getKommentar().get(k_id).getUser();
-		kommentar += " schrieb am " + themes_data.getTheme().get(t_id).getInteraktion().getKommentare().getKommentar().get(k_id).getUhrzeit() + "/n";
-		kommentar += ": " + themes_data.getTheme().get(t_id).getInteraktion().getKommentare().getKommentar().get(k_id).getNachricht();	
+		String kommentar = kommi_daten.getUser();
+		kommentar += " schrieb am " + kommi_daten.getUhrzeit() + "/n";
+		kommentar += ": " + kommi_daten.getNachricht();	
 		
 		return kommentar;
 	}
@@ -304,18 +425,23 @@ public class ThemesService {
 	@POST
 	@Path("/{theme_id}/kommentare")
 	@Produces(MediaType.TEXT_PLAIN)
-	@Consumes(MediaType.TEXT_PLAIN) // ?
-	public Response addKommentar(@PathParam("theme_id") String theme_id, String k) throws FileNotFoundException, JAXBException
+	@Consumes(MediaType.TEXT_PLAIN)
+	public Response addKommentar(@PathParam("theme_id") String theme_id, String new_kommi) throws FileNotFoundException, JAXBException
 	{
 		JAXBContext context = JAXBContext.newInstance(Themes.class);
 	    Unmarshaller um = context.createUnmarshaller();
-	    Kommentar kommentar = (Kommentar) um.unmarshal(new FileInputStream(k));
-	    
+	    Marshaller m = context.createMarshaller();
+	    //missing an @XmlRootElement annotation
+//	    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+//		m.marshal(new_kommi, new FileOutputStream( new File ("XSD/kommentar-tmp.xml")));
+	    Kommentar kommentar = (Kommentar) um.unmarshal(new File ("XSD/kommentar-tmp.xml"));
+	    System.out.println("hier gehts  noch 3");
 	    Themes daten = gibThemeDaten();
+	    System.out.println("hier gehts  noch 4");
 	    daten.getTheme().get(Integer.parseInt(theme_id.substring(1))).getInteraktion().getKommentare().getKommentar().add(kommentar);
-	    
+	    System.out.println("hier gehts  noch 5");
 	    setzeThemeDaten(daten);
-	
+	    System.out.println("hier gehts  noch ende");
 		return Response.status(201).build();
 	}
 }

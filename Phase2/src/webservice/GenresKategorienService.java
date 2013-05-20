@@ -2,8 +2,6 @@ package webservice;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,8 +13,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import app.*;
 
@@ -24,61 +20,85 @@ import app.*;
 public class GenresKategorienService {
 	
 	/**
+	 * Unmarshalt Liste aller Genres.
 	 * 
-	 * @return gibt geunmarshallte Liste aller Genres zurück
+	 * @return Genres-Listen-Objekt
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	private Genres gibGenreDaten() throws JAXBException, FileNotFoundException
+	public Genres gibGenreDaten() throws JAXBException
 	{
 		JAXBContext context = JAXBContext.newInstance(Genres.class);
 	    Unmarshaller um = context.createUnmarshaller();
-	    Genres genres_data = (Genres) um.unmarshal(new FileInputStream("XSD/genres.xml"));
+	    Genres genres_data = null;
+		try {
+			genres_data = (Genres) um.unmarshal(new FileInputStream("XSD/genres.xml"));
+		} catch (FileNotFoundException e) {
+			System.out.println("Liste der Genres konnte nicht gefunden werden.");
+		}
 		return genres_data;
 	}
 	
 	/**
+	 * Unmarshalt Liste aller Kategorien.
 	 * 
 	 * @param genre_id in welcher sich die Kategorie befindet
-	 * @return gibt geunmarshallte Liste aller Kategorien zurück
+	 * @return Kategorien-Listen-Objekt
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	private Kategorien gibKategorienDaten(String genre_id) throws JAXBException, FileNotFoundException
+	public Kategorien gibKategorienDaten(String genre_id) throws JAXBException
 	{
 		JAXBContext context = JAXBContext.newInstance(Kategorien.class);
 	    Unmarshaller um = context.createUnmarshaller();
-	    Kategorien kategorien_data = (Kategorien) um.unmarshal(new FileInputStream("XSD/kategorien_"+ genre_id +".xml"));
+	    Kategorien kategorien_data = null;
+		try {
+			kategorien_data = (Kategorien) um.unmarshal(new FileInputStream("XSD/kategorien_"+ genre_id +".xml"));
+		} catch (FileNotFoundException e) {
+			System.out.println("Liste der Kategorien konnte nicht gefunden werden.");
+		}
 		return kategorien_data;
 	}
 
+	@Path("/abonnenten")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getAbonnenten() throws JAXBException, FileNotFoundException
+	{
+		
+		return "hate";
+	}
 	/**
+	 * Gibt Liste aller Genres zurück.
 	 * 
 	 * @param id falls per Query eine genre-id mitgegeben wird, wird ein bestimmtes Genre zurück gegeben
-	 * @return die Liste alle Genres
+	 * @return Liste alle Genres
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 * @throws DatatypeConfigurationException
 	 */
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getGenres(@QueryParam("id") String id) throws JAXBException, FileNotFoundException, DatatypeConfigurationException
+	public String getGenres(@QueryParam("genre_id") String genre_id) throws JAXBException, FileNotFoundException
 	{
-		if(id==null)
+		// wenn kein QueryParameter übergeben wird
+		if(genre_id==null)
 		{
-			String genres_list = "";
-			Genres genres_data = gibGenreDaten();
+			String genres_liste = "";
+			Genres genres_daten = gibGenreDaten();
 		    
-		    for (int i=0; i<genres_data.getGenre().size(); i ++)
-		    	genres_list += genres_data.getGenre().get(i).getGenreTitel() + "\n";
+			// Alle Genre-Titel werden in einem String konkateniert
+		    for (int i=0; i<genres_daten.getGenre().size(); i ++)
+		    	genres_liste += genres_daten.getGenre().get(i).getGenreTitel() + "\n";
 		    
-			return genres_list;
-
+			return genres_liste;
 		}
-		return getGenre(id);
+		
+		// wenn QueryParameter übergeben wird
+		return getGenre(genre_id);
 	}
 	
-// dieselbe GET wie oben nur ohne Queryparams
+//  GET-Methode (wie oben) nur ohne Queryparams
 //	@GET
 //	@Produces(MediaType.TEXT_PLAIN)
 //	public String getGenres() throws JAXBException, FileNotFoundException
@@ -93,9 +113,10 @@ public class GenresKategorienService {
 //	}
 	
 	/**
+	 * Titel und Beschreibung eines Genre konkatiniert in einem String.
 	 * 
 	 * @param genre_id identifiziert ein Genre aus der Liste aller Genres
-	 * @return Titel und Beschreibung eines Genre konkatiniert in einem String
+	 * @return Titel und Beschreibung eines Genres
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
@@ -104,48 +125,50 @@ public class GenresKategorienService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getGenre(@PathParam("genre_id") String genre_id) throws JAXBException, FileNotFoundException
 	{
-		String genres_info = ""; 
+		String genres_info = "";
 		int nr = Integer.parseInt(genre_id.substring(1));
-		Genres genres_data = gibGenreDaten();
+		Genres genres_daten = gibGenreDaten();
 	    
-	    genres_info = genres_data.getGenre().get(nr).getGenreTitel() + "\n";
-	    genres_info += genres_data.getGenre().get(nr).getGenreBeschreibung();
+	    genres_info = genres_daten.getGenre().get(nr).getGenreTitel() + "\n";
+	    genres_info += genres_daten.getGenre().get(nr).getGenreBeschreibung();
 	    
 		return genres_info;
 	}
 	
 	/**
+	 * Gibt die Liste aller Kategorien eines Genres als String zurück.
 	 * 
 	 * @param genre_id ist die ID in der alle Kategorien angehörig ist
 	 * @param id falls eine Kategorie per Query anhand ihrer ID abgerufen wird
-	 * @return die Liste aller Kategorien eines Genres
+	 * @return alle Kategorien eines Genres
 	 * @throws FileNotFoundException
 	 * @throws JAXBException
 	 */
 	@GET
 	@Path("/{genre_id}/kategorien")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getKategorien(@PathParam("genre_id") String genre_id, @QueryParam("id") String id) throws FileNotFoundException, JAXBException
+	public String getKategorien(@PathParam("genre_id") String genre_id, @QueryParam("kategorie_id") String kategorie_id) throws FileNotFoundException, JAXBException
 	{
-		if (id==null)
+		if (kategorie_id==null)
 		{
-			String kategorien_list = "";
-			Kategorien kategorien_data = gibKategorienDaten(genre_id);
+			String kategorien_liste = "";
+			Kategorien kategorien_daten = gibKategorienDaten(genre_id);
 		    
-		    for (int i=0; i<kategorien_data.getKategorie().size(); i ++)
-		    	kategorien_list += kategorien_data.getKategorie().get(i).getKategorieTitel() + "\n";
+		    for (int i=0; i<kategorien_daten.getKategorie().size(); i ++)
+		    	kategorien_liste += kategorien_daten.getKategorie().get(i).getKategorieTitel() + "\n";
 		    
-			return kategorien_list;
+			return kategorien_liste;
 		}
 		
-		return getKategorie(genre_id, id);
+		return getKategorie(genre_id, kategorie_id);
 	}
 	
 	/**
+	 *  Gibt Titel und Beschreibung einer Kategorie konkatiniert in einem String zurück.
 	 * 
 	 * @param genre_id ist die ID in der alle Kategorien angehörig ist
 	 * @param kategorien_id  ist die ID in der die angefragte Kategorie angehörig ist
-	 * @return Titel und Beschreibung einer Kategorie konkatiniert in einem String
+	 * @return Titel und Beschreibung einer Kategorie
 	 * @throws FileNotFoundException
 	 * @throws JAXBException
 	 */
@@ -156,10 +179,10 @@ public class GenresKategorienService {
 	{
 		String kategorie_info = ""; 
 		int nr = Integer.parseInt(kategorien_id.substring(1));
-		Kategorien kategorien_data = gibKategorienDaten(genre_id);
+		Kategorien kategorien_daten = gibKategorienDaten(genre_id);
 		
-		kategorie_info = kategorien_data.getKategorie().get(nr).getKategorieTitel() + "\n";
-		kategorie_info += kategorien_data.getKategorie().get(nr).getKategorieBeschreibung();
+		kategorie_info = kategorien_daten.getKategorie().get(nr).getKategorieTitel() + "\n";
+		kategorie_info += kategorien_daten.getKategorie().get(nr).getKategorieBeschreibung();
 	    
 		return kategorie_info;
 	}
