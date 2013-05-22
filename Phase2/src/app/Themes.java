@@ -590,7 +590,7 @@ public class Themes {
         public static class Allgemeines {
 
             @XmlElement(name = "theme_titel", required = true)
-            protected Object themeTitel;
+            protected String themeTitel;
             @XmlElement(required = true)
             protected Themes.Theme.Allgemeines.Genres genres;
             @XmlElement(required = true)
@@ -623,7 +623,7 @@ public class Themes {
              *     {@link Object }
              *     
              */
-            public void setThemeTitel(Object value) {
+            public void setThemeTitel(String value) {
                 this.themeTitel = value;
             }
 

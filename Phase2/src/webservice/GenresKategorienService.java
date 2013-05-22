@@ -60,14 +60,6 @@ public class GenresKategorienService {
 		return kategorien_data;
 	}
 
-	@Path("/abonnenten")
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getAbonnenten() throws JAXBException, FileNotFoundException
-	{
-		
-		return "hate";
-	}
 	/**
 	 * Gibt Liste aller Genres zurück.
 	 * 
