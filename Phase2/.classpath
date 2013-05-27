@@ -2,18 +2,18 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/grizzly-servlet-webserver-1.9.18.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/asm-3.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jackson-core-asl-1.1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jersey-client-1.1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jersey-core-1.1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jersey-json-1.1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jersey-server-1.1.5.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jettison-1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/WBA_2_Phase_2_jars/jersey/jsr311-api-1.1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/smack_3_3_0/smack.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/smack_3_3_0/smackx.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/smack_3_3_0/smackx-debug.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Ngoc-Anh/Dropbox/FH/4. Semester/WBA2/Phase2/jars/smack_3_3_0/smackx-jingle.jar"/>
+	<classpathentry kind="lib" path="jars/smack_3_3_0/smack.jar"/>
+	<classpathentry kind="lib" path="jars/smack_3_3_0/smackx-debug.jar"/>
+	<classpathentry kind="lib" path="jars/smack_3_3_0/smackx-jingle.jar"/>
+	<classpathentry kind="lib" path="jars/smack_3_3_0/smackx.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/asm-3.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jackson-core-asl-1.1.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jersey-client-1.1.5.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jersey-core-1.1.5.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jersey-json-1.1.5.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jersey-server-1.1.5.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jettison-1.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/jersey/jsr311-api-1.1.1.jar"/>
+	<classpathentry kind="lib" path="jars/WBA_2_Phase_2_jars/grizzly-servlet-webserver-1.9.18.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
