@@ -74,23 +74,23 @@ public class ThemesService {
 		}
 	}
 	
-	/**
-	 * Hilfsfunktion zur Überprüfung der Korrektheit der Theme-ID.
-	 * 
-	 * @param id theme-id
-	 * @return boolean Wert, ob ID gültig ist
-	 * @throws JAXBException
-	 * @throws FileNotFoundException 
-	 */
-	private boolean gueltigID(int id) throws JAXBException, FileNotFoundException 
-	{
-		if ( (id < 0) || (id>gibThemeDaten().getTheme().size()))
-		{
-			System.out.println("Diese Theme-ID ist nicht zulässig.");
-			return false;
-		}
-		return true;
-	}
+//	/**
+//	 * Hilfsfunktion zur Überprüfung der Korrektheit der Theme-ID.
+//	 * 
+//	 * @param id theme-id
+//	 * @return boolean Wert, ob ID gültig ist
+//	 * @throws JAXBException
+//	 * @throws FileNotFoundException 
+//	 */
+//	private boolean gueltigID(int id) throws JAXBException, FileNotFoundException 
+//	{
+//		if ( (id < 0) || (id>gibThemeDaten().getTheme().size()))
+//		{
+//			System.out.println("Diese Theme-ID ist nicht zulässig.");
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	
 	/**
@@ -133,27 +133,26 @@ public class ThemesService {
 	public String getTheme(@PathParam("theme_id") String theme_id) throws FileNotFoundException, JAXBException
 	{
 		Themes themes_daten = gibThemeDaten();
-		int nr = Integer.parseInt(theme_id.substring(1));
+		String theme_info = ""; 
 		
-		if (!gueltigID(nr))
-			return "Theme kann nicht zurückgegeben werden.";
-
-		else
+		for (int i=0; i<themes_daten.getTheme().size(); i++)
 		{
-			String theme_info = ""; 
-			Themes.Theme.Allgemeines allg_daten = themes_daten.getTheme().get(nr).getAllgemeines();
-		    
-			theme_info = "Titel:" + allg_daten.getThemeTitel()+ "\n";
-			theme_info += "Bewertung:" + allg_daten.getBewertung()+ "\n";
-			theme_info += "Genre(s):\n";
-			for(int i=0; i<allg_daten.getGenres().getGenre().size(); i++)
-				theme_info += allg_daten.getGenres().getGenre().get(i).getValue()+ "\n";
-			theme_info += "Kategorie(n):\n";
-			for(int i=0; i<allg_daten.getGenres().getGenre().size(); i++)
-				theme_info += allg_daten.getKategorien().getKategorie().get(i).getValue()+ "\n";
-			
-			return theme_info;
+			if(theme_id.equals(themes_daten.getTheme().get(i).getAllgemeines().getThemeId()))
+			{
+				Themes.Theme.Allgemeines allg_daten = themes_daten.getTheme().get(i).getAllgemeines();
+				
+				theme_info = "Titel:" + allg_daten.getThemeTitel()+ "\n";
+				theme_info += "Bewertung:" + allg_daten.getBewertung()+ "\n";
+				theme_info += "Genre(s):\n";
+				for(int j=0; i<allg_daten.getGenres().getGenre().size(); i++)
+					theme_info += allg_daten.getGenres().getGenre().get(i).getValue()+ "\n";
+				theme_info += "Kategorie(n):\n";
+				for(int j=0; i<allg_daten.getKategorien().getKategorie().size(); i++)
+					theme_info += allg_daten.getKategorien().getKategorie().get(i).getValue()+ "\n";
+			}
 		}
+			
+		return theme_info;
 	}
 	
 	/**
@@ -184,6 +183,7 @@ public class ThemesService {
 		return Response.status(404).build();
 	}
 	
+//  Alternative Methode?
 //	@POST
 //	@Produces(MediaType.TEXT_PLAIN)
 //	@Consumes(MediaType.TEXT_PLAIN) // erlaubte MIME-types, die diese Methode verarbeiten kann
@@ -216,57 +216,48 @@ public class ThemesService {
 		JAXBContext context = JAXBContext.newInstance(Theme.class);
 	    Unmarshaller um = context.createUnmarshaller();
 		Theme neues_theme = (Theme) um.unmarshal(new StreamSource(new StringReader(t)), Theme.class).getValue();
-		
 		Themes daten = gibThemeDaten();
-		daten.getTheme().add(neues_theme);
 		
+		//Überprüfung auf Richtigkeit der Genres und Kategorien
+		Genres genres_daten = GenresKategorienService.gibGenreDaten();
+		boolean genre_gueltig = false;
+		int anz_kategorien = neues_theme.getAllgemeines().getKategorien().getKategorie().size();
+		for(int i=0; i<neues_theme.getAllgemeines().getGenres().getGenre().size(); i++)
+		{
+			for (int j=0; j<genres_daten.getGenre().size(); j++)
+			{
+				// Prüfung der Existenz des Genre
+				if (neues_theme.getAllgemeines().getGenres().getGenre().get(i).equals(genres_daten.getGenre().get(j)))
+				{
+					genre_gueltig = true;
+					
+					// Prüfung Korrektheit der Kategorien
+					Kategorien kategorien_daten = GenresKategorienService.gibKategorienDaten(genres_daten.getGenre().get(j).getGenreId());
+					int zaehler = 0;
+					for (int k=0; k<neues_theme.getAllgemeines().getKategorien().getKategorie().size(); k++)
+					{
+						for(int l=0; l<kategorien_daten.getKategorie().size(); l++)
+						if (neues_theme.getAllgemeines().getKategorien().getKategorie().get(k).equals(kategorien_daten.getKategorie().get(l)))
+						{
+							zaehler++;
+							anz_kategorien--;
+						}		
+					}
+					
+					if (zaehler==0) // wenn in diesem Genre keine Kateggorie ausgewählt wurde
+						return Response.status(420).build();
+					
+					break;
+				}
+			}
+			
+			if ( (genre_gueltig == false) || (anz_kategorien>0)) //wenn es das Genre nicht gibt oder Kategorien nicht dem Genre angehören
+				return Response.status(420).build(); // Policy Not Fulfilled: In W3C PEP (Working Draft 21. November 1997)[6] wird dieser Code vorgeschlagen, um mitzuteilen, dass eine Bedingung nicht erfüllt wurde.
+		}
+		
+		daten.getTheme().add(neues_theme);
 		setzeThemeDaten(daten);
 	    
-	    // Überprüfung, ob ein Genre eingespeichert wurde, welches existiert
-//	    
-//	    GenresKategorienService gks = new GenresKategorienService();
-//	    Genres festgelegte_genres = gks.gibGenreDaten();
-//	    Kategorien festgelegte_kategorien;
-//	    boolean gueltig = false;
-	    
-	    
-//	    for (int i=0, ii=0 ; i<new_theme.getAllgemeines().getGenres().getGenre().size(), ii<festgelegte_genres.getGenre().size(); i++, ii++)
-//	    {
-//	    	// jedes Genre aus dem neuen Theme wird mit jedem Genre aus der gegebenen Liste verglichen
-//	    	if (new_theme.getAllgemeines().getGenres().getGenre().get(i).equals(festgelegte_genres.getGenre().get(ii).getGenreId()))
-//		    {
-//	    		// wenn es eine Übereinstimmung gibt, dann wird unter jedem Genre die Kategorien verglichen
-//		    	festgelegte_kategorien = gks.gibKategorienDaten(festgelegte_genres.getGenre().get(ii).getGenreId());
-//		    	for (int j=0, jj=0; j<festgelegte_kategorien.getKategorie().size(), jj<new_theme.getAllgemeines().getKategorien().getKategorie().size(); j++, jj++)
-//		    	{
-//		    		// stimmen auch die Kategorien über ein, wird die Eingabe als gültig gesetzt
-//		    		if (new_theme.getAllgemeines().getKategorien().getKategorie().get(j).equals(festgelegte_kategorien.getKategorie().get(jj)))
-//		    			gueltig = true;
-//		    				
-//		    	}
-//		    	
-//	    	}
-//	    	
-//	    }
-//	    		
-//	    // Auswertung der Gültigkeit
-//	    if(!gueltig)
-//	    	return Response.status(402).build(); // 402: In W3C PEP (Working Draft 21. November 1997)[6] wird dieser Code vorgeschlagen, um mitzuteilen, dass eine Bedingung nicht erfüllt wurde.
-	    
-//	    
-//	    // neue ID wird generiert
-//	  	String id = "t"+daten.getTheme().size();		
-//	  	new_theme.getAllgemeines().setThemeId(id);
-//	    
-//	    // Bewertung wird auf 0 gesetzt
-//	  	new_theme.getAllgemeines().setBewertung(0);
-//	    
-//	    // neues Theme wird der Liste angefügt
-//	    daten.getTheme().add(new_theme);
-//	    
-//	    // spersistente Speicherung in einer XML-Datei
-//	    setzeThemeDaten(daten);
-	
 		return Response.status(201).build();
 	}
 	
@@ -288,21 +279,53 @@ public class ThemesService {
 	{
 		JAXBContext context = JAXBContext.newInstance(Theme.class);
 	    Unmarshaller um = context.createUnmarshaller();
-		Theme veraendertes_theme = (Theme) um.unmarshal(new StreamSource(new StringReader(v_theme)), Theme.class).getValue();
-		
+		Theme veraendertes_theme = (Theme) um.unmarshal(new StreamSource(new StringReader(v_theme)), Theme.class).getValue();		
 		Themes daten = gibThemeDaten();
 		
+		//Überprüfung auf Richtigkeit der Genres und Kategorien
+		Genres genres_daten = GenresKategorienService.gibGenreDaten();
+		boolean genre_gueltig = false;
+		int anz_kategorien = veraendertes_theme.getAllgemeines().getKategorien().getKategorie().size();
+		for(int i=0; i<veraendertes_theme.getAllgemeines().getGenres().getGenre().size(); i++)
+		{
+			for (int j=0; j<genres_daten.getGenre().size(); j++)
+			{
+				// Prüfung der Existenz des Genre
+				if (veraendertes_theme.getAllgemeines().getGenres().getGenre().get(i).equals(genres_daten.getGenre().get(j)))
+				{
+					genre_gueltig = true;
+					
+					// Prüfung Korrektheit der Kategorien
+					Kategorien kategorien_daten = GenresKategorienService.gibKategorienDaten(genres_daten.getGenre().get(j).getGenreId());
+					int zaehler = 0;
+					for (int k=0; k<veraendertes_theme.getAllgemeines().getKategorien().getKategorie().size(); k++)
+					{
+						for(int l=0; l<kategorien_daten.getKategorie().size(); l++)
+						if (veraendertes_theme.getAllgemeines().getKategorien().getKategorie().get(k).equals(kategorien_daten.getKategorie().get(l)))
+							zaehler++;
+							anz_kategorien--;
+					}
+					
+					if (zaehler==0) // wenn in diesem Genre keine Kateggorie ausgewählt wurde
+						return Response.status(420).build();
+					
+					break;
+				}
+			}
+					
+			if (genre_gueltig == false) //wenn es das Genre nicht gibt
+				return Response.status(420).build(); // Policy Not Fulfilled: In W3C PEP (Working Draft 21. November 1997)[6] wird dieser Code vorgeschlagen, um mitzuteilen, dass eine Bedingung nicht erfüllt wurde.
+			if ((anz_kategorien>0)) // wenn diese Kategorien nicht dem Genre angehören
+				return Response.status(420).build();
+		}
+
 		daten.getTheme().remove(Integer.parseInt(theme_id.substring(1)));
 		daten.getTheme().add(veraendertes_theme);
-		
-		setzeThemeDaten(daten);
-	    
-		// funktioniert noch nicht für daten, die in ter mitte gelöscht werden.
-		
+		setzeThemeDaten(daten);		
 		return Response.ok().build();
 	}
 	
-	//********************** Kommentare ***********************************
+	//********************** Kommentare ***********************************//
 	
 	/**
 	 * Hilfsfunktion um ein Datum zu generien, an welchem ein neuer Kommentar verfasst wurde.

@@ -20,13 +20,13 @@ import app.*;
 public class GenresKategorienService {
 	
 	/**
-	 * Unmarshalt Liste aller Genres.
+	 * Unmarshalt XML-Liste aller Genres.
 	 * 
 	 * @return Genres-Listen-Objekt
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	public Genres gibGenreDaten() throws JAXBException
+	public static Genres gibGenreDaten() throws JAXBException
 	{
 		JAXBContext context = JAXBContext.newInstance(Genres.class);
 	    Unmarshaller um = context.createUnmarshaller();
@@ -47,7 +47,7 @@ public class GenresKategorienService {
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	public Kategorien gibKategorienDaten(String genre_id) throws JAXBException
+	public static Kategorien gibKategorienDaten(String genre_id) throws JAXBException
 	{
 		JAXBContext context = JAXBContext.newInstance(Kategorien.class);
 	    Unmarshaller um = context.createUnmarshaller();
@@ -118,12 +118,22 @@ public class GenresKategorienService {
 	public String getGenre(@PathParam("genre_id") String genre_id) throws JAXBException, FileNotFoundException
 	{
 		String genres_info = "";
-		int nr = Integer.parseInt(genre_id.substring(1));
+		int eingabe_id = Integer.parseInt(genre_id.substring(1));
 		Genres genres_daten = gibGenreDaten();
 	    
-	    genres_info = genres_daten.getGenre().get(nr).getGenreTitel() + "\n";
-	    genres_info += genres_daten.getGenre().get(nr).getGenreBeschreibung();
-	    
+		for (int i=0; i<genres_daten.getGenre().size(); i++)
+		{
+			int real_id = Integer.parseInt(genres_daten.getGenre().get(i).getGenreId().substring(1));
+			if (eingabe_id == real_id)
+			{
+				genres_info = genres_daten.getGenre().get(i).getGenreTitel() + "\n";
+			    genres_info += genres_daten.getGenre().get(i).getGenreBeschreibung();
+			}
+		}
+		
+		if (genres_info.equals(""))
+			genres_info = "Ungültige ID.";
+		
 		return genres_info;
 	}
 	
@@ -170,11 +180,21 @@ public class GenresKategorienService {
 	public String getKategorie(@PathParam("genre_id") String genre_id, @PathParam("kategorien_id") String kategorien_id) throws FileNotFoundException, JAXBException
 	{
 		String kategorie_info = ""; 
-		int nr = Integer.parseInt(kategorien_id.substring(1));
+		int eingabe_id = Integer.parseInt(kategorien_id.substring(1));
 		Kategorien kategorien_daten = gibKategorienDaten(genre_id);
 		
-		kategorie_info = kategorien_daten.getKategorie().get(nr).getKategorieTitel() + "\n";
-		kategorie_info += kategorien_daten.getKategorie().get(nr).getKategorieBeschreibung();
+		for (int i=0; i<kategorien_daten.getKategorie().size(); i++)
+		{
+			int real_id = Integer.parseInt(kategorien_daten.getKategorie().get(i).getKategorieId().substring(1));
+			if (eingabe_id == real_id)
+			{
+				kategorie_info = kategorien_daten.getKategorie().get(i).getKategorieTitel() + "\n";
+				kategorie_info += kategorien_daten.getKategorie().get(i).getKategorieBeschreibung();
+			}
+		}
+		
+		if (kategorie_info.equals(""))
+			kategorie_info = "Ungültige ID.";
 	    
 		return kategorie_info;
 	}
