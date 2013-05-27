@@ -222,12 +222,13 @@ public class ThemesService {
 		Genres genres_daten = GenresKategorienService.gibGenreDaten();
 		boolean genre_gueltig = false;
 		int anz_kategorien = neues_theme.getAllgemeines().getKategorien().getKategorie().size();
+		
 		for(int i=0; i<neues_theme.getAllgemeines().getGenres().getGenre().size(); i++)
 		{
 			for (int j=0; j<genres_daten.getGenre().size(); j++)
 			{
 				// Prüfung der Existenz des Genre
-				if (neues_theme.getAllgemeines().getGenres().getGenre().get(i).equals(genres_daten.getGenre().get(j)))
+				if (neues_theme.getAllgemeines().getGenres().getGenre().get(i).getValue().equals(genres_daten.getGenre().get(j).getGenreId()))
 				{
 					genre_gueltig = true;
 					
@@ -237,7 +238,7 @@ public class ThemesService {
 					for (int k=0; k<neues_theme.getAllgemeines().getKategorien().getKategorie().size(); k++)
 					{
 						for(int l=0; l<kategorien_daten.getKategorie().size(); l++)
-						if (neues_theme.getAllgemeines().getKategorien().getKategorie().get(k).equals(kategorien_daten.getKategorie().get(l)))
+						if (neues_theme.getAllgemeines().getKategorien().getKategorie().get(k).getValue().equals(kategorien_daten.getKategorie().get(l).getKategorieId()))
 						{
 							zaehler++;
 							anz_kategorien--;
