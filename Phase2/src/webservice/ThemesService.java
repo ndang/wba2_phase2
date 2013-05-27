@@ -292,7 +292,7 @@ public class ThemesService {
 			for (int j=0; j<genres_daten.getGenre().size(); j++)
 			{
 				// Prüfung der Existenz des Genre
-				if (veraendertes_theme.getAllgemeines().getGenres().getGenre().get(i).equals(genres_daten.getGenre().get(j)))
+				if (veraendertes_theme.getAllgemeines().getGenres().getGenre().get(i).getValue().equals(genres_daten.getGenre().get(j).getGenreId()))
 				{
 					genre_gueltig = true;
 					
@@ -302,7 +302,7 @@ public class ThemesService {
 					for (int k=0; k<veraendertes_theme.getAllgemeines().getKategorien().getKategorie().size(); k++)
 					{
 						for(int l=0; l<kategorien_daten.getKategorie().size(); l++)
-						if (veraendertes_theme.getAllgemeines().getKategorien().getKategorie().get(k).equals(kategorien_daten.getKategorie().get(l)))
+						if (veraendertes_theme.getAllgemeines().getKategorien().getKategorie().get(k).getValue().equals(kategorien_daten.getKategorie().get(l).getKategorieId()))
 							zaehler++;
 							anz_kategorien--;
 					}
@@ -320,7 +320,13 @@ public class ThemesService {
 				return Response.status(420).build();
 		}
 
-		daten.getTheme().remove(Integer.parseInt(theme_id.substring(1)));
+		int pos = -1;
+		for (int i=0; i< daten.getTheme().size(); i++)
+		{
+			if (daten.getTheme().get(i).getAllgemeines().getThemeId().equals(veraendertes_theme.getAllgemeines().getThemeId()))
+				pos = i;
+		}
+		daten.getTheme().remove(pos);
 		daten.getTheme().add(veraendertes_theme);
 		setzeThemeDaten(daten);		
 		return Response.ok().build();
