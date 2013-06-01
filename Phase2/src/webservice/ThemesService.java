@@ -1,19 +1,12 @@
 package webservice;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.StringReader;
-import java.util.Date;
-import java.util.GregorianCalendar;
+//import java.util.Date;
+//import java.util.GregorianCalendar;
 import java.util.List;
-
-import app.Genres;
-import app.Kategorien;
-import app.Themes;
-import app.Themes.Theme;
-import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,16 +19,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
+//import javax.xml.datatype.DatatypeConfigurationException;
+//import javax.xml.datatype.DatatypeFactory;
+//import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.stream.StreamSource;
+
+import app.Genres;
+import app.Kategorien;
+import app.Themes;
+import app.Themes.Theme;
+import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
 
 @Path("/themes")
 public class ThemesService {
@@ -145,10 +142,10 @@ public class ThemesService {
 				theme_info += "Bewertung:" + allg_daten.getBewertung()+ "\n";
 				theme_info += "Genre(s):\n";
 				for(int j=0; i<allg_daten.getGenres().getGenre().size(); i++)
-					theme_info += allg_daten.getGenres().getGenre().get(i).getValue()+ "\n";
+					theme_info += allg_daten.getGenres().getGenre().get(j).getValue()+ "\n";
 				theme_info += "Kategorie(n):\n";
 				for(int j=0; i<allg_daten.getKategorien().getKategorie().size(); i++)
-					theme_info += allg_daten.getKategorien().getKategorie().get(i).getValue()+ "\n";
+					theme_info += allg_daten.getKategorien().getKategorie().get(j).getValue()+ "\n";
 			}
 		}
 			
@@ -340,14 +337,14 @@ public class ThemesService {
 	 * @return die aktuelle Zeit vom Typ XMLGregorianCalender
 	 * @throws DatatypeConfigurationException
 	 */
-	private XMLGregorianCalendar gibDatum() throws DatatypeConfigurationException
-	{
-		GregorianCalendar kalender = new GregorianCalendar();
-		kalender.setTime(new Date());
-        XMLGregorianCalendar zeit = DatatypeFactory.newInstance().newXMLGregorianCalendar(kalender);
-		return zeit;
-	}
-	
+//	private XMLGregorianCalendar gibDatum() throws DatatypeConfigurationException
+//	{
+//		GregorianCalendar kalender = new GregorianCalendar();
+//		kalender.setTime(new Date());
+//        XMLGregorianCalendar zeit = DatatypeFactory.newInstance().newXMLGregorianCalendar(kalender);
+//		return zeit;
+//	}
+//	
 	
 	/**
 	 * Gibt alle Kommentare zu einem bestimmten Theme aus.
