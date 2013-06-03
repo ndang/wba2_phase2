@@ -44,7 +44,7 @@ public class ThemesService {
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	private Themes gibThemeDaten() throws JAXBException, FileNotFoundException
+	public Themes gibThemeDaten() throws JAXBException, FileNotFoundException
 	{
 		JAXBContext context = JAXBContext.newInstance(Themes.class);
 	    Unmarshaller um = context.createUnmarshaller();
