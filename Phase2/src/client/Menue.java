@@ -60,7 +60,6 @@ public class Menue {
 				break;
 				
 			case 3:
-//				app.gibMyThemes();
 				t_publish_menue();
 				break;
 		
