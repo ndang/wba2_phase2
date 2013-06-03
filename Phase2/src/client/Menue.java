@@ -205,6 +205,7 @@ public class Menue {
 		} while (auswahl == 0);
 		
 		String id;
+		String item_payload;
 		
 		switch(auswahl)
 		{
@@ -216,7 +217,9 @@ public class Menue {
 				
 			case 2:
 				id = id_waehlen();
-//				theme_bearb();
+				System.out.println("");
+				item_payload = in.nextLine();
+//				theme_bearb(id, itemPayload);
 				break; 
 	
 			case 3:
@@ -282,6 +285,57 @@ public class Menue {
 			default:
 				System.out.println("Diese Option ist unzulässig");
 				g_menue();
+				break;
+		}
+	}
+
+	private void theme_bearb(String t_id)
+	{
+		System.out.println();
+		System.out.println("__________________________________________________________________");
+		System.out.println();
+		
+		System.out.println("1 - Etwas zum Theme hinzufügen");
+		System.out.println("2 - Etwas aus dem Theme löschen");
+		System.out.println("3 - zum Hauptmenü");
+		System.out.println("4 - Programm beenden");
+		
+		int auswahl = 0;
+		
+		do 
+		{
+			System.out.println();
+			System.out.print("Ihre Auswahl: ");
+			auswahl = in.nextInt();
+		} while (auswahl == 0);
+		
+		String id;
+		String item_payload;
+		
+		switch(auswahl)
+		{
+			case 1:
+				theme_item_hinzufügen(t_id, );
+				theme_bearb(t_id);
+				break;
+				
+			case 2:
+				theme_item_loeschen(t_id, );
+				item_payload = in.nextLine();
+				theme_bearb(t_id);
+				break; 
+	
+			case 3:
+				home();
+				break;
+	
+			case 4:
+				app.ausloggen();
+				break;
+				
+			default:
+				System.out.println("Diese Option ist unzulässig");
+				k_menue();
 				break;
 		}
 	}

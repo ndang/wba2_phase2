@@ -339,7 +339,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		System.out.println(user + " ausgeloggt.");
 	}
 	
-	public void theme_item_hinzufügen(String t_id, String item_id) throws XMPPException
+	public void theme_item_hinzufügen(String t_id, String payload) throws XMPPException
 	{
 		LeafNode theme = pubsub_mgr.getNode(t_id);
 
@@ -349,8 +349,8 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 //		theme.publish(); // asynchronous call
 		
 		// Publish an Item with payload
-		theme.send(new PayloadItem( item_id, new SimplePayload("root element of the payload (IQ, Message, Presence)", "namespace", "(xml)payload string"))); // item = id + payload (stores payload as a string)
-//		theme.publish(new PayloadItem(item_id, ));
+//		theme.send(new PayloadItem( payload, new SimplePayload("root element of the payload (IQ, Message, Presence)", "namespace", "(xml)payload string"))); // item = id + payload (stores payload as a string)
+//		theme.publish(new PayloadItem(new SimplePayload ));
 	}
 	
 	public void theme_item_loeschen(String t_id, String item_id) throws XMPPException

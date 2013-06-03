@@ -2,7 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="jars/smack_3_3_0/smack.jar"/>
+	<classpathentry kind="lib" path="jars/smack_3_3_0/smack.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/G:/MiKTeX/Home/git/wba2_phase2/Phase2/jars/smack_3_3_0/javadoc/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="jars/smack_3_3_0/smackx-debug.jar"/>
 	<classpathentry kind="lib" path="jars/smack_3_3_0/smackx-jingle.jar"/>
 	<classpathentry kind="lib" path="jars/smack_3_3_0/smackx.jar"/>
