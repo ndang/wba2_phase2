@@ -266,6 +266,8 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		}	
 	}
 	
+	
+
 	public boolean gibAbonnements()
 	{
 		String ret = "";
