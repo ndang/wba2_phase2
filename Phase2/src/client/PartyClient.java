@@ -43,6 +43,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 	private static Connection con;
 	private PubSubManager pubsub_mgr;
 	private Vector<LeafNode> topics;
+	private Vector<String> benachrichtigungen;
 	
 	Scanner in = new Scanner(System.in);
 	
@@ -51,6 +52,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		this.con = connection;
 		this.pubsub_mgr = new PubSubManager(con, "pubsub."+con.getHost()); //?
 		this.topics = new Vector<LeafNode>();
+		this.benachrichtigungen = new Vector<String>();
 		hole_daten();
 		topics_init();
 		
@@ -107,6 +109,14 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 			System.err.println("Liste von Knoten konnte nicht geholt werden.");
 		}	
 
+//		try { // Alles zurücksetzen
+//			topics_clear();
+//		} catch (XMPPException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			System.err.println("piss");
+//		}
+		
 		if ( topics.size() != anz_g + anz_k + anz_t )
 		{
 			
@@ -240,6 +250,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 				System.out.println(topic.getId().toString());
 		}
 	}
+
 	
 	public void abonnieren(String topic_id)
 	{
@@ -262,7 +273,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		catch (XMPPException e)
 		{
 			e.printStackTrace();
-			System.out.println("Topic konnte nicht abonniert werden.");
+			System.err.println("Topic konnte nicht abonniert werden.");
 		}	
 	}
 	
@@ -306,7 +317,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		return false;
 	}
 
-	public void abo_kuendigen(String id)
+	public void abo_kuendigen(String id) 
 	{
 		LeafNode abo = null;
 		try
@@ -316,11 +327,17 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 				if ( topic.getId().equals(id) )
 					abo = topic;
 			}
-			abo.removeItemEventListener(this);
-			if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
-				abo.removeItemDeleteListener(this);
-			abo.unsubscribe(meineJID());
-			System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
+			
+			if (!abonniert(abo))
+				System.err.println("Dieser Topic wurde gar nicht abonniert.");
+			else
+			{
+				abo.removeItemEventListener(this);
+				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
+					abo.removeItemDeleteListener(this);
+				abo.unsubscribe(meineJID());
+				System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
+			}
 		}
 		
 		catch (XMPPException e)
@@ -331,7 +348,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		catch (NullPointerException e)
 		{
 //			e.printStackTrace();
-			System.err.println("Abonemment konnte nicht gekündigt werden.");
+			System.err.println("Topic existiert nicht.\n");
 		}
 	}
 
@@ -341,24 +358,55 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		System.out.println(user + " ausgeloggt.");
 	}
 	
-	public void theme_item_hinzufügen(String t_id, String payload) throws XMPPException
+	public void theme_erstellen(String theme_body)
 	{
-		LeafNode theme = pubsub_mgr.getNode(t_id);
-
-//		//publishen ohne payload
-//		node.send(new Item());
-//		theme.send(); // synchronous call
-//		theme.publish(); // asynchronous call
-		
-		// Publish an Item with payload
-//		theme.send(new PayloadItem( payload, new SimplePayload("root element of the payload (IQ, Message, Presence)", "namespace", "(xml)payload string"))); // item = id + payload (stores payload as a string)
-//		theme.publish(new PayloadItem(new SimplePayload ));
+		try
+		{
+			new_topic("t");
+			LeafNode new_theme = pubsub_mgr.getNode("t"+(anz_t-1));
+			theme_item_hinzufügen(new_theme.getId().toString(), theme_body);
+			System.out.println("Theme wurde erstellt.");
+		}
+		catch(XMPPException e)
+		{
+			System.err.println("Theme kann nicht erstellt werden.");
+		}
 	}
 	
-	public void theme_item_loeschen(String t_id, String item_id) throws XMPPException
+	public void theme_item_hinzufügen(String t_id, String payload)
 	{
-		LeafNode theme= pubsub_mgr.getNode(t_id);
-		theme.deleteItem(item_id);
+		LeafNode theme;
+		try {
+			theme = pubsub_mgr.getNode(t_id);
+//			//publishen ohne payload
+//			node.send(new Item());
+//			theme.publish(); // asynchronous call
+			// Publish an Item with payload
+			System.out.println(payload);
+			theme.publish(new PayloadItem(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
+			System.out.println("Theme wurde erweitert.");
+		}
+		
+		catch (XMPPException e)
+		{
+			e.printStackTrace();
+			System.err.println("Es konnte nichts zum Theme hinzugefügt werden.");
+		}
+	}
+	
+	public void theme_item_loeschen(String t_id, String item_id)
+	{
+		try
+		{
+			LeafNode theme= pubsub_mgr.getNode(t_id);
+			theme.deleteItem(item_id);
+		}
+		
+		catch (XMPPException e)
+		{
+			e.printStackTrace();
+			System.err.println("Es konnte nichts aus dem Theme gelöscht werden.");
+		}
 	}
 	
 	public void bestimmte_items_holen(String topic_id, String []items) throws XMPPException // TODO
@@ -371,6 +419,20 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 	    List<? extends Item> item_list = node.getItems(item_ids);
 	}
     
+	public void benachrichtigungenAusgeben()
+	{
+		if(!benachrichtigungen.isEmpty())
+		{
+			int anz_nachrichten = 1;
+			System.out.println("\nSie haben " + benachrichtigungen.size() + " Benachrichtigungen.");
+			for (Object nachricht : benachrichtigungen)
+				System.out.println((anz_nachrichten++) + ") " + nachricht.toString() + "\n");
+			benachrichtigungen.clear();
+		}
+		else
+			System.out.println("Keine neuen Benachrichtigungen.");	
+	}
+	
 	private String meineJID() {
 		return con.getUser()+"@"+con.getHost();
 	}
@@ -425,17 +487,10 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
     }
 
 	@Override
-	public void handlePublishedItems(ItemPublishEvent items_event) { // TODO 
+	public void handlePublishedItems(ItemPublishEvent items_event) {
 		List<Item> item_list = items_event.getItems();
-//		PayloadItem<SimplePayload> pi = null;
-//		for (int i=0; i<itemlist.size(); i++) {
-//			// Die Stelle kÃ¶nnte Probleme machen
-//			pi = (PayloadItem<SimplePayload>) itemlist.get(i);
-//			notifications.add(pi);
-//		}
-//		updateNotificationsJList();
-		System.out.println("Neues Item wurde hinzugefügt");
-		
+		for (int i=0; i<item_list.size(); i++)
+			benachrichtigungen.add(item_list.get(i).getNode());
 	}
 
 	@Override
