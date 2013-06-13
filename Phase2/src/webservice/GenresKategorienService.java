@@ -14,7 +14,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import app.*;
+import app.Genres;
+import app.Kategorien;
 
 @Path("/genres")
 public class GenresKategorienService {

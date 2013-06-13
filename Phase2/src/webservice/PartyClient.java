@@ -1,6 +1,7 @@
 package webservice;
 
 import javax.ws.rs.core.MediaType;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 

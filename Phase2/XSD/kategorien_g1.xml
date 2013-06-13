@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kategorien xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kategorien.xsd">
-  <kategorie kategorie_id="k0">
+  <kategorie kategorie_id="k0_g1">
     <kategorie_titel>Kindergeburtstag</kategorie_titel>
     <kategorie_beschreibung>Der Kindergeburtstag ist ein über die gesamte Welt verbreiteter Brauch, bei dem der Geburtstag von Kindern mit einem Fest gefeiert wird.</kategorie_beschreibung>
   </kategorie>
-   <kategorie kategorie_id="k1">
+   <kategorie kategorie_id="k1_g1">
     <kategorie_titel>Sweet 16</kategorie_titel>
     <kategorie_beschreibung>A sweet sixteen is a coming of age party celebrating a girl's sixteenth birthday in North America; primarily in the United States and Canada. Recently, boys have also began to celebrate their sixteenth birthday in this trend as well.</kategorie_beschreibung>
   </kategorie>

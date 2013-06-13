@@ -1,8 +1,6 @@
 package client;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -22,17 +20,16 @@ import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.ItemDeleteEvent;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
-import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
-import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.Subscription;
 import org.jivesoftware.smackx.pubsub.listener.ItemDeleteListener;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 
-import webservice.*;
+import webservice.GenresKategorienService;
+import webservice.ThemesService;
 
-public class PartyClient implements ItemDeleteListener,ItemEventListener {
+public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 	
 	private static String user = "user1";
 	private static String pw = "user1user1";
@@ -40,37 +37,48 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 	
 	private int anz_g = 0, anz_k = 0, anz_t = 0;
 	
-	private static Connection con;
+	private Connection con;
 	private PubSubManager pubsub_mgr;
+	
 	private Vector<LeafNode> topics;
-	private Vector<String> benachrichtigungen;
+	private Vector<String> benachrichtigungen = new Vector<String>();
 	
 	Scanner in = new Scanner(System.in);
 	
-	public PartyClient(XMPPConnection connection) throws XMPPException, JAXBException
+	public PartyClient() throws JAXBException
 	{
-		this.con = connection;
-		this.pubsub_mgr = new PubSubManager(con, "pubsub."+con.getHost()); //?
+		try
+		{
+			con = new XMPPConnection(server);
+			con.connect();
+			con.login(user, pw);
+			System.out.println("Login erfolgreich.");
+		}
+		catch (XMPPException e)
+		{
+			e.printStackTrace();
+			System.err.println("\nLogin fehlgeschlagen.");
+		}
+		PubSubManager p = new PubSubManager(con, "pubsub.localhost");
+//		this.pubsub_mgr = new PubSubManager(con, "pubsub."+con.getHost()); //?
+		this.pubsub_mgr = p;
 		this.topics = new Vector<LeafNode>();
 		this.benachrichtigungen = new Vector<String>();
 		hole_daten();
-		topics_init();
-		
+		topics_init();		
 	}
 	
 	private void hole_daten()
 	{
-		GenresKategorienService gks = new GenresKategorienService();
 		ThemesService ts = new ThemesService ();
 		try
 		{
-			anz_g = gks.gibGenreDaten().getGenre().size();
+			anz_g = GenresKategorienService.gibGenreDaten().getGenre().size();
 		
 			for  (int i = 0; i<anz_g; i ++)
-				anz_k += gks.gibKategorienDaten(gks.gibGenreDaten().getGenre().get(i).getGenreId()).getKategorie().size();
+				anz_k += GenresKategorienService.gibKategorienDaten(GenresKategorienService.gibGenreDaten().getGenre().get(i).getGenreId()).getKategorie().size();
 			anz_t = ts.gibThemeDaten().getTheme().size();
 		}
-		
 		catch (JAXBException e)
 		{
 			e.printStackTrace();
@@ -119,7 +127,6 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		
 		if ( topics.size() != anz_g + anz_k + anz_t )
 		{
-			
 			try
 			{
 				topics_clear();
@@ -187,7 +194,6 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 			e.printStackTrace();
 			System.err.println("Topic konnte nicht angelegt werden.");
 		}	
-		
 	}
 		
 	public void delete_topic(String to_delete_topic)
@@ -251,7 +257,6 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		}
 	}
 
-	
 	public void abonnieren(String topic_id)
 	{
 		try {
@@ -277,8 +282,6 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		}	
 	}
 	
-	
-
 	public boolean gibAbonnements()
 	{
 		String ret = "";
@@ -296,6 +299,20 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 			 
 		System.out.println(ret);
 		return true;
+	}
+	
+	public Vector<String> gibAbos() throws XMPPException
+	{
+		Vector<String> abos = new Vector<String>();
+		List<Subscription> abonennten;
+		for (LeafNode topic: topics)
+		{
+			abonennten = topic.getSubscriptions();
+			for (Subscription curr_abonennt: abonennten)
+				if (curr_abonennt.getJid().equals(meineJID()))
+					abos.add(topic.getId());
+		}
+		return abos;
 	}
 	
 	private boolean abonniert(LeafNode abo)
@@ -378,12 +395,15 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		LeafNode theme;
 		try {
 			theme = pubsub_mgr.getNode(t_id);
+			theme.send();
 //			//publishen ohne payload
 //			node.send(new Item());
 //			theme.publish(); // asynchronous call
 			// Publish an Item with payload
-			System.out.println(payload);
-			theme.publish(new PayloadItem(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
+//			theme.publish(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
+//			theme.publish();
+//			theme.publish(new Item("item_id" + (int) Math.random()));
+//			theme.send(new Item("item_id" + (int) Math.random()));
 			System.out.println("Theme wurde erweitert.");
 		}
 		
@@ -409,16 +429,16 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 		}
 	}
 	
-	public void bestimmte_items_holen(String topic_id, String []items) throws XMPPException // TODO
-	{
-	    LeafNode node = pubsub_mgr.getNode(topic_id);
-	    Collection<String> item_ids = new ArrayList<String>(items.length);
-	    for (String item_id: items)
-	    	item_ids.add(item_id);
-	      
-	    List<? extends Item> item_list = node.getItems(item_ids);
-	}
-    
+//	public void bestimmte_items_holen(String topic_id, String []items) throws XMPPException // TODO
+//	{
+//	    LeafNode node = pubsub_mgr.getNode(topic_id);
+//	    Collection<String> item_ids = new ArrayList<String>(items.length);
+//	    for (String item_id: items)
+//	    	item_ids.add(item_id);
+//	      
+//	    List<? extends Item> item_list = node.getItems(item_ids);
+//	}
+//    
 	public void benachrichtigungenAusgeben()
 	{
 		if(!benachrichtigungen.isEmpty())
@@ -427,42 +447,73 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
 			System.out.println("\nSie haben " + benachrichtigungen.size() + " Benachrichtigungen.");
 			for (Object nachricht : benachrichtigungen)
 				System.out.println((anz_nachrichten++) + ") " + nachricht.toString() + "\n");
-			benachrichtigungen.clear();
+//			benachrichtigungen.clear();
 		}
 		else
-			System.out.println("Keine neuen Benachrichtigungen.");	
+			System.out.println("Keine neuen Benachrichtigungen.");		
+	}
+	
+	public Vector<String> benachrichtigungenHolen()
+	{
+		if(!benachrichtigungen.isEmpty())
+		{
+			return benachrichtigungen;
+		}
+		else
+			return new Vector<String>();	
 	}
 	
 	private String meineJID() {
 		return con.getUser()+"@"+con.getHost();
 	}
 	
-	private Menue menue() throws XMPPException, JAXBException
+//	private Menue menue() throws XMPPException, JAXBException
+//	{
+//		return new Menue(this);
+//	}
+	
+	public Vector<String> getTopicNames()
 	{
-		return new Menue(this);
+		Vector<String> topic_names = new Vector<String>();
+		for (LeafNode topic : topics)
+			topic_names.add(topic.getId());
+		return topic_names;
+	}
+	
+	public Vector<String> getTopicNames(String type)
+	{
+		Vector<String> topic_names = new Vector<String>();
+		for (LeafNode topic : topics)
+		{
+			String name = topic.getId();
+			if( name.substring(0,1).equals(type) && name.length()<3 )
+				topic_names.add(name);
+		}
+			
+		return topic_names;
 	}
 	
 	public static void main(String[] args) throws JAXBException {
-		try
-		{
-			XMPPConnection con = new XMPPConnection(server);
-			con.connect();
-			con.login(user, pw);
-			System.out.println("Login erfolgreich.");
-			PartyClient pc = new PartyClient(con);
-			pc.menue();
-		}
-		catch (XMPPException e)
-		{
-			e.printStackTrace();
-			System.err.println("\nLogin fehlgeschlagen.");
-		}		
+//		try
+//		{
+//			XMPPConnection con = new XMPPConnection(server);
+//			con.connect();
+//			con.login(user, pw);
+//			System.out.println("Login erfolgreich.");
+//			PartyClient pc = new PartyClient(con);
+//			pc.menue();
+//		}
+//		catch (XMPPException e)
+//		{
+//			e.printStackTrace();
+//			System.err.println("\nLogin fehlgeschlagen.");
+//		}		
 	}
 	
-	class ItemEventCoordinator<Item> implements ItemEventListener
+	class ItemEventCoordinator implements ItemEventListener<Item>
     {
         @Override
-        public void handlePublishedItems(ItemPublishEvent items)
+        public void handlePublishedItems(ItemPublishEvent<Item> items)
         {
             System.out.println("Item count: " + items.getItems().size());
             System.out.println(items);
@@ -470,7 +521,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
        
 	}
 	
-	class ItemDeleteCoordinator<Item> implements ItemDeleteListener
+	class ItemDeleteCoordinator implements ItemDeleteListener
     {
         @Override
         public void handleDeletedItems(ItemDeleteEvent items)
@@ -487,10 +538,10 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener {
     }
 
 	@Override
-	public void handlePublishedItems(ItemPublishEvent items_event) {
+	public void handlePublishedItems(ItemPublishEvent<Item> items_event) {
 		List<Item> item_list = items_event.getItems();
 		for (int i=0; i<item_list.size(); i++)
-			benachrichtigungen.add(item_list.get(i).getNode());
+			benachrichtigungen.add(item_list.get(i).getId());
 	}
 
 	@Override

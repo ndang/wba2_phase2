@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 import javax.xml.bind.JAXBException;
 
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
 public class Menue {

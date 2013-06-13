@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <themes>
     <theme>
-        <allgemeines bewertung="5" theme_id="t0">
+        <allgemeines bewertung="5" theme_id="t0_k0_g0">
             <theme_titel>Robust und Glitzernd</theme_titel>
             <genres>
                 <genre>g0</genre>
@@ -99,7 +99,7 @@
         </interaktion>
     </theme>
     <theme>
-        <allgemeines bewertung="5" theme_id="t1">
+        <allgemeines bewertung="5" theme_id="t1_k0_g0">
             <theme_titel>I Love Glittering things.</theme_titel>
             <genres>
                 <genre>g0</genre>
@@ -182,7 +182,7 @@
         </interaktion>
     </theme>
     <theme>
-        <allgemeines bewertung="5" theme_id="t1">
+        <allgemeines bewertung="5" theme_id="t2_k0_g0">
             <theme_titel>I Love Glitter</theme_titel>
             <genres>
                 <genre>g0</genre>

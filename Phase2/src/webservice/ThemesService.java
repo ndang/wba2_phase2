@@ -4,8 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.StringReader;
-//import java.util.Date;
-//import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -23,9 +21,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-//import javax.xml.datatype.DatatypeConfigurationException;
-//import javax.xml.datatype.DatatypeFactory;
-//import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.stream.StreamSource;
 
 import app.Genres;
@@ -33,6 +28,11 @@ import app.Kategorien;
 import app.Themes;
 import app.Themes.Theme;
 import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
+//import java.util.Date;
+//import java.util.GregorianCalendar;
+//import javax.xml.datatype.DatatypeConfigurationException;
+//import javax.xml.datatype.DatatypeFactory;
+//import javax.xml.datatype.XMLGregorianCalendar;
 
 @Path("/themes")
 public class ThemesService {
