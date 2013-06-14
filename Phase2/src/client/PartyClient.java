@@ -29,13 +29,18 @@ import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 import webservice.GenresKategorienService;
 import webservice.ThemesService;
 
-public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
+public class PartyClient {
+	
+	private static GenresKategorienService gks;
+	private static ThemesService ts;
 	
 	private static String user = "user1";
 	private static String pw = "user1user1";
 	private static String server = "localhost";
 	
-	private int anz_g = 0, anz_k = 0, anz_t = 0;
+	private static Scanner in = new Scanner(System.in);
+	
+	private static int anz_g = 0, anz_k = 0, anz_t = 0;
 	
 	private Connection con;
 	private PubSubManager pubsub_mgr;
@@ -43,9 +48,7 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 	private Vector<LeafNode> topics;
 	private Vector<String> benachrichtigungen = new Vector<String>();
 	
-	Scanner in = new Scanner(System.in);
-	
-	public PartyClient() throws JAXBException
+	public PartyClient() throws XMPPException
 	{
 		try
 		{
@@ -59,36 +62,21 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 			e.printStackTrace();
 			System.err.println("\nLogin fehlgeschlagen.");
 		}
-		PubSubManager p = new PubSubManager(con, "pubsub.localhost");
-//		this.pubsub_mgr = new PubSubManager(con, "pubsub."+con.getHost()); //?
-		this.pubsub_mgr = p;
+		
+		this.gks = new GenresKategorienService();
+		this.ts = new ThemesService();
+		
+		this.pubsub_mgr = new PubSubManager(con, "pubsub."+con.getHost());
 		this.topics = new Vector<LeafNode>();
 		this.benachrichtigungen = new Vector<String>();
-		hole_daten();
-		topics_init();		
-	}
-	
-	private void hole_daten()
-	{
-		ThemesService ts = new ThemesService ();
-		try
-		{
-			anz_g = GenresKategorienService.gibGenreDaten().getGenre().size();
 		
-			for  (int i = 0; i<anz_g; i ++)
-				anz_k += GenresKategorienService.gibKategorienDaten(GenresKategorienService.gibGenreDaten().getGenre().get(i).getGenreId()).getKategorie().size();
-			anz_t = ts.gibThemeDaten().getTheme().size();
-		}
-		catch (JAXBException e)
-		{
-			e.printStackTrace();
-			System.err.println("Es konnte nicht auf die XML Daten zugegriffen werden.");
-		}
+		this.anz_g = gks.getGenres().getGenre().size();
+		for ( int i = 0; i<anz_g; i ++ )
+			this.anz_k += gks.getKategorien(gks.getGenres().getGenre().get(i).getGenreId()).getKategorie().size();
+		this.anz_t = ts.getThemes().getTheme().size();
 		
-		catch (FileNotFoundException e1)
-		{
-			System.err.println("XML Daten existieren nicht.");
-		}
+//		deleteAllTopics();
+		initTopics();	
 	}
 	
 	/**
@@ -96,83 +84,67 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 	 * @throws XMPPException 
 	 * @throws JAXBException 
 	 */
-	private void topics_init() throws JAXBException
+	private void initTopics() throws XMPPException
 	{
 		topics.clear();
-		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor(con);   //Object has u.a. ability to discover items and infos of remote(entfernte) XMPP entities
-		DiscoverItems discovery_items; // to request and receive items associated with XMPP entities
+		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor(con);
+		DiscoverItems discovery_items;
+		
 		try
 		{
 			discovery_items = discovery_mgr.discoverItems("pubsub."+con.getHost()); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
 			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
+			
 			while (iterator.hasNext())
 			{
 				DiscoverItems.Item item = (DiscoverItems.Item) iterator.next();
 				topics.addElement((LeafNode) pubsub_mgr.getNode(item.getNode()));
 			}
-		}
-		catch (XMPPException e)
-		{
+		} catch (XMPPException e) {
 			e.printStackTrace();
-			System.err.println("Liste von Knoten konnte nicht geholt werden.");
-		}	
-
-//		try { // Alles zurücksetzen
-//			topics_clear();
-//		} catch (XMPPException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			System.err.println("piss");
-//		}
+			System.err.println("Topics konnten nicht initialisiert werden!");
+		}
 		
-		if ( topics.size() != anz_g + anz_k + anz_t )
+		/* aller erste Initialisierung*/
+		if (anz_g+anz_k+anz_t != topics.size()) //TODO muss noch gescheit geschrieben werden und nicht so manuell
 		{
-			try
-			{
-				topics_clear();
-			} catch (XMPPException e) {
-				e.printStackTrace();
-				System.err.println("Topics konnten nicht gecleart werden.");
-			}
+			deleteAllTopics();
 			
-			int temp = anz_g;
-			anz_g = 0;
-			for ( int i = 0; i<temp; i++ )
-				new_topic("g");
+			for( int i=0; i<anz_g; i++)
+				createTopic("g"+i);
 			
-			temp = anz_k;
-			anz_k = 0;
-//			for  ( int i = 0; i<temp; i++ )
-//				new_topic("k");
+			createTopic("k0_g0");
+			createTopic("k1_g0");
+			createTopic("k0_g1");
+			createTopic("k1_g1");
+			createTopic("k0_g2");
+			createTopic("k0_g3");
+			createTopic("k1_g3");
+			createTopic("k2_g3");
 			
-			/** naja, hierrum kann ich micht später kümmern **/
-			new_topic("g0_k", 0); anz_k++;
-			new_topic("g0_k", 1); anz_k++;
-			new_topic("g1_k", 0); anz_k++;
-			new_topic("g1_k", 1); anz_k++;
-			new_topic("g2_k", 0); anz_k++;
-			new_topic("g3_k", 0); anz_k++;
-			new_topic("g3_k", 1); anz_k++;
-			new_topic("g3_k", 2); anz_k++;
-			
-			temp = anz_t;
-			anz_t = 0;
-			for  ( int i = 0; i<temp; i++ )
-				new_topic("t");
+			createTopic("t0_k0_g0");
+			createTopic("t1_k0_g0");
+			createTopic("t2_k0_g0");			
 		}
+		
 	}
 	
-	public void new_topic(String typ)
+	public String createGID()
 	{
-		switch(typ)
-		{
-			case "g": new_topic(typ, anz_g++); break;
-			case "k": new_topic(typ, anz_k++); break;
-			case "t": new_topic(typ, anz_t++); break;
-		}
+		return  "g"+(anz_g++);
 	}
 	
-	public void new_topic(String typ, int id)
+	public String createKID(String g_id)
+	{
+		return "k"+(anz_k++)+"_"+g_id;
+	}
+	
+	public String createTID(String g_id, String k_id)
+	{
+		return "t"+(anz_t++)+"_"+k_id+g_id;
+	}
+	
+	public void createTopic(String id)
 	{
 		try
 		{
@@ -180,56 +152,47 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
 		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
 		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
-		    form.setPersistentItems(false);
+		    form.setPersistentItems(true); // ???
 		    form.setPublishModel(PublishModel.open); // jeder darf publishen
 		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
 		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
 		    form.setSubscribe(true); // ob man das subsciben kann
-		    LeafNode topic = (LeafNode) pubsub_mgr.createNode(typ+id, form);
+		    LeafNode topic = (LeafNode) pubsub_mgr.createNode(id, form);
 			topics.add(topic);	
-		}
-		
-		catch (XMPPException e)
-		{
+		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("Topic konnte nicht angelegt werden.");
 		}	
 	}
 		
-	public void delete_topic(String to_delete_topic)
+	public void deleteTopic(String topic)
 	{
 		try
 		{
 			for (LeafNode curr_topic: topics)
 			{
-				if (curr_topic.equals(to_delete_topic))
+				if (curr_topic.equals(topic))
 				{
-					curr_topic.removeItemDeleteListener(this);
-					curr_topic.removeItemEventListener(this);
-					pubsub_mgr.deleteNode(to_delete_topic);
+//					curr_topic.removeItemDeleteListener();
+//					curr_topic.removeItemEventListener();
+					pubsub_mgr.deleteNode(topic);
 					topics.remove(curr_topic);
 				}
 			}
-		}
-		
-		catch (XMPPException e)
-		{
+		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("Topic konnte nicht gelöscht werden.");
 		}
 	}
 	
-	private void topics_clear() throws XMPPException
+	private void deleteAllTopics()
 	{
 		for(LeafNode curr_topic: topics)
 		{
 			try
 			{
 				pubsub_mgr.deleteNode(curr_topic.getId());
-			}
-			
-			catch (XMPPException e)
-			{
+			} catch (XMPPException e) {
 				e.printStackTrace();
 				System.err.println("Topics konnten nicht gelöscht werden.");
 			}
@@ -239,120 +202,149 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 		System.out.println("Topic Anzahl ist wieder auf "+ topics.size());
 	}
 
-	public void topicInfo(String typ)
+	public void getTopicTitle(String typ)
 	{
 		for(LeafNode topic : topics)
 		{
-			if (topic.getId().toString().substring(0, 1).equals(typ) && topic.getId().toString().length()==2)
-				System.out.println(topic.getId().toString());
+			if ( topic.getId().equals(typ) )
+				System.out.println(topic.getId()+" Titel");
 		}
 	}
 	
-	public void topicInfo(String typ, String id)
-	{
-		for(LeafNode topic : topics)
-		{
-			if (topic.getId().toString().substring(0, 2).equals(id) && topic.getId().toString().length()>2)
-				System.out.println(topic.getId().toString());
-		}
-	}
-
-	public void abonnieren(String topic_id)
-	{
-		try {
-			LeafNode abo = pubsub_mgr.getNode(topic_id);
-			
-			if (!abonniert(abo))
-			{
-				abo.addItemEventListener(this); // für jedes abo ein neues?
-				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
-					abo.addItemDeleteListener(this);
-				abo.subscribe(meineJID());
-				System.out.println(abo.getId() + " wurde abonniert.");
-			}
-			
-			else
-				System.err.println("Dieses Topic wurde bereits abonniert.");
-		}
-		
-		catch (XMPPException e)
-		{
-			e.printStackTrace();
-			System.err.println("Topic konnte nicht abonniert werden.");
-		}	
-	}
-	
-	public boolean gibAbonnements()
-	{
-		String ret = "";
-		for (LeafNode topic : topics)
-		{
-			if (abonniert(topic))
-				ret += topic.getId() + "\n";
-		}
-		
-		if (ret.equals(""))
-		{
-			ret = "Sie haben noch keine Abonnements.";
-			return false;
-		}
-			 
-		System.out.println(ret);
-		return true;
-	}
-	
-	public Vector<String> gibAbos() throws XMPPException
+	public Vector<String> getMySubscriptions()
 	{
 		Vector<String> abos = new Vector<String>();
-		List<Subscription> abonennten;
+		List<Subscription> abonennten = null;
 		for (LeafNode topic: topics)
 		{
-			abonennten = topic.getSubscriptions();
+			try
+			{
+				abonennten = topic.getSubscriptions();
+			} catch (XMPPException e) {
+				e.printStackTrace();
+				System.err.println("Abonnenments konnten nicht geholt werden.");
+			}
 			for (Subscription curr_abonennt: abonennten)
-				if (curr_abonennt.getJid().equals(meineJID()))
+				if (curr_abonennt.getJid().equals(getMyJID()))
 					abos.add(topic.getId());
 		}
 		return abos;
 	}
 	
-	private boolean abonniert(LeafNode abo)
+	public Vector<String> getBenachrichtigungen()
+	{
+		if(!benachrichtigungen.isEmpty())
+			return benachrichtigungen;
+		else
+			return new Vector<String>();	
+	}
+	
+	public Vector<String> getTopicNames()
+	{
+		Vector<String> topic_names = new Vector<String>();
+		for (LeafNode topic : topics)
+			topic_names.add(topic.getId());
+		return topic_names;
+	}
+	
+	public Vector<String> getGenres()
+	{
+		Vector<String> topic_names = new Vector<String>();
+		for (LeafNode topic : topics)
+		{
+			String name = topic.getId();
+			if( name.substring(0,1).equals("g"))
+				topic_names.add(name);
+		}
+		return topic_names;
+	}
+	
+	public Vector<String> getKategorien(String genre)
+	{
+		Vector<String> topic_names = new Vector<String>();
+		for (LeafNode topic : topics)
+		{
+			String name = topic.getId();			
+			if( name.substring(0,1).equals("k") && name.substring(3,4).equals(genre))
+				topic_names.add(name);
+		}
+		topic_names.add("Test");
+		return topic_names;
+	}
+	
+	public Vector<String> getThemes(String genre, String kategorie)
+	{
+		Vector<String> topic_names = new Vector<String>();
+		for (LeafNode topic : topics)
+		{
+			String name = topic.getId();
+			if( name.substring(0,1).equals("t") && name.substring(3,4).equals(kategorie) && name.substring(3,4).equals(genre))
+				topic_names.add(name);
+		}
+		return topic_names;
+	}
+	
+	private String getMyJID() {
+		return con.getUser()+"@"+con.getHost();
+	}
+	
+	private boolean isSubscribed(LeafNode abo)
 	{
 		try
 		{
 			List<Subscription> abonennten;
 			abonennten = abo.getSubscriptions();
 			for (Subscription curr_abonennt: abonennten)
-				if (curr_abonennt.getJid().equals(meineJID()))
+				if (curr_abonennt.getJid().equals(getMyJID()))
 					return true;
-		}
-		
-		catch (XMPPException e)
-		{
+		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("Abonnement konnte nicht überprüft werden.");
 		}
 		return false;
 	}
 
-	public void abo_kuendigen(String id) 
+	public void subscribe(String topic_id)
+	{
+		try
+		{
+			LeafNode abo = pubsub_mgr.getNode(topic_id);
+			
+			if (!isSubscribed(abo))
+			{
+				abo.addItemEventListener(new ItemEventCoordinator()); 
+				if (abo.toString().substring(0,1).equals("t"))
+					abo.addItemDeleteListener(new ItemDeleteCoordinator());
+				abo.subscribe(getMyJID());
+				System.out.println(abo.getId() + " wurde abonniert.");
+			}
+			else
+				System.err.println("Dieses Topic wurde bereits abonniert.");
+		}	catch (XMPPException e) {
+			e.printStackTrace();
+			System.err.println("Topic konnte nicht abonniert werden.");
+		}	
+	}
+	
+	public void unsubscribe(String topic_id) 
 	{
 		LeafNode abo = null;
 		try
 		{
 			for (LeafNode topic : topics)
 			{
-				if ( topic.getId().equals(id) )
+				if ( topic.getId().equals(topic_id) )
 					abo = topic;
 			}
 			
-			if (!abonniert(abo))
+			if (!isSubscribed(abo))
 				System.err.println("Dieser Topic wurde gar nicht abonniert.");
 			else
 			{
-				abo.removeItemEventListener(this);
+//				abo.removeItemEventListener(this);
 				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
-					abo.removeItemDeleteListener(this);
-				abo.unsubscribe(meineJID());
+//					abo.removeItemDeleteListener(this);
+				abo.unsubscribe(getMyJID());
 				System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
 			}
 		}
@@ -369,46 +361,21 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 		}
 	}
 
-	public void ausloggen()
+	public void logout()
 	{
 		con.disconnect();
 		System.out.println(user + " ausgeloggt.");
 	}
 	
-	public void theme_erstellen(String theme_body)
-	{
-		try
-		{
-			new_topic("t");
-			LeafNode new_theme = pubsub_mgr.getNode("t"+(anz_t-1));
-			theme_item_hinzufügen(new_theme.getId().toString(), theme_body);
-			System.out.println("Theme wurde erstellt.");
-		}
-		catch(XMPPException e)
-		{
-			System.err.println("Theme kann nicht erstellt werden.");
-		}
-	}
-	
 	public void theme_item_hinzufügen(String t_id, String payload)
 	{
 		LeafNode theme;
-		try {
-			theme = pubsub_mgr.getNode(t_id);
-			theme.send();
-//			//publishen ohne payload
-//			node.send(new Item());
-//			theme.publish(); // asynchronous call
-			// Publish an Item with payload
-//			theme.publish(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
-//			theme.publish();
-//			theme.publish(new Item("item_id" + (int) Math.random()));
-//			theme.send(new Item("item_id" + (int) Math.random()));
-			System.out.println("Theme wurde erweitert.");
-		}
-		
-		catch (XMPPException e)
+		try
 		{
+			theme = pubsub_mgr.getNode(t_id);
+//			theme.send();
+//			theme.send(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
+		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("Es konnte nichts zum Theme hinzugefügt werden.");
 		}
@@ -420,96 +387,12 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
 		{
 			LeafNode theme= pubsub_mgr.getNode(t_id);
 			theme.deleteItem(item_id);
-		}
-		
-		catch (XMPPException e)
-		{
+		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("Es konnte nichts aus dem Theme gelöscht werden.");
 		}
 	}
-	
-//	public void bestimmte_items_holen(String topic_id, String []items) throws XMPPException // TODO
-//	{
-//	    LeafNode node = pubsub_mgr.getNode(topic_id);
-//	    Collection<String> item_ids = new ArrayList<String>(items.length);
-//	    for (String item_id: items)
-//	    	item_ids.add(item_id);
-//	      
-//	    List<? extends Item> item_list = node.getItems(item_ids);
-//	}
-//    
-	public void benachrichtigungenAusgeben()
-	{
-		if(!benachrichtigungen.isEmpty())
-		{
-			int anz_nachrichten = 1;
-			System.out.println("\nSie haben " + benachrichtigungen.size() + " Benachrichtigungen.");
-			for (Object nachricht : benachrichtigungen)
-				System.out.println((anz_nachrichten++) + ") " + nachricht.toString() + "\n");
-//			benachrichtigungen.clear();
-		}
-		else
-			System.out.println("Keine neuen Benachrichtigungen.");		
-	}
-	
-	public Vector<String> benachrichtigungenHolen()
-	{
-		if(!benachrichtigungen.isEmpty())
-		{
-			return benachrichtigungen;
-		}
-		else
-			return new Vector<String>();	
-	}
-	
-	private String meineJID() {
-		return con.getUser()+"@"+con.getHost();
-	}
-	
-//	private Menue menue() throws XMPPException, JAXBException
-//	{
-//		return new Menue(this);
-//	}
-	
-	public Vector<String> getTopicNames()
-	{
-		Vector<String> topic_names = new Vector<String>();
-		for (LeafNode topic : topics)
-			topic_names.add(topic.getId());
-		return topic_names;
-	}
-	
-	public Vector<String> getTopicNames(String type)
-	{
-		Vector<String> topic_names = new Vector<String>();
-		for (LeafNode topic : topics)
-		{
-			String name = topic.getId();
-			if( name.substring(0,1).equals(type) && name.length()<3 )
-				topic_names.add(name);
-		}
-			
-		return topic_names;
-	}
-	
-	public static void main(String[] args) throws JAXBException {
-//		try
-//		{
-//			XMPPConnection con = new XMPPConnection(server);
-//			con.connect();
-//			con.login(user, pw);
-//			System.out.println("Login erfolgreich.");
-//			PartyClient pc = new PartyClient(con);
-//			pc.menue();
-//		}
-//		catch (XMPPException e)
-//		{
-//			e.printStackTrace();
-//			System.err.println("\nLogin fehlgeschlagen.");
-//		}		
-	}
-	
+
 	class ItemEventCoordinator implements ItemEventListener<Item>
     {
         @Override
@@ -536,24 +419,4 @@ public class PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
             System.out.println("All items have been deleted from node");
         }
     }
-
-	@Override
-	public void handlePublishedItems(ItemPublishEvent<Item> items_event) {
-		List<Item> item_list = items_event.getItems();
-		for (int i=0; i<item_list.size(); i++)
-			benachrichtigungen.add(item_list.get(i).getId());
-	}
-
-	@Override
-	public void handleDeletedItems(ItemDeleteEvent items_event) { // TODO 
-		List<String> item_list = items_event.getItemIds();
-		for (int i=0; 0<item_list.size(); i++)
-			System.out.println(item_list.get(i) + " wurde gelöscht.");
-		
-	}
-
-	@Override
-	public void handlePurge() { // TODO: Called when all items are deleted from a node the listener is registered with.
-		System.out.println("Gesamtes Theme wurde gelöscht.");
-	}
 }
