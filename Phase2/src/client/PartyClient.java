@@ -1,6 +1,5 @@
 package client;
 
-import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -75,7 +74,6 @@ public class PartyClient {
 			this.anz_k += gks.getKategorien(gks.getGenres().getGenre().get(i).getGenreId()).getKategorie().size();
 		this.anz_t = ts.getThemes().getTheme().size();
 		
-//		deleteAllTopics();
 		initTopics();	
 	}
 	
@@ -106,7 +104,7 @@ public class PartyClient {
 		}
 		
 		/* aller erste Initialisierung*/
-		if (anz_g+anz_k+anz_t != topics.size()) //TODO muss noch gescheit geschrieben werden und nicht so manuell
+		if ( anz_g+anz_k+anz_t != topics.size() ) //TODO muss noch gescheit geschrieben werden und nicht so manuell
 		{
 			deleteAllTopics();
 			
@@ -167,6 +165,8 @@ public class PartyClient {
 		
 	public void deleteTopic(String topic)
 	{
+		// TODO: anz_x anpassen und Typ abfragen
+		
 		try
 		{
 			for (LeafNode curr_topic: topics)
@@ -204,6 +204,7 @@ public class PartyClient {
 
 	public void getTopicTitle(String typ)
 	{
+		// TODO: per WebServices!
 		for(LeafNode topic : topics)
 		{
 			if ( topic.getId().equals(typ) )
@@ -265,10 +266,9 @@ public class PartyClient {
 		for (LeafNode topic : topics)
 		{
 			String name = topic.getId();			
-			if( name.substring(0,1).equals("k") && name.substring(3,4).equals(genre))
+			if( name.substring(0,1).equals("k") && name.substring(3).equals(genre))
 				topic_names.add(name);
 		}
-		topic_names.add("Test");
 		return topic_names;
 	}
 	
@@ -278,13 +278,14 @@ public class PartyClient {
 		for (LeafNode topic : topics)
 		{
 			String name = topic.getId();
-			if( name.substring(0,1).equals("t") && name.substring(3,4).equals(kategorie) && name.substring(3,4).equals(genre))
+			if( name.substring(0,1).equals("t") && name.substring(3,5).equals(kategorie) && name.substring(6).equals(genre))
 				topic_names.add(name);
 		}
 		return topic_names;
 	}
 	
-	private String getMyJID() {
+	private String getMyJID()
+	{
 		return con.getUser()+"@"+con.getHost();
 	}
 	
@@ -328,21 +329,15 @@ public class PartyClient {
 	
 	public void unsubscribe(String topic_id) 
 	{
-		LeafNode abo = null;
 		try
 		{
-			for (LeafNode topic : topics)
-			{
-				if ( topic.getId().equals(topic_id) )
-					abo = topic;
-			}
-			
+			LeafNode abo = pubsub_mgr.getNode(topic_id);
 			if (!isSubscribed(abo))
 				System.err.println("Dieser Topic wurde gar nicht abonniert.");
 			else
 			{
 //				abo.removeItemEventListener(this);
-				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
+//				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
 //					abo.removeItemDeleteListener(this);
 				abo.unsubscribe(getMyJID());
 				System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
@@ -367,13 +362,13 @@ public class PartyClient {
 		System.out.println(user + " ausgeloggt.");
 	}
 	
-	public void theme_item_hinzufügen(String t_id, String payload)
+	public void publish(String t_id, String payload)
 	{
 		LeafNode theme;
 		try
 		{
 			theme = pubsub_mgr.getNode(t_id);
-//			theme.send();
+			theme.send();
 //			theme.send(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
 		} catch (XMPPException e) {
 			e.printStackTrace();
@@ -381,17 +376,17 @@ public class PartyClient {
 		}
 	}
 	
-	public void theme_item_loeschen(String t_id, String item_id)
-	{
-		try
-		{
-			LeafNode theme= pubsub_mgr.getNode(t_id);
-			theme.deleteItem(item_id);
-		} catch (XMPPException e) {
-			e.printStackTrace();
-			System.err.println("Es konnte nichts aus dem Theme gelöscht werden.");
-		}
-	}
+//	public void theme_item_loeschen(String t_id, String item_id)
+//	{
+//		try
+//		{
+//			LeafNode theme= pubsub_mgr.getNode(t_id);
+//			theme.deleteItem(item_id);
+//		} catch (XMPPException e) {
+//			e.printStackTrace();
+//			System.err.println("Es konnte nichts aus dem Theme gelöscht werden.");
+//		}
+//	}
 
 	class ItemEventCoordinator implements ItemEventListener<Item>
     {

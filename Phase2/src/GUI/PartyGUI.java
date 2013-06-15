@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -11,10 +12,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
@@ -32,6 +35,13 @@ import javax.swing.PopupFactory;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.Highlighter.Highlight;
+import javax.swing.text.Highlighter.HighlightPainter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.JTextField;
@@ -62,10 +72,34 @@ public class PartyGUI extends JFrame {
 	
 	private Border b = new LineBorder(Color.black);
 	private PartyClient partyc;
+		
+	// Buttons
+	JButton btnAusloggen;
+	JButton btnHilfe;
 	
-	private JList list_kategorien;
-
-
+	// TabbedPanes
+	JTabbedPane mainTabbedPane;
+	
+	//Panels
+	JPanel panel_news;
+	JPanel panel_abos;
+	JPanel panel_search;
+	JPanel panel_create;
+	
+	//Listen
+	JList list_benachrichtigungen;
+	Vector<String> subscriptions;
+	
+	Vector<String> genres_liste;
+	JList list_genre;
+	
+	Vector<String> kategorien_list;
+	JList list_kategorien;
+	
+	Vector<String> theme_topics;
+	JList list_themes;
+	JScrollPane scrollPane_theme;
+ 
 	/**
 	 * Launch the application.
 	 */
@@ -109,11 +143,11 @@ public class PartyGUI extends JFrame {
 	private void fixedMenue()
 	{
 		// Content
-		JButton btnAusloggen = new JButton("Logout");
+		btnAusloggen = new JButton("Logout");
 		btnAusloggen.setBounds(554, 376, 89, 23);
 		main_panel.add(btnAusloggen);
 		
-		JButton btnHilfe = new JButton("Hilfe");
+		btnHilfe = new JButton("Hilfe");
 		btnHilfe.setBounds(455, 376, 89, 23);
 		main_panel.add(btnHilfe);
 		
@@ -141,28 +175,26 @@ public class PartyGUI extends JFrame {
 
 	private void mainTabbedMenue()
 	{
-		// LAYOUT
-		JTabbedPane mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		mainTabbedPane.setBounds(0, 0, 653, 356);
 		main_panel.add(mainTabbedPane);
 		
-		// CONTENT
-		JPanel panel_news = new JPanel();
+		panel_news = new JPanel();
 		panel_news.setToolTipText("Benachrichtigungen");
 		mainTabbedPane.addTab("Benachrichtigungen", null, panel_news, null);
 		newsMenue(panel_news);
 		
-		JPanel panel_abos = new JPanel();
+		panel_abos = new JPanel();
 		panel_abos.setToolTipText("Abonnemnets");
-		mainTabbedPane.addTab("Meine Abonnemnets", null, panel_abos, null);
+		mainTabbedPane.addTab("Meine Abonnements", null, panel_abos, null);
 		aboMenue(panel_abos);
 		
-		JPanel panel_search = new JPanel();
+		panel_search = new JPanel();
 		panel_search.setToolTipText("Stöbern");
 		mainTabbedPane.addTab("Stöbern", null, panel_search, null);
 		searchMenue(panel_search);
 		
-		JPanel panel_create = new JPanel();
+		panel_create = new JPanel();
 		panel_create.setToolTipText("Theme erstellen");
 		mainTabbedPane.addTab("Theme erstellen", null, panel_create, null);
 		createMenue(panel_create);
@@ -170,22 +202,24 @@ public class PartyGUI extends JFrame {
 	
 	private void newsMenue(JPanel panel_news)
 	{
-		// CONTENT
-		/**************************** BenachrichtigungenFeld **********************************/
-		String nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
+		// TODO: Feld soll sich immer aktuallisieren, sobald es Neuigkeiten gibt, nicht nur, wenn der Nutzer sich das erste mal einloggt.
 		
-		Vector<String> benachrichtigungen_v;
-		benachrichtigungen_v = partyc.getBenachrichtigungen();
-//		benachrichtigungen_v.add("naaaaaaa");
+		/**************************** BenachrichtigungenFeld **********************************/
+		
+		String nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
+		Vector<String> benachrichtigungen_v = partyc.getBenachrichtigungen();
 		
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
+		
 		JLabel lblZurZeitHaben = new JLabel(nachricht);;
 
-		final JList list_benachrichtigungen = new JList(benachrichtigungen_v);
+		list_benachrichtigungen = new JList(benachrichtigungen_v);
 		JScrollPane scrollPane = new JScrollPane(list_benachrichtigungen);
 		
+		
 		/**************************** Löschen ************************************************/
+		
 		JButton btnAllesLoeschen = new JButton("Benachrichtigungen löschen");
 		
 		// LAYOUT
@@ -215,14 +249,13 @@ public class PartyGUI extends JFrame {
 		);
 		panel_news.setLayout(gl_panel_news);	
 		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
+		/************************************ ACTIONLISTENER ****************************************************/
 		
 		btnAllesLoeschen.addActionListener(new ActionListener()
 		{
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent arg0)
+			{
 				list_benachrichtigungen.setListData(new Vector());
 			}
 		});
@@ -231,18 +264,21 @@ public class PartyGUI extends JFrame {
 
 	private void aboMenue(JPanel panel_abos)
 	{
-		// CONTENT
 		JButton btnThemeAnsehen = new JButton("Theme ansehen");
 		JButton btnThemeBearbeiten = new JButton("Theme bearbeiten");
 		JButton btnAbonnementKndigen = new JButton("Abonnement k\u00FCndigen");
+				
+		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
+		//TODO: Liste soll sich aktuallisieren, sobald etwas neues abonniert wurde.
 		
-		// Test Tree
-		Vector<String> subscriptions = partyc.getMySubscriptions();
+		subscriptions = partyc.getMySubscriptions();
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
+		
 		for (String abo : subscriptions)
 		{
 			root.add(new DefaultMutableTreeNode(abo));
 		}
+		
 		final JTree tree = new JTree();
 		tree.setModel(new DefaultTreeModel(root));
 		
@@ -274,7 +310,6 @@ public class PartyGUI extends JFrame {
 //			}
 //		));
 		
-		// LAYOUT
 		GroupLayout gl_panel_abos = new GroupLayout(panel_abos);
 		gl_panel_abos.setHorizontalGroup(
 			gl_panel_abos.createParallelGroup(Alignment.TRAILING)
@@ -301,38 +336,38 @@ public class PartyGUI extends JFrame {
 		);
 		panel_abos.setLayout(gl_panel_abos);
 		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
+		/************************************ ACTIONLISTENER ****************************************************/
 		
-		btnThemeAnsehen.addActionListener(new ActionListener() {
-			
+		btnThemeAnsehen.addActionListener(new ActionListener()
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				if (tree.isSelectionEmpty() || !(tree.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
 					fehlerPopup("Bitte Theme auswählen.");
 				else
-					themeAnsehenPopup();			
+					themeAnsehenPopup(tree.getSelectionPath().getLastPathComponent().toString());			
 			}
 		});
 		
-		btnThemeBearbeiten.addActionListener(new ActionListener() {
-			
+		btnThemeBearbeiten.addActionListener(new ActionListener()
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				if (tree.isSelectionEmpty() || !(tree.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
 					fehlerPopup("Bitte Theme auswählen.");
 				else
-				{
 					themeBearbeitenPopup(tree.getSelectionPath().getLastPathComponent().toString());
-				}
 			}
 		});
 		
-		btnAbonnementKndigen.addActionListener(new ActionListener() {
+		btnAbonnementKndigen.addActionListener(new ActionListener()
+		{
 			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				if ( tree.isSelectionEmpty() )
 					fehlerPopup("Bitte ein Element auswählen.");
 				else
@@ -343,35 +378,26 @@ public class PartyGUI extends JFrame {
 				}				
 			}
 		});
-		
 	}
 
 	private void searchMenue(JPanel panel_search)
 	{
-		// **LAYOUT ALLGEMEIN**
+		// TODO: Selection-Exceptions behandeln  bei Umwahl!
+		
 		panel_search.setLayout(new GridLayout(0, 3, 0, 0));
 		JButton btnAbonnieren = new JButton("abonnieren");
-		btnAbonnieren.setVisible(true);
 		JButton btnAnsehen = new JButton("ansehen");
 		
-		// **CONTENT ALLGEMEIN**
+		/************************************ GENRES ******************************************/
 		
-		// GENRES - CONTENT
 		JPanel panel_genre = new JPanel();
 		panel_search.add(panel_genre);
-		
 		JLabel lblGenres = new JLabel("Genres");
 		
-		Vector<String> genres_liste = partyc.getGenres();
-		final JList list_genre = new JList(genres_liste);
-		
-		// ActionListener
-//		list_genre.addSelectionListener( new ListSelectionListener()
-//		{
-//			
-//		});
-			
-		// GENRES - LAYOUT
+		genres_liste = partyc.getGenres();
+		list_genre = new JList(genres_liste);
+		list_genre.setBorder(b);
+
 		GroupLayout gl_panel_genre = new GroupLayout(panel_genre);
 		gl_panel_genre.setHorizontalGroup(
 			gl_panel_genre.createParallelGroup(Alignment.LEADING)
@@ -394,22 +420,18 @@ public class PartyGUI extends JFrame {
 		panel_genre.setLayout(gl_panel_genre);
 		
 		
-		// KATEGORIEN - CONTENT
-		final JPanel panel_kategorie = new JPanel();
+		/************************************ Kategorien ******************************************/
+
+		JPanel panel_kategorie = new JPanel();
 		panel_search.add(panel_kategorie);	
+		final JLabel lblKategorien = new JLabel("Kategorien");
 		
-		JLabel lblKategorien = new JLabel("Kategorien");
+		list_kategorien = new JList();
+		list_kategorien.setBorder(b);
 		
-		Vector<String> kategorien_list = partyc.getKategorien("g0");
-//		System.out.println(kategorien_list.get(0).toString());
-		list_kategorien = new JList(kategorien_list);
-		if (list_genre.isSelectionEmpty())
-		{
-			lblKategorien.setVisible(false);
-			list_kategorien.setVisible(false);
-		}		
+		lblKategorien.setVisible(false);
+		list_kategorien.setVisible(false);		
 		
-		// KATEGORIEN - LAYOUT
 		GroupLayout gl_panel_kategorie = new GroupLayout(panel_kategorie);
 		gl_panel_kategorie.setHorizontalGroup(
 			gl_panel_kategorie.createParallelGroup(Alignment.LEADING)
@@ -432,21 +454,20 @@ public class PartyGUI extends JFrame {
 		panel_kategorie.setLayout(gl_panel_kategorie);
 		
 		
-		// THEMES - CONTENT
-		final JPanel panel_themes = new JPanel();
+		/************************************ Themes ******************************************/
+
+		JPanel panel_themes = new JPanel();
 		panel_search.add(panel_themes);
-		JLabel lblThemes = new JLabel("Themes");
+		final JLabel lblThemes = new JLabel("Themes");
 		
-//		Vector<String> themes_list;
-		final JList list_themes = new JList();
-		final JScrollPane scrollPane_theme = new JScrollPane(list_themes);
-		if(list_kategorien.isSelectionEmpty())
-		{
-			scrollPane_theme.setVisible(false);
-			lblThemes.setVisible(false);
-		}
+		list_themes = new JList();
 		
-		// THEMES - LAYOUT
+		scrollPane_theme = new JScrollPane(list_themes);
+		scrollPane_theme.setBorder(b);
+		
+		scrollPane_theme.setVisible(false);
+		lblThemes.setVisible(false);
+		
 		GroupLayout gl_panel_themes = new GroupLayout(panel_themes);
 		gl_panel_themes.setHorizontalGroup(
 			gl_panel_themes.createParallelGroup(Alignment.LEADING)
@@ -476,34 +497,47 @@ public class PartyGUI extends JFrame {
 		);
 		panel_themes.setLayout(gl_panel_themes);
 		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
-		
-		list_genre.addMouseListener(new MouseAdapter()
+		/****************************************** ACTIONLISTENER ****************************************/
+				
+		list_genre.addListSelectionListener(new ListSelectionListener()
 		{
-			public void mouseClicked(MouseEvent e) {
-		         if (e.getClickCount() != 0) {
-		        	 String selection = list_genre.getSelectedValue().toString();
-		        	 changeKategorienContent(selection);
-		        	 changeVis(panel_kategorie);
-		          }
-		     }
+			@Override
+			public void valueChanged(ListSelectionEvent e)
+			{
+				 list_kategorien.clearSelection();
+				 list_themes.clearSelection();
+				 
+				 String selection = list_genre.getSelectedValue().toString();
+	        	 changeKategorienContent(selection);
+	        	 
+	        	 list_kategorien.setVisible(true);
+	        	 lblKategorien.setVisible(true);
+			}
 		});
 		
-		list_kategorien.addMouseListener(new MouseAdapter()
+		list_kategorien.addListSelectionListener(new ListSelectionListener()
 		{
-			public void mouseClicked(MouseEvent e) {
-		         if (e.getClickCount() == 1) {
-//		             int index = list_kategorien.locationToIndex(e.getPoint());
-		             changeVis(scrollPane_theme);
-		          }
-		     }
+			@Override
+			public void valueChanged(ListSelectionEvent arg0)
+			{
+				String selectionG =  list_genre.getSelectedValue().toString();
+				String selectionK =  list_kategorien.getSelectedValue().toString().substring(0, 2);
+
+				changeThemesContent(selectionG, selectionK);
+				
+				scrollPane_theme.setVisible(true);
+				lblThemes.setVisible(true);
+			}
 		});
 		
-		btnAnsehen.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				themeAnsehenPopup();
+		btnAnsehen.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent arg0)
+			{
+				if ( list_themes.isSelectionEmpty() )
+					fehlerPopup("Es muss ein Theme ausgewählt sein.");
+				else
+					themeAnsehenPopup(list_themes.getSelectedValue().toString());
 			}
 		});
 		
@@ -516,16 +550,25 @@ public class PartyGUI extends JFrame {
 				{
 					partyc.subscribe(list_genre.getSelectedValue().toString());
 					aboPopup(list_genre.getSelectedValue().toString());
+					
+					list_genre.clearSelection();
 				}
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
 					partyc.subscribe(list_kategorien.getSelectedValue().toString());
 					aboPopup(list_kategorien.getSelectedValue().toString());
+					
+					list_genre.clearSelection();
+					list_kategorien.clearSelection();
 				}					
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
 					partyc.subscribe(list_themes.getSelectedValue().toString());
 					aboPopup(list_themes.getSelectedValue().toString());
+					
+					list_genre.clearSelection();
+					list_kategorien.clearSelection();
+					list_themes.clearSelection();
 				}
 			}
 		});
@@ -533,19 +576,21 @@ public class PartyGUI extends JFrame {
 
 	private void createMenue(JPanel panel_create)
 	{
-		// CONTENT
+		/***************************************LINKS*************************************************/
+		
 		JLabel lblThemeTitel = new JLabel("Theme Titel");
 		txtTitelHierEingeben = new JTextField();
+		
 		txtTitelHierEingeben.setText("Titel eingeben");
 		txtTitelHierEingeben.setColumns(10);
 		
 		JLabel lblGenre = new JLabel("Genre");
-		JComboBox<String> comboBox_genre = new JComboBox<String>();
-		comboBox_genre.setModel(new DefaultComboBoxModel<String>(new String[] {"g0", "g1", "g2", "g3"}));
+		final JComboBox<String> comboBox_genre = new JComboBox<String>();
+		comboBox_genre.setModel(new DefaultComboBoxModel<String>(genres_liste));
 		
 		final JLabel lblKategorie = new JLabel("Kategorie");
 		final JComboBox<String> comboBox_kategorie = new JComboBox<String>();
-		comboBox_kategorie.setModel(new DefaultComboBoxModel<String>(new String[] {"k0", "k1", "k2"}));
+		comboBox_kategorie.setModel(new DefaultComboBoxModel<String>());
 		
 		lblKategorie.setVisible(false);
 		comboBox_kategorie.setVisible(false);
@@ -555,7 +600,8 @@ public class PartyGUI extends JFrame {
 		JButton btnClear = new JButton("zurücksetzten");
 		JButton btnSpeichern = new JButton("speichern");
 		
-		// LAYOUT
+		/******************************************LAYOUT**********************************************/
+
 		GroupLayout gl_panel_create = new GroupLayout(panel_create);
 		gl_panel_create.setHorizontalGroup(
 			gl_panel_create.createParallelGroup(Alignment.LEADING)
@@ -605,7 +651,8 @@ public class PartyGUI extends JFrame {
 					.addContainerGap())
 		);
 		
-		// Theme erstellen Menü
+		/*****************************************RECHTS***********************************************/
+
 		JPanel panel = new JPanel();
 		tabbedPane_module.addTab("Dekoration", null, panel, null);
 		
@@ -687,24 +734,29 @@ public class PartyGUI extends JFrame {
 		panel_4.setLayout(gl_panel_4);
 		panel_create.setLayout(gl_panel_create);
 	
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
+		/****************************************** ACTIONLISTENER *****************************************/
 		
 		comboBox_genre.addActionListener(new ActionListener()
 		{
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				changeVis(lblKategorie);
-				changeVis(comboBox_kategorie);
+			public void actionPerformed(ActionEvent arg0)
+			{
+				String selection = comboBox_genre.getSelectedItem().toString();
+				Vector<String> newKats = partyc.getKategorien(selection); 
+				comboBox_kategorie.setModel(new DefaultComboBoxModel<String>(newKats));
+				
+				lblKategorie.setVisible(true);
+				comboBox_kategorie.setVisible(true);
 			}
 			
 		});
 		
-		btnClear.addActionListener(new ActionListener() {
+		btnClear.addActionListener(new ActionListener()
+		{
 			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				editorPane.setText("");
 				editorPane_2.setText("");
 				editorPane_3.setText("");
@@ -712,11 +764,23 @@ public class PartyGUI extends JFrame {
 			}
 		});
 		
-		btnSpeichern.addActionListener(new ActionListener() {
+		btnSpeichern.addActionListener(new ActionListener()
+		{
+			// TODO: Theme-ID holen + für das PopUp übergeben
 			
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				speichernPopup();
+			public void actionPerformed(ActionEvent arg0)
+			{
+				String t_id = "";
+				String g_id = comboBox_genre.getItemAt(comboBox_genre.getSelectedIndex());
+				String k_id = comboBox_kategorie.getItemAt(comboBox_kategorie.getSelectedIndex());
+				
+				System.out.println(g_id +" "+ k_id);
+				
+				partyc.createTopic(partyc.createTID(g_id, k_id));
+				partyc.publish(t_id, "new Theme");
+				
+				speichernPopup(t_id);
 			}
 		});
 	}
@@ -726,13 +790,8 @@ public class PartyGUI extends JFrame {
 	/*****************************************************/
 	
 	private void hilfePopup()
-	{
-//		JFrame hilfeFrame = new JFrame();
-//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		setBounds(100, 100, 679, 460);
-		
+	{	
 		JPanel panel_hilfe = new JPanel();
-//		hilfeFrame.add(panel_hilfe);
 		
 		JLabel hilfe_text = new JLabel("In WBA2 verdienen wir eine 1,0.");
 		panel_hilfe.add(hilfe_text);
@@ -757,27 +816,33 @@ public class PartyGUI extends JFrame {
 		});
 	}
 
-	private void themeAnsehenPopup()
+	private void themeAnsehenPopup(String themeName)
 	{
+		// TODO: richtiger Theme Inhalt per Webservices!
+		
 		JPanel panel_ansehen = new JPanel();
-		JLabel ansehen_text = new JLabel("Theme: ");
-		panel_ansehen.add(ansehen_text);
-		
+		JLabel ansehen_text = new JLabel("Theme '"+ themeName +"': ");
 		JButton btnOk = new JButton("Schliessen");
-		panel_ansehen.add(btnOk);
+		JEditorPane content = new JEditorPane();
 		
+		content.setEditable(false);
+		content.setText("Theme Inhalt");
+		
+		panel_ansehen.add(ansehen_text);
+		panel_ansehen.add(content);
+		panel_ansehen.add(btnOk);
 		panel_ansehen.setBorder(b);
 				
 		PopupFactory factory = PopupFactory.getSharedInstance();
 		ansehenPU = factory.getPopup(this, panel_ansehen, 400, 300);
 		ansehenPU.show();
 		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
+		/************************************* ACTIONLISTENER **************************************/
 		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		btnOk.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				ansehenPU.hide();
 			}
 		});
@@ -785,25 +850,43 @@ public class PartyGUI extends JFrame {
 	
 	private void themeBearbeitenPopup(String theme)
 	{
+		// TODO: richtigen Theme Inhalt anzeigen
+		// TODO: Oberfläche angleichen an "Theme erstellen"
+		
 		JPanel panel_bearbeiten = new JPanel();
-		JLabel bearbeiten_text = new JLabel("Theme: ");
-		panel_bearbeiten.add(bearbeiten_text);
+		JLabel bearbeiten_text = new JLabel("Theme '"+ theme +"': ");
+		JButton btnOk = new JButton("Speichern");
+		JButton btnNotOk = new JButton("Abbrechen");
+		JEditorPane content = new JEditorPane();
 		
-		JButton btnOk = new JButton("Schliessen");
+		content.setText("Theme Inhalt");
+		
 		panel_bearbeiten.add(btnOk);
-		
+		panel_bearbeiten.add(btnNotOk);
+		panel_bearbeiten.add(bearbeiten_text);
+		panel_bearbeiten.add(content);
 		panel_bearbeiten.setBorder(b);
 				
 		PopupFactory factory = PopupFactory.getSharedInstance();
 		bearbeitenPU = factory.getPopup(this, panel_bearbeiten, 400, 300);
 		bearbeitenPU.show();
 		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
+		/******************************************** ACTIONLISTENER ****************************************/
 		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		btnOk.addActionListener(new ActionListener()
+		{
+			// TODO: Speichern und Publishen!
+			public void actionPerformed(ActionEvent e)
+			{
+//				partyc.
+				bearbeitenPU.hide();
+			}
+		});
+		
+		btnNotOk.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				bearbeitenPU.hide();
 			}
 		});
@@ -825,9 +908,7 @@ public class PartyGUI extends JFrame {
 		kuendigenPU = factory.getPopup(this, panel_kuendigen, 400, 300);
 		kuendigenPU.show();
 		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
+		/********************************** ACTIONLISTENER *******************************************/
 		
 		btnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -863,25 +944,21 @@ public class PartyGUI extends JFrame {
 		});
 	}
 	
-	private void speichernPopup()
+	private void speichernPopup(String theme)
 	{
-		String theme =":)";
 		JPanel panel_speichern = new JPanel();
 		JLabel text = new JLabel(theme + " wurde gespeichert und veröffentlicht.");
-		panel_speichern.add(text);
-		
 		JButton btnOk = new JButton("Gut");
-		panel_speichern.add(btnOk);
 		
+		panel_speichern.add(text);
+		panel_speichern.add(btnOk);
 		panel_speichern.setBorder(b);
 				
 		PopupFactory factory = PopupFactory.getSharedInstance();
 		speichernPU = factory.getPopup(this, panel_speichern, 400, 300);
 		speichernPU.show();
 		
-		/*****************************************************/
 		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
 		
 		btnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -892,6 +969,8 @@ public class PartyGUI extends JFrame {
 	
 	private void login()
 	{
+		//TODO: Werte eingeben und an client übergeben
+		
 //		JPanel panel_login = new JPanel(new GridBagLayout());
 //        GridBagConstraints cs = new GridBagConstraints();
 // 
@@ -941,9 +1020,7 @@ public class PartyGUI extends JFrame {
 		fehlerPU = factory.getPopup(this, panel_fehler, 400, 300);
 		fehlerPU.show();
 		
-		/*****************************************************/
 		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
 		
 		btnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -966,9 +1043,16 @@ public class PartyGUI extends JFrame {
 	
 	private void changeKategorienContent(String selection)
 	{
-		list_kategorien.removeAll();
-		list_kategorien = new JList(partyc.getKategorien(selection));
-//		list_kategorien.updateUI();
+		Vector<String> neueKategorien = partyc.getKategorien(selection);
+		list_kategorien.setListData(neueKategorien);
+	}
+	
+	private void changeThemesContent(String selectionG, String selectionK)
+	{
+		Vector<String> neueThemes = partyc.getThemes(selectionG, selectionK);
+		if ( neueThemes.isEmpty() )
+			neueThemes.add("Keine Themes vorhanden");
+		list_themes.setListData(neueThemes);
 	}
 	
 	private void close()
