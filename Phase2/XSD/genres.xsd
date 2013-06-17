@@ -3,16 +3,19 @@
     <xs:element name="genres">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="genre" minOccurs="1" maxOccurs="unbounded">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element name="genre_titel" type="xs:string" minOccurs="1" maxOccurs="1"/>
-                            <xs:element name="genre_beschreibung" type="xs:string" minOccurs="1" maxOccurs="1"/>
-                        </xs:sequence>
-                        <xs:attribute name="genre_id" type="xs:ID" use="required"/>
-                    </xs:complexType>
-                </xs:element>
+                <xs:element  ref="genre" minOccurs="1" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+    
+	<xs:element name="genre">
+	    <xs:complexType>
+	        <xs:sequence>
+	            <xs:element name="genre_titel" type="xs:string" minOccurs="1" maxOccurs="1"/>
+	            <xs:element name="genre_beschreibung" type="xs:string" minOccurs="1" maxOccurs="1"/>
+	        </xs:sequence>
+	        <xs:attribute name="genre_id" type="xs:ID" use="required"/>
+	    </xs:complexType>
+	</xs:element>
 </xs:schema>
+

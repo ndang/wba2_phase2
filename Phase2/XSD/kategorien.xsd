@@ -3,16 +3,19 @@
     <xs:element name="kategorien">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="kategorie" minOccurs="1" maxOccurs="unbounded">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element name="kategorie_titel" type="xs:string" maxOccurs="1" minOccurs="1"/>
-                            <xs:element name="kategorie_beschreibung" type="xs:string" minOccurs="1" maxOccurs="1"/>
-                        </xs:sequence>
-                        <xs:attribute name="kategorie_id" type="xs:ID" use="required"/>
-                    </xs:complexType>
-                </xs:element>
+				<xs:element ref="kategorie" minOccurs="1" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+    
+    <xs:element name="kategorie">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="kategorie_titel" type="xs:string" maxOccurs="1" minOccurs="1"/>
+                <xs:element name="kategorie_beschreibung" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="kategorie_id" type="xs:ID" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
 </xs:schema>
