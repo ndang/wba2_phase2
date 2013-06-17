@@ -2,7 +2,6 @@ package webservice;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,15 +10,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
 
+import app.Genre;
 import app.Genres;
-import app.Themes;
-import app.Genres.Genre;
+import app.Kategorie;
 import app.Kategorien;
-import app.Kategorien.Kategorie;
 
 @Path("/genres")
 public class GenresKategorienService {
@@ -47,7 +43,7 @@ public class GenresKategorienService {
 	@GET 
 	@Path("/{genre_id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public Genre getGenre( @PathParam( "genre_id" ) String genre_id )
+	public String getGenre( @PathParam( "genre_id" ) String genre_id )
 	{
 		
 		Genres genres_daten = getGenres();
@@ -76,7 +72,7 @@ public class GenresKategorienService {
 //			System.out.println( "Theme(s) konnte(n) nicht gespeichert werden." );
 //		}
 //		/*********/
-		return genre;
+		return "hi";
 	}
 	 
 	@GET

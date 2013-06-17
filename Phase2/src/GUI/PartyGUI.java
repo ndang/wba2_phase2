@@ -2,32 +2,26 @@ package GUI;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.Popup;
@@ -37,22 +31,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Highlighter;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.Highlighter.Highlight;
-import javax.swing.text.Highlighter.HighlightPainter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JEditorPane;
-import javax.xml.bind.JAXBException;
 
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smackx.pubsub.packet.PubSub;
 
 import client.PartyClient;
 
@@ -104,6 +86,8 @@ public class PartyGUI extends JFrame {
 	String nachricht;
 	JLabel lblZurZeitHaben;
 	JScrollPane scrollPane_news;
+	
+	JTree tree_abos;
  
 	/**
 	 * Launch the application.
@@ -278,7 +262,8 @@ public class PartyGUI extends JFrame {
 		JButton btnThemeAnsehen = new JButton("Theme ansehen");
 		JButton btnThemeBearbeiten = new JButton("Theme bearbeiten");
 		JButton btnAbonnementKndigen = new JButton("Abonnement k\u00FCndigen");
-				
+		JButton btnAlleAbonnementsKndigen = new JButton("Alle Abonnements k\u00FCndigen");
+		
 		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
 		//TODO: Liste soll sich aktuallisieren, sobald etwas neues abonniert wurde.
 		
@@ -290,8 +275,8 @@ public class PartyGUI extends JFrame {
 			root.add(new DefaultMutableTreeNode(abo));
 		}
 		
-		final JTree tree = new JTree();
-		tree.setModel(new DefaultTreeModel(root));
+		tree_abos = new JTree();
+		tree_abos.setModel(new DefaultTreeModel(root));
 		
 		// ORGINAL
 //		JTree tree = new JTree();
@@ -325,12 +310,13 @@ public class PartyGUI extends JFrame {
 		gl_panel_abos.setHorizontalGroup(
 			gl_panel_abos.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_panel_abos.createSequentialGroup()
-					.addComponent(tree, GroupLayout.PREFERRED_SIZE, 437, GroupLayout.PREFERRED_SIZE)
+					.addComponent(tree_abos, GroupLayout.PREFERRED_SIZE, 437, GroupLayout.PREFERRED_SIZE)
 					.addGap(18)
-					.addGroup(gl_panel_abos.createParallelGroup(Alignment.TRAILING)
-						.addComponent(btnAbonnementKndigen, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
-						.addComponent(btnThemeAnsehen, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
-						.addComponent(btnThemeBearbeiten, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE))
+					.addGroup(gl_panel_abos.createParallelGroup(Alignment.LEADING)
+						.addComponent(btnThemeAnsehen, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
+						.addComponent(btnThemeBearbeiten, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
+						.addComponent(btnAbonnementKndigen, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
+						.addComponent(btnAlleAbonnementsKndigen, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		gl_panel_abos.setVerticalGroup(
@@ -340,10 +326,12 @@ public class PartyGUI extends JFrame {
 					.addComponent(btnThemeAnsehen)
 					.addGap(18)
 					.addComponent(btnThemeBearbeiten)
-					.addPreferredGap(ComponentPlacement.RELATED, 182, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED, 148, Short.MAX_VALUE)
 					.addComponent(btnAbonnementKndigen)
-					.addGap(30))
-				.addComponent(tree, GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE)
+					.addGap(18)
+					.addComponent(btnAlleAbonnementsKndigen)
+					.addGap(23))
+				.addComponent(tree_abos, GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE)
 		);
 		panel_abos.setLayout(gl_panel_abos);
 		
@@ -354,10 +342,10 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				if (tree.isSelectionEmpty() || !(tree.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
+				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
 					fehlerPopup("Bitte Theme auswählen.");
 				else
-					themeAnsehenPopup(tree.getSelectionPath().getLastPathComponent().toString());			
+					themeAnsehenPopup(tree_abos.getSelectionPath().getLastPathComponent().toString());			
 			}
 		});
 		
@@ -366,10 +354,10 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				if (tree.isSelectionEmpty() || !(tree.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
+				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
 					fehlerPopup("Bitte Theme auswählen.");
 				else
-					themeBearbeitenPopup(tree.getSelectionPath().getLastPathComponent().toString());
+					themeBearbeitenPopup(tree_abos.getSelectionPath().getLastPathComponent().toString());
 			}
 		});
 		
@@ -379,14 +367,23 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				if ( tree.isSelectionEmpty() )
+				if ( tree_abos.isSelectionEmpty() )
 					fehlerPopup("Bitte ein Element auswählen.");
 				else
 				{
-					String abo = tree.getSelectionPath().getLastPathComponent().toString();
+					String abo = tree_abos.getSelectionPath().getLastPathComponent().toString();
 					partyc.unsubscribe(abo);
 					aboKuendigenPopup(abo);
 				}				
+			}
+		});
+		
+		btnAlleAbonnementsKndigen.addActionListener(new ActionListener()
+		{	
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				partyc.unsubscribeAll();
+				aboKuendigenPopup("alle");
 			}
 		});
 	}
@@ -1136,6 +1133,21 @@ public class PartyGUI extends JFrame {
 		lblZurZeitHaben = new JLabel(nachricht);
 
 		list_benachrichtigungen.setListData(benachrichtigungen_v);
+	}
+	
+	private void updateAbos()
+	{
+		subscriptions = partyc.getMySubscriptions();
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
+		
+		for (String abo : subscriptions)
+		{
+			root.add(new DefaultMutableTreeNode(abo));
+		}
+		
+		DefaultTreeModel aktuallisiert = new DefaultTreeModel(root);
+		
+		tree_abos.setModel(aktuallisiert);
 	}
 	
 	private void close()

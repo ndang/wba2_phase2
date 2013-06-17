@@ -1,6 +1,5 @@
 package client;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
@@ -10,13 +9,10 @@ import javax.xml.bind.JAXBException;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.FormType;
 import org.jivesoftware.smackx.pubsub.Item;
-import org.jivesoftware.smackx.pubsub.ItemDeleteEvent;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
@@ -24,7 +20,6 @@ import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.Subscription;
-import org.jivesoftware.smackx.pubsub.listener.ItemDeleteListener;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 
 import webservice.GenresKategorienService;
@@ -79,8 +74,8 @@ public class PartyClient {
 			this.anz_k += gks.getKategorien(gks.getGenres().getGenre().get(i).getGenreId()).getKategorie().size();
 		this.anz_t = ts.getThemes().getTheme().size();
 		
-//		deleteAllTopics();
-		initTopics();	
+		deleteAllTopics();
+//		initTopics();	
 
 	}
 	
@@ -92,47 +87,47 @@ public class PartyClient {
 	private void initTopics()
 	{
 		topics.clear();
-		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( con );
-		DiscoverItems discovery_items;
-		
-		try
-		{
-			discovery_items = discovery_mgr.discoverItems( "pubsub." + con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
-			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
-			
-			while (iterator.hasNext())
-			{
-				DiscoverItems.Item item = (DiscoverItems.Item) iterator.next();
-				topics.addElement( (LeafNode) pubsub_mgr.getNode( item.getNode() ) );
-			}
-		} catch (XMPPException e) {
-			e.printStackTrace();
-			System.err.println("Topics konnten nicht initialisiert werden!");
-		}
+//		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( con );
+//		DiscoverItems discovery_items;
+//		
+//		try
+//		{
+//			discovery_items = discovery_mgr.discoverItems( "pubsub." + con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
+//			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
+//			
+//			while (iterator.hasNext())
+//			{
+//				DiscoverItems.Item item = (DiscoverItems.Item) iterator.next();
+//				topics.addElement( (LeafNode) pubsub_mgr.getNode( item.getNode() ) );
+//			}
+//		} catch (XMPPException e) {
+//			e.printStackTrace();
+//			System.err.println("Topics konnten nicht initialisiert werden!");
+//		}
 		
 		/* aller erste Initialisierung*/
 		//TODO muss noch gescheit geschrieben werden und nicht so manuell
-		
-		if ( anz_g+anz_k+anz_t != topics.size() ) 
-		{
-			deleteAllTopics();
-			
-			for( int i=0; i<anz_g; i++)
-				createTopic("g"+i);
-			
-			createTopic("k0_g0");
-			createTopic("k1_g0");
-			createTopic("k0_g1");
-			createTopic("k1_g1");
-			createTopic("k0_g2");
-			createTopic("k0_g3");
-			createTopic("k1_g3");
-			createTopic("k2_g3");
-			
-			createTopic("t0_k0_g0");
-			createTopic("t1_k0_g0");
-			createTopic("t2_k0_g0");			
-		}
+//		
+//		if ( anz_g+anz_k+anz_t != topics.size() ) 
+//		{
+//			deleteAllTopics();
+//			
+//			for( int i=0; i<anz_g; i++)
+//				createTopic("g"+i);
+//			
+//			createTopic("k0_g0");
+//			createTopic("k1_g0");
+//			createTopic("k0_g1");
+//			createTopic("k1_g1");
+//			createTopic("k0_g2");
+//			createTopic("k0_g3");
+//			createTopic("k1_g3");
+//			createTopic("k2_g3");
+//			
+//			createTopic("t0_k0_g0");
+//			createTopic("t1_k0_g0");
+//			createTopic("t2_k0_g0");			
+//		}
 		
 		addListeners();
 	}
@@ -142,7 +137,8 @@ public class PartyClient {
 		Vector<String> s = getMySubscriptions();
 		for (String name : s)
 		{
-			try {
+			try
+			{
 				pubsub_mgr.getNode(name).addItemEventListener(iec);
 			} catch (XMPPException e) {
 				e.printStackTrace();
@@ -373,26 +369,42 @@ public class PartyClient {
 				System.err.println("Dieser Topic wurde gar nicht abonniert.");
 			else
 			{
-//				abo.removeItemEventListener(this);
+				abo.removeItemEventListener(iec);
 //				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
 //					abo.removeItemDeleteListener(this);
 				abo.unsubscribe(getMyJID());
 				System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
 			}
-		}
-		
-		catch (XMPPException e)
-		{
-//			e.printStackTrace();
+		} catch (XMPPException | NullPointerException e) {
+			e.printStackTrace();
 			System.err.println("Abonemment konnte nicht gekündigt werden.");
-		}
-		catch (NullPointerException e)
-		{
-//			e.printStackTrace();
-			System.err.println("Topic existiert nicht.\n");
 		}
 	}
 
+	public void unsubscribeAll()
+	{
+		try
+		{
+			Vector<String> subscriptions = getMySubscriptions();
+			for( String abo_name : subscriptions )
+			{
+				LeafNode abo = pubsub_mgr.getNode(abo_name);
+				if ( !isSubscribed(abo) )
+					System.err.println("Dieser Topic wurde gar nicht abonniert.");
+				else
+				{
+					abo.removeItemEventListener(iec);
+					abo.unsubscribe(getMyJID());
+					System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
+				}
+					
+			}
+		} catch (XMPPException | NullPointerException e) {
+			e.printStackTrace();
+			System.err.println("Abonemment konnte nicht gekündigt werden.");
+		}
+	}
+	
 	public void logout()
 	{
 		con.disconnect();

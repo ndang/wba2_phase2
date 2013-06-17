@@ -5,11 +5,9 @@ import java.io.IOException;
 import javax.ws.rs.core.MediaType;
 
 import app.*;
-import app.Genres.Genre;
-import app.Kategorien.Kategorie;
-import app.Themes.Theme;
-import app.Themes.Theme.Interaktion.Kommentare;
-import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
+import app.Theme.Interaktion.Kommentare;
+import app.Theme.Interaktion.Kommentare.Kommentar;
+
 
 import com.sun.grizzly.http.SelectorThread;
 import com.sun.jersey.api.client.Client;

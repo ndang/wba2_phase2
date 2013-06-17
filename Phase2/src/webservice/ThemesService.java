@@ -3,8 +3,6 @@ package webservice;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.StringReader;
-import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,21 +12,17 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 
-import app.Genres;
-import app.Kategorien;
+import app.Theme;
+import app.Theme.Interaktion.Kommentare;
+import app.Theme.Interaktion.Kommentare.Kommentar;
 import app.Themes;
-import app.Themes.Theme;
-import app.Themes.Theme.Interaktion.Kommentare;
-import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
 
 
 @Path("/themes")
