@@ -72,9 +72,7 @@ public class GenresKategorienService {
 			context = JAXBContext.newInstance( Kategorien.class );
 			Unmarshaller um = context.createUnmarshaller();
 	    	kategorien_data = (Kategorien) um.unmarshal( new FileInputStream("XSD/kategorien_"+ genre_id +".xml" ));
-		}
-		catch (FileNotFoundException | JAXBException e)
-		{
+		} catch (FileNotFoundException | JAXBException e) {
 			System.out.println( "Liste der Kategorien konnte nicht gefunden oder gelesen werden." );
 		}
 		

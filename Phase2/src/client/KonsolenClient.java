@@ -61,7 +61,12 @@ public class KonsolenClient
 				break;
 				
 			case 3:
+			try {
 				t_publish_menue();
+			} catch (XMPPException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 				break;
 		
 			case 4:
@@ -85,7 +90,7 @@ public class KonsolenClient
 				String payload = in.next();
 				
 				app.publish(node, payload);
-				
+				break;
 			default:
 				System.out.println("Diese Option ist unzulässig");
 				home();
@@ -249,7 +254,7 @@ public class KonsolenClient
 		}
 	}
 	
-	private void t_publish_menue()
+	private void t_publish_menue() throws XMPPException
 	{
 		System.out.println();
 		System.out.println("__________________________________________________________________");

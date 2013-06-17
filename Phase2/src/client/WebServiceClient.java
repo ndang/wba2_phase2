@@ -76,10 +76,12 @@ public class WebServiceClient
 		return wrs_Ts.accept( appxml ).get( Themes.class );
 	}
 	
-	public boolean postTheme(Theme t)
+	public String postTheme(Theme t)
 	{
-		wrs_Ts.post(t);
-		return true;
+		String t_id = "";
+		wrs_Ts = Client.create().resource( urlClnt_T );
+		t_id = wrs_Ts.post( String.class, t);
+		return t_id;
 	}
 	
 	public Theme getTheme(String t_id)

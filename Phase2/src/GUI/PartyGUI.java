@@ -198,6 +198,11 @@ public class PartyGUI extends JFrame {
 		panel_create.setToolTipText("Theme erstellen");
 		mainTabbedPane.addTab("Theme erstellen", null, panel_create, null);
 		createMenue(panel_create);
+		
+		JPanel panel_publish = new JPanel();
+		panel_publish.setToolTipText("publish something");
+		mainTabbedPane.addTab("Publishing", null, panel_publish, null);
+		publishMenue(panel_publish);
 	}
 	
 	private void newsMenue(JPanel panel_news)
@@ -498,20 +503,20 @@ public class PartyGUI extends JFrame {
 		panel_themes.setLayout(gl_panel_themes);
 		
 		/****************************************** ACTIONLISTENER ****************************************/
-				
+		
 		list_genre.addListSelectionListener(new ListSelectionListener()
 		{
 			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
-				 list_kategorien.clearSelection();
-				 list_themes.clearSelection();
-				 
-				 String selection = list_genre.getSelectedValue().toString();
-	        	 changeKategorienContent(selection);
-	        	 
-	        	 list_kategorien.setVisible(true);
-	        	 lblKategorien.setVisible(true);
+				 if ( !list_genre.isSelectionEmpty() )
+				 {
+					 String selection = list_genre.getSelectedValue().toString();
+					 changeKategorienContent(selection);
+					 
+					 list_kategorien.setVisible(true);
+		        	 lblKategorien.setVisible(true);
+				 } 
 			}
 		});
 		
@@ -520,13 +525,16 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0)
 			{
-				String selectionG =  list_genre.getSelectedValue().toString();
-				String selectionK =  list_kategorien.getSelectedValue().toString().substring(0, 2);
-
-				changeThemesContent(selectionG, selectionK);
-				
-				scrollPane_theme.setVisible(true);
-				lblThemes.setVisible(true);
+				if ( !list_kategorien.isSelectionEmpty() )
+				{
+					String selectionG =  list_genre.getSelectedValue().toString();
+					String selectionK =  list_kategorien.getSelectedValue().toString().substring(0, 2);
+	
+					changeThemesContent(selectionG, selectionK);
+					
+					scrollPane_theme.setVisible(true);
+					lblThemes.setVisible(true);
+				}
 			}
 		});
 		
@@ -541,26 +549,26 @@ public class PartyGUI extends JFrame {
 			}
 		});
 		
-		btnAbonnieren.addActionListener(new ActionListener() {
+		btnAbonnieren.addActionListener(new ActionListener()
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				if ( list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty())
 					fehlerPopup("Es muss ein Topic ausgewählt sein.");
+				
 				else if ( !list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
 					partyc.subscribe(list_genre.getSelectedValue().toString());
 					aboPopup(list_genre.getSelectedValue().toString());
-					
-					list_genre.clearSelection();
 				}
+				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
 					partyc.subscribe(list_kategorien.getSelectedValue().toString());
 					aboPopup(list_kategorien.getSelectedValue().toString());
-					
-					list_genre.clearSelection();
-					list_kategorien.clearSelection();
-				}					
+				}	
+				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
 					partyc.subscribe(list_themes.getSelectedValue().toString());
@@ -784,6 +792,54 @@ public class PartyGUI extends JFrame {
 		});
 	}
 
+	private void publishMenue(JPanel panel_publish)
+	{
+		final JComboBox checkBox_subscriptions = new JComboBox();
+		Vector<String> subscriptions = partyc.getMySubscriptions();
+		checkBox_subscriptions.setModel(new DefaultComboBoxModel<String>(subscriptions));
+		
+		final JEditorPane editorPane_payload = new JEditorPane();
+		
+		JButton btnPublish = new JButton("publish");
+		
+		GroupLayout gl_panel_publish = new GroupLayout(panel_publish);
+		gl_panel_publish.setHorizontalGroup(
+			gl_panel_publish.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_publish.createSequentialGroup()
+					.addGap(27)
+					.addGroup(gl_panel_publish.createParallelGroup(Alignment.LEADING)
+						.addComponent(editorPane_payload, GroupLayout.PREFERRED_SIZE, 381, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnPublish)
+						.addComponent(checkBox_subscriptions, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(240, Short.MAX_VALUE))
+		);
+		gl_panel_publish.setVerticalGroup(
+			gl_panel_publish.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_publish.createSequentialGroup()
+					.addGap(31)
+					.addComponent(checkBox_subscriptions, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addGap(18)
+					.addComponent(editorPane_payload, GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+					.addGap(18)
+					.addComponent(btnPublish)
+					.addGap(43))
+		);
+		panel_publish.setLayout(gl_panel_publish);
+		
+		/************************* ActionListener ******************************/
+		
+		btnPublish.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent arg0)
+			{
+				String t_id = checkBox_subscriptions.getSelectedItem().toString();
+				String payload = editorPane_payload.getText();
+				partyc.publish(t_id, payload);
+			}
+		});
+		
+	}
+	
 	/*****************************************************/
 	/*************** Pop-Ups *****************************/
 	/*****************************************************/

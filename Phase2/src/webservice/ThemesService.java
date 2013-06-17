@@ -159,15 +159,16 @@ public class ThemesService {
 	}
 	
 	@POST
-	@Produces(MediaType.APPLICATION_XML)
+	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_XML)
-	public Response addTheme(Theme t) throws FileNotFoundException, JAXBException
+	public String addTheme(Theme t) throws FileNotFoundException, JAXBException
 	{
+		String t_id = "Test";
 		Themes daten = gibThemeDaten();		
 		daten.getTheme().add(t);
 		setzeThemeDaten(daten);
 	    
-		return Response.status(201).build();
+		return t_id;
 	}
 	
 	/**

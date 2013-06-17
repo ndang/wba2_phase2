@@ -32,6 +32,7 @@ import webservice.ThemesService;
 
 public class PartyClient {
 	
+	
 	private static GenresKategorienService gks;
 	private static ThemesService ts;
 	
@@ -49,17 +50,17 @@ public class PartyClient {
 	private Vector<LeafNode> topics;
 	protected Vector<String> benachrichtigungen = new Vector<String>();
 	
-	public PartyClient() throws XMPPException
+	
+	public PartyClient()
 	{
 		try
 		{
+//			XMPPConnection.DEBUG_ENABLED=true;
 			con = new XMPPConnection(server);
 			con.connect();
 			con.login(user, pw);
 			System.out.println("Login erfolgreich.");
-		}
-		catch (XMPPException e)
-		{
+		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("\nLogin fehlgeschlagen.");
 		}
@@ -67,7 +68,7 @@ public class PartyClient {
 		this.gks = new GenresKategorienService();
 		this.ts = new ThemesService();
 		
-		this.pubsub_mgr = new PubSubManager(con, "pubsub."+con.getHost());
+		this.pubsub_mgr = new PubSubManager( con, "pubsub." + con.getHost() );
 		this.topics = new Vector<LeafNode>();
 		this.benachrichtigungen = new Vector<String>();
 		
@@ -76,7 +77,9 @@ public class PartyClient {
 			this.anz_k += gks.getKategorien(gks.getGenres().getGenre().get(i).getGenreId()).getKategorie().size();
 		this.anz_t = ts.getThemes().getTheme().size();
 		
+//		deleteAllTopics();
 		initTopics();	
+
 	}
 	
 	/**
@@ -84,21 +87,21 @@ public class PartyClient {
 	 * @throws XMPPException 
 	 * @throws JAXBException 
 	 */
-	private void initTopics() throws XMPPException
+	private void initTopics()
 	{
 		topics.clear();
-		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor(con);
+		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( con );
 		DiscoverItems discovery_items;
 		
 		try
 		{
-			discovery_items = discovery_mgr.discoverItems("pubsub."+con.getHost()); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
+			discovery_items = discovery_mgr.discoverItems( "pubsub." + con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
 			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
 			
 			while (iterator.hasNext())
 			{
 				DiscoverItems.Item item = (DiscoverItems.Item) iterator.next();
-				topics.addElement((LeafNode) pubsub_mgr.getNode(item.getNode()));
+				topics.addElement( (LeafNode) pubsub_mgr.getNode( item.getNode() ) );
 			}
 		} catch (XMPPException e) {
 			e.printStackTrace();
@@ -106,7 +109,9 @@ public class PartyClient {
 		}
 		
 		/* aller erste Initialisierung*/
-		if ( anz_g+anz_k+anz_t != topics.size() ) //TODO muss noch gescheit geschrieben werden und nicht so manuell
+		//TODO muss noch gescheit geschrieben werden und nicht so manuell
+		
+		if ( anz_g+anz_k+anz_t != topics.size() ) 
 		{
 			deleteAllTopics();
 			
@@ -159,7 +164,7 @@ public class PartyClient {
 //		    form.setSubscribe(true); // ob man das subsciben kann
 			
 			 form.setAccessModel(AccessModel.open);
-		     form.setDeliverPayloads(false);
+		     form.setDeliverPayloads(true);
 		     form.setNotifyRetract(true);
 		     form.setPersistentItems(true);
 		     form.setPublishModel(PublishModel.open);
@@ -209,7 +214,7 @@ public class PartyClient {
 		}
 		
 		topics.clear();
-		System.out.println("Topic Anzahl ist wieder auf "+ topics.size());
+		System.out.println( "Topic Anzahl ist wieder auf "+ topics.size() );
 	}
 
 	public void getTopicTitle(String typ)
@@ -244,7 +249,7 @@ public class PartyClient {
 	
 	public Vector<String> getBenachrichtigungen()
 	{
-		if(!benachrichtigungen.isEmpty())
+		if( !benachrichtigungen.isEmpty() )
 			return benachrichtigungen;
 		else
 			return new Vector<String>();	
@@ -253,8 +258,8 @@ public class PartyClient {
 	public Vector<String> getTopicNames()
 	{
 		Vector<String> topic_names = new Vector<String>();
-		for (LeafNode topic : topics)
-			topic_names.add(topic.getId());
+		for ( LeafNode topic : topics )
+			topic_names.add( topic.getId() );
 		return topic_names;
 	}
 	
@@ -324,8 +329,8 @@ public class PartyClient {
 			if (!isSubscribed(abo))
 			{
 				abo.addItemEventListener(new ItemEventCoordinator()); 
-				if (abo.toString().substring(0,1).equals("t"))
-					abo.addItemDeleteListener(new ItemDeleteCoordinator());
+//				if (abo.toString().substring(0,1).equals("t"))
+//					abo.addItemDeleteListener(new ItemDeleteCoordinator());
 				abo.subscribe(getMyJID());
 				System.out.println(abo.getId() + " wurde abonniert.");
 			}
@@ -373,12 +378,11 @@ public class PartyClient {
 	}
 	
 	public void publish(String t_id, String payload)
-	{
-		LeafNode theme;
+	{	
 		try
 		{
-			theme = pubsub_mgr.getNode(t_id);
-			theme.send();
+			LeafNode theme = pubsub_mgr.getNode(t_id);
+			theme.send(new Item(payload));
 //			theme.send(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
 //			theme.send(new PayloadItem("test" + System.currentTimeMillis(), new SimplePayload("book", "pubsub:test:book", "")));
 		} catch (XMPPException e) {
@@ -404,25 +408,35 @@ public class PartyClient {
         @Override
         public void handlePublishedItems(ItemPublishEvent<Item> items)
         {
-            System.out.println("Item count: " + items.getItems().size());
-            System.out.println(items);
+        	List<Item> itemlist = items.getItems();
+    		PayloadItem<SimplePayload> pi = null;
+    		for (int i=0; i<itemlist.size(); i++) {
+    			pi = (PayloadItem<SimplePayload>) itemlist.get(i);
+    			benachrichtigungen.add(pi.toString());
+    			System.out.println("new item arrived");
+    		}
 		}
        
 	}
 	
-	class ItemDeleteCoordinator implements ItemDeleteListener
-    {
-        @Override
-        public void handleDeletedItems(ItemDeleteEvent items)
-        {
-            System.out.println("Item count: " + items.getItemIds().size());
-            System.out.println(items);
-        }
-        
-        @Override
-        public void handlePurge()
-        {
-            System.out.println("All items have been deleted from node");
-        }
-    }
+//	class ItemDeleteCoordinator implements ItemDeleteListener
+//    {
+//        @Override
+//        public void handleDeletedItems(ItemDeleteEvent items)
+//        {
+//        	List<Item> itemlist = items.getItems();
+//    		PayloadItem<SimplePayload> pi = null;
+//    		for (int i=0; i<itemlist.size(); i++) {
+//    			pi = (PayloadItem<SimplePayload>) itemlist.get(i);
+//    			benachrichtigungen.add(pi.toString());
+//    			System.out.println("item deleted");
+//    		}
+//        }
+//        
+//        @Override
+//        public void handlePurge()
+//        {
+//            System.out.println("All items have been deleted from node");
+//        }
+//    }
 }

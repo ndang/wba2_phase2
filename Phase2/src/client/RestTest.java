@@ -24,26 +24,29 @@ public class RestTest {
 		Themes  ts = wsc.getThemes();
 		System.out.println(ts.getTheme().get(0).getAllgemeines().getThemeTitel().toString());
 		
-		Theme t = null;
-		Themes themes;
-		try
-		{
-			JAXBContext context = JAXBContext.newInstance(Themes.class);
-			Unmarshaller um = context.createUnmarshaller();
-			Marshaller m = context.createMarshaller();
-			t = (Theme) um.unmarshal(new FileInputStream("XSD/theme_post.xml"));
-		} catch (JAXBException | FileNotFoundException e) {
-			e.printStackTrace();
-			System.err.println("Kein JAXBContext konnte intanziiert werden.");
-		}
-
-		wsc.postTheme(t);
+		Genre g = wsc.getGenre("g0");
+		System.out.println(g.getGenreId().toString());
+		
+//		Theme t = null;
+//		Themes themes;
+//		try
+//		{
+//			JAXBContext context = JAXBContext.newInstance( Theme.class );
+//			Unmarshaller um = context.createUnmarshaller();
+//			Marshaller m = context.createMarshaller();
+//			t = (Theme) um.unmarshal( new FileInputStream( "XSD/theme_post.xml" ) );
+//		} catch ( JAXBException | FileNotFoundException e ) {
+//			e.printStackTrace();
+//			System.err.println("Kein JAXBContext konnte intanziiert werden.");
+//		}
+//
+//		String result = wsc.postTheme(t);
+//		System.out.println(result);
 		
 //		Kommentare kos = wsc.getKommentare("t0_k0_g0");
 //		System.out.println(kos.getKommentar().get(0).getNachricht().toString());
 		
-//		Genre g = wsc.getGenre("g0");
-//		System.out.println(g.getGenreId().toString());
+
 		
 //		Kategorien ks = wsc.getKategorien("g0");
 //		System.out.println(ks.getKategorie().get(0).getKategorieId().toString());
