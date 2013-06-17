@@ -19,8 +19,10 @@ import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.ItemDeleteEvent;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
+import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
+import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.Subscription;
 import org.jivesoftware.smackx.pubsub.listener.ItemDeleteListener;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
@@ -39,13 +41,13 @@ public class PartyClient {
 	
 	private static Scanner in = new Scanner(System.in);
 	
-	private static int anz_g = 0, anz_k = 0, anz_t = 0;
+	public static int anz_g = 0, anz_k = 0, anz_t = 0;
 	
 	private Connection con;
 	private PubSubManager pubsub_mgr;
 	
 	private Vector<LeafNode> topics;
-	private Vector<String> benachrichtigungen = new Vector<String>();
+	protected Vector<String> benachrichtigungen = new Vector<String>();
 	
 	public PartyClient() throws XMPPException
 	{
@@ -147,14 +149,22 @@ public class PartyClient {
 		try
 		{
 		    ConfigureForm form = new ConfigureForm(FormType.submit);
-		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
-		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
-		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
-		    form.setPersistentItems(true); // ???
-		    form.setPublishModel(PublishModel.open); // jeder darf publishen
-		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
-		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
-		    form.setSubscribe(true); // ob man das subsciben kann
+//		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
+//		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
+//		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
+//		    form.setPersistentItems(true); // ???
+//		    form.setPublishModel(PublishModel.open); // jeder darf publishen
+//		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
+//		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
+//		    form.setSubscribe(true); // ob man das subsciben kann
+			
+			 form.setAccessModel(AccessModel.open);
+		     form.setDeliverPayloads(false);
+		     form.setNotifyRetract(true);
+		     form.setPersistentItems(true);
+		     form.setPublishModel(PublishModel.open);
+		      
+		      
 		    LeafNode topic = (LeafNode) pubsub_mgr.createNode(id, form);
 			topics.add(topic);	
 		} catch (XMPPException e) {
@@ -370,9 +380,10 @@ public class PartyClient {
 			theme = pubsub_mgr.getNode(t_id);
 			theme.send();
 //			theme.send(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
+//			theme.send(new PayloadItem("test" + System.currentTimeMillis(), new SimplePayload("book", "pubsub:test:book", "")));
 		} catch (XMPPException e) {
 			e.printStackTrace();
-			System.err.println("Es konnte nichts zum Theme hinzugefügt werden.");
+			System.err.println("Es konnte nichts gepublisht werden.");
 		}
 	}
 	

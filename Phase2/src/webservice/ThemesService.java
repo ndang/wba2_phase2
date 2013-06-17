@@ -100,7 +100,7 @@ public class ThemesService {
 	 * @throws JAXBException
 	 */
 	@GET
-	@Produces(MediaType.APPLICATION_XML)
+	@Produces( MediaType.APPLICATION_XML )
 	public Themes getThemes()
 	{	
 		return gibThemeDaten();
@@ -116,8 +116,8 @@ public class ThemesService {
 	 */
 	@GET
 	@Path("/{theme_id}")
-	@Produces(MediaType.APPLICATION_XML)
-	public Theme getTheme(@PathParam("theme_id") String theme_id)
+	@Produces( MediaType.APPLICATION_XML )
+	public Theme getTheme( @PathParam("theme_id") String theme_id )
 	{
 		Themes themes_daten = gibThemeDaten();
 		Theme t = null;

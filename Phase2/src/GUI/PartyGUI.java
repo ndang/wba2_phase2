@@ -771,16 +771,15 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String t_id = "";
+				String t_id = "t"+String.valueOf(partyc.anz_t);
 				String g_id = comboBox_genre.getItemAt(comboBox_genre.getSelectedIndex());
 				String k_id = comboBox_kategorie.getItemAt(comboBox_kategorie.getSelectedIndex());
-				
-				System.out.println(g_id +" "+ k_id);
-				
+				String id = t_id + "_" +k_id;
+								
 				partyc.createTopic(partyc.createTID(g_id, k_id));
-				partyc.publish(t_id, "new Theme");
+				partyc.publish(id, "new Theme '"+ id +"' created");
 				
-				speichernPopup(t_id);
+				speichernPopup(id);
 			}
 		});
 	}
