@@ -42,6 +42,8 @@ public class PartyClient {
 	
 	private static Scanner in = new Scanner(System.in);
 	
+	private ItemEventCoordinator iec = new ItemEventCoordinator();
+	
 	public static int anz_g = 0, anz_k = 0, anz_t = 0;
 	
 	private Connection con;
@@ -56,10 +58,10 @@ public class PartyClient {
 		try
 		{
 //			XMPPConnection.DEBUG_ENABLED=true;
-			con = new XMPPConnection(server);
+			con = new XMPPConnection( server );
 			con.connect();
-			con.login(user, pw);
-			System.out.println("Login erfolgreich.");
+			con.login( user, pw );
+			System.out.println( "Login erfolgreich." );
 		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("\nLogin fehlgeschlagen.");
@@ -132,8 +134,22 @@ public class PartyClient {
 			createTopic("t2_k0_g0");			
 		}
 		
+		addListeners();
 	}
 	
+	private void addListeners()
+	{
+		Vector<String> s = getMySubscriptions();
+		for (String name : s)
+		{
+			try {
+				pubsub_mgr.getNode(name).addItemEventListener(iec);
+			} catch (XMPPException e) {
+				e.printStackTrace();
+				System.err.println( "An die vorhandenen Abonnements können keine Listeners angehängt werden." );
+			}
+		}
+	}
 	public String createGID()
 	{
 		return  "g"+(anz_g++);
@@ -154,20 +170,20 @@ public class PartyClient {
 		try
 		{
 		    ConfigureForm form = new ConfigureForm(FormType.submit);
-//		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
-//		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
-//		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
-//		    form.setPersistentItems(true); // ???
-//		    form.setPublishModel(PublishModel.open); // jeder darf publishen
-//		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
-//		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
-//		    form.setSubscribe(true); // ob man das subsciben kann
+		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
+		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
+		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
+		    form.setPersistentItems(true); // ???
+		    form.setPublishModel(PublishModel.open); // jeder darf publishen
+		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
+		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
+		    form.setSubscribe(true); // ob man das subsciben kann
 			
-			 form.setAccessModel(AccessModel.open);
-		     form.setDeliverPayloads(true);
-		     form.setNotifyRetract(true);
-		     form.setPersistentItems(true);
-		     form.setPublishModel(PublishModel.open);
+//			 form.setAccessModel(AccessModel.open);
+//		     form.setDeliverPayloads(true);
+//		     form.setNotifyRetract(true);
+//		     form.setPersistentItems(true);
+//		     form.setPublishModel(PublishModel.open);
 		      
 		      
 		    LeafNode topic = (LeafNode) pubsub_mgr.createNode(id, form);
@@ -215,6 +231,11 @@ public class PartyClient {
 		
 		topics.clear();
 		System.out.println( "Topic Anzahl ist wieder auf "+ topics.size() );
+	}
+	
+	public void deleteBenachrichtigungen()
+	{
+		benachrichtigungen = new Vector<String>();
 	}
 
 	public void getTopicTitle(String typ)
@@ -301,7 +322,7 @@ public class PartyClient {
 	
 	private String getMyJID()
 	{
-		return con.getUser()+"@"+con.getHost();
+		return user+"@"+server;
 	}
 	
 	private boolean isSubscribed(LeafNode abo)
@@ -328,7 +349,8 @@ public class PartyClient {
 			
 			if (!isSubscribed(abo))
 			{
-				abo.addItemEventListener(new ItemEventCoordinator()); 
+				abo.addItemEventListener( iec ); 
+				System.out.println("hi");
 //				if (abo.toString().substring(0,1).equals("t"))
 //					abo.addItemDeleteListener(new ItemDeleteCoordinator());
 				abo.subscribe(getMyJID());
@@ -379,12 +401,12 @@ public class PartyClient {
 	
 	public void publish(String t_id, String payload)
 	{	
+		payload = "<" + payload + "/>";
+		
 		try
 		{
 			LeafNode theme = pubsub_mgr.getNode(t_id);
-			theme.send(new Item(payload));
-//			theme.send(new PayloadItem<SimplePayload>(theme.getId()+"_item_id", new SimplePayload("theme", "namespace", payload)));
-//			theme.send(new PayloadItem("test" + System.currentTimeMillis(), new SimplePayload("book", "pubsub:test:book", "")));
+			theme.send(new PayloadItem<SimplePayload>(new SimplePayload(payload, null, payload)));
 		} catch (XMPPException e) {
 			e.printStackTrace();
 			System.err.println("Es konnte nichts gepublisht werden.");
@@ -405,15 +427,18 @@ public class PartyClient {
 
 	class ItemEventCoordinator implements ItemEventListener<Item>
     {
+		// TODO: persistente Speicherung 
         @Override
         public void handlePublishedItems(ItemPublishEvent<Item> items)
         {
         	List<Item> itemlist = items.getItems();
     		PayloadItem<SimplePayload> pi = null;
-    		for (int i=0; i<itemlist.size(); i++) {
+    		for ( int i=0; i<itemlist.size(); i++ )
+    		{
     			pi = (PayloadItem<SimplePayload>) itemlist.get(i);
-    			benachrichtigungen.add(pi.toString());
-    			System.out.println("new item arrived");
+    			benachrichtigungen.add("Das ist neu: " + pi.getPayload().getElementName().toString());
+    			System.out.println(benachrichtigungen.get(i));
+    			System.out.println("New item arrived!");
     		}
 		}
        

@@ -99,6 +99,11 @@ public class PartyGUI extends JFrame {
 	Vector<String> theme_topics;
 	JList list_themes;
 	JScrollPane scrollPane_theme;
+	
+	Vector<String> benachrichtigungen_v;
+	String nachricht;
+	JLabel lblZurZeitHaben;
+	JScrollPane scrollPane_news;
  
 	/**
 	 * Launch the application.
@@ -211,16 +216,16 @@ public class PartyGUI extends JFrame {
 		
 		/**************************** BenachrichtigungenFeld **********************************/
 		
-		String nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
-		Vector<String> benachrichtigungen_v = partyc.getBenachrichtigungen();
+		nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
+		benachrichtigungen_v = partyc.getBenachrichtigungen();
 		
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
 		
-		JLabel lblZurZeitHaben = new JLabel(nachricht);;
+		lblZurZeitHaben = new JLabel(nachricht);;
 
-		list_benachrichtigungen = new JList(benachrichtigungen_v);
-		JScrollPane scrollPane = new JScrollPane(list_benachrichtigungen);
+		list_benachrichtigungen = new JList( benachrichtigungen_v );
+		scrollPane_news = new JScrollPane( list_benachrichtigungen );
 		
 		
 		/**************************** Löschen ************************************************/
@@ -235,7 +240,7 @@ public class PartyGUI extends JFrame {
 					.addGap(204)
 					.addComponent(lblZurZeitHaben)
 					.addContainerGap(228, Short.MAX_VALUE))
-				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
+				.addComponent(scrollPane_news, GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
 				.addGroup(Alignment.LEADING, gl_panel_news.createSequentialGroup()
 					.addGap(234)
 					.addComponent(btnAllesLoeschen)
@@ -247,7 +252,7 @@ public class PartyGUI extends JFrame {
 					.addGap(28)
 					.addComponent(lblZurZeitHaben)
 					.addGap(11)
-					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)
+					.addComponent(scrollPane_news, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(btnAllesLoeschen)
 					.addContainerGap(13, Short.MAX_VALUE))
@@ -261,7 +266,8 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				list_benachrichtigungen.setListData(new Vector());
+				partyc.deleteBenachrichtigungen();
+				updateNews();
 			}
 		});
 		
@@ -760,8 +766,7 @@ public class PartyGUI extends JFrame {
 		});
 		
 		btnClear.addActionListener(new ActionListener()
-		{
-			
+		{	
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
@@ -779,15 +784,15 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String t_id = "t"+String.valueOf(partyc.anz_t);
-				String g_id = comboBox_genre.getItemAt(comboBox_genre.getSelectedIndex());
-				String k_id = comboBox_kategorie.getItemAt(comboBox_kategorie.getSelectedIndex());
-				String id = t_id + "_" +k_id;
+				String t_id = "t" + String.valueOf( partyc.anz_t );
+				String g_id = comboBox_genre.getItemAt( comboBox_genre.getSelectedIndex() );
+				String k_id = comboBox_kategorie.getItemAt( comboBox_kategorie.getSelectedIndex() );
+				String id = t_id + "_" + k_id;
 								
-				partyc.createTopic(partyc.createTID(g_id, k_id));
-				partyc.publish(id, "new Theme '"+ id +"' created");
+				partyc.createTopic( partyc.createTID(g_id, k_id) );
+				partyc.publish( id, "new Theme '" + id + "' created" );
 				
-				speichernPopup(id);
+				speichernPopup( id );
 			}
 		});
 	}
@@ -798,9 +803,12 @@ public class PartyGUI extends JFrame {
 		Vector<String> subscriptions = partyc.getMySubscriptions();
 		checkBox_subscriptions.setModel(new DefaultComboBoxModel<String>(subscriptions));
 		
-		final JEditorPane editorPane_payload = new JEditorPane();
+		final JEditorPane dtrpnPayload = new JEditorPane();
+		dtrpnPayload.setText("payload");
 		
 		JButton btnPublish = new JButton("publish");
+		
+		JLabel lblPublishTo = new JLabel("publish to:");
 		
 		GroupLayout gl_panel_publish = new GroupLayout(panel_publish);
 		gl_panel_publish.setHorizontalGroup(
@@ -808,18 +816,23 @@ public class PartyGUI extends JFrame {
 				.addGroup(gl_panel_publish.createSequentialGroup()
 					.addGap(27)
 					.addGroup(gl_panel_publish.createParallelGroup(Alignment.LEADING)
-						.addComponent(editorPane_payload, GroupLayout.PREFERRED_SIZE, 381, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnPublish)
-						.addComponent(checkBox_subscriptions, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_panel_publish.createSequentialGroup()
+							.addComponent(lblPublishTo)
+							.addGap(38)
+							.addComponent(checkBox_subscriptions, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(dtrpnPayload, GroupLayout.PREFERRED_SIZE, 381, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnPublish))
 					.addContainerGap(240, Short.MAX_VALUE))
 		);
 		gl_panel_publish.setVerticalGroup(
 			gl_panel_publish.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_publish.createSequentialGroup()
 					.addGap(31)
-					.addComponent(checkBox_subscriptions, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addGroup(gl_panel_publish.createParallelGroup(Alignment.BASELINE)
+						.addComponent(checkBox_subscriptions, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblPublishTo))
 					.addGap(18)
-					.addComponent(editorPane_payload, GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+					.addComponent(dtrpnPayload, GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
 					.addGap(18)
 					.addComponent(btnPublish)
 					.addGap(43))
@@ -833,8 +846,10 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String t_id = checkBox_subscriptions.getSelectedItem().toString();
-				String payload = editorPane_payload.getText();
+				String payload = dtrpnPayload.getText();
 				partyc.publish(t_id, payload);
+				
+				updateNews();
 			}
 		});
 		
@@ -1108,6 +1123,19 @@ public class PartyGUI extends JFrame {
 		if ( neueThemes.isEmpty() )
 			neueThemes.add("Keine Themes vorhanden");
 		list_themes.setListData(neueThemes);
+	}
+	
+	private void updateNews()
+	{
+//		nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
+		benachrichtigungen_v = partyc.getBenachrichtigungen();
+//		System.out.println(benachrichtigungen_v.get(0));
+		if (!benachrichtigungen_v.isEmpty())
+			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
+		
+		lblZurZeitHaben = new JLabel(nachricht);
+
+		list_benachrichtigungen.setListData(benachrichtigungen_v);
 	}
 	
 	private void close()

@@ -2,6 +2,7 @@ package webservice;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,9 +11,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import app.Genres;
+import app.Themes;
 import app.Genres.Genre;
 import app.Kategorien;
 import app.Kategorien.Kategorie;
@@ -26,8 +30,8 @@ public class GenresKategorienService {
 	@Produces(MediaType.APPLICATION_XML)
 	public Genres getGenres()
 	{
-		Genres genres_data = null;
-		
+		Genres genres_data = new Genres();
+		System.out.println("Start der get-Methode");
 		try
 		{
 			context = JAXBContext.newInstance(Genres.class);
@@ -40,26 +44,41 @@ public class GenresKategorienService {
 		return genres_data;
 	}
 	
-	@GET
+	@GET 
 	@Path("/{genre_id}")
 	@Produces(MediaType.APPLICATION_XML)
 	public Genre getGenre( @PathParam( "genre_id" ) String genre_id )
 	{
+		
 		Genres genres_daten = getGenres();
 		Genre genre = null;
 		
-		for ( int i=0; i<genres_daten.getGenre().size(); i++ )
-		{
-			if ( genres_daten.getGenre().get(i).getGenreId().equals( genre_id ) )
-				genre = genres_daten.getGenre().get(i);
+		for (Genre genre_item: genres_daten.getGenre()){
+			if (genre_item.getGenreId().compareTo(genre_id)==0){
+				genre = genre_item;
+			}
 		}
+		
+		System.out.println("Nach for-Schleife");
 		
 		if ( genre == null )
 			System.err.println( "Das Genre existert nicht." );
 		
+//		/*** test***/
+//		try {
+//			
+//			JAXBContext context = JAXBContext.newInstance(Themes.class);
+//			Marshaller m = context.createMarshaller();		
+//			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+//			m.marshal(genre, new FileOutputStream( "XSD/genre_test.xml" ));
+//			
+//		} catch (FileNotFoundException | JAXBException e) {
+//			System.out.println( "Theme(s) konnte(n) nicht gespeichert werden." );
+//		}
+//		/*********/
 		return genre;
 	}
-	
+	 
 	@GET
 	@Path("/{genre_id}/kategorien")
 	@Produces(MediaType.APPLICATION_XML)
@@ -86,7 +105,7 @@ public class GenresKategorienService {
 	{
 		Kategorien kategorien_daten = getKategorien( genre_id );
 		Kategorie k = null;
-		for (int i=0; i<kategorien_daten.getKategorie().size(); i++)
+		for ( int i=0; i<kategorien_daten.getKategorie().size(); i++ )
 		{
 			if ( kategorien_daten.getKategorie().get(i).getKategorieId().equals(kategorien_id) )
 				k = kategorien_daten.getKategorie().get(i);
@@ -97,4 +116,5 @@ public class GenresKategorienService {
 	    
 		return k;
 	}
+	
 }

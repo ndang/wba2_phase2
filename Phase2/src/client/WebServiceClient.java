@@ -13,6 +13,7 @@ import app.Themes.Theme.Interaktion.Kommentare.Kommentar;
 
 import com.sun.grizzly.http.SelectorThread;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.container.grizzly.GrizzlyServerFactory;
 import org.junit.*;
@@ -52,10 +53,20 @@ public class WebServiceClient
 		return wrs_Gs.accept( appxml ).get( Genres.class );
 	}
 	
-	public Genre getGenre(String g_id)
+	public Genre getGenre(String g_id) 
 	{
-		WebResource wrs_G = Client.create().resource( urlClnt_G ).path( g_id );
-		return wrs_G.accept( appxml ).get( Genre.class );
+		//try {
+			WebResource wrs_G = Client.create().resource(urlSrvr).path("/genres").path(g_id );
+			System.out.println(wrs_G.accept( appxml ).get( String.class ));
+			
+			
+			
+			return new Genre();
+		/*} catch (UniformInterfaceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;*/
+		//}
 	}
 	
 	public Kategorien getKategorien(String g_id)

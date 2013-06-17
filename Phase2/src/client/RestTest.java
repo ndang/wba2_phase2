@@ -24,9 +24,9 @@ public class RestTest {
 		Themes  ts = wsc.getThemes();
 		System.out.println(ts.getTheme().get(0).getAllgemeines().getThemeTitel().toString());
 		
-		Genre g = wsc.getGenre("g0");
-		System.out.println(g.getGenreId().toString());
-		
+		Genre g = wsc.getGenre("/g0");
+		System.out.println(g.getGenreId());
+		System.out.println("na");
 //		Theme t = null;
 //		Themes themes;
 //		try
