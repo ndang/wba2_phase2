@@ -36,6 +36,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.jivesoftware.smack.XMPPException;
 
+import client.PartyClient;
 import client.XmppClient;
 
 public class PartyGUI extends JFrame {
@@ -53,7 +54,7 @@ public class PartyGUI extends JFrame {
 	private Popup fehlerPU;
 	
 	private Border b = new LineBorder(Color.black);
-	private XmppClient partyc;
+	private PartyClient partyc;
 		
 	// Buttons
 	JButton btnAusloggen;
@@ -114,7 +115,7 @@ public class PartyGUI extends JFrame {
 	 * @throws XMPPException 
 	 */
 	public PartyGUI() throws XMPPException {
-		partyc = new XmppClient();
+		partyc = new PartyClient();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 679, 460);
@@ -205,7 +206,7 @@ public class PartyGUI extends JFrame {
 		/**************************** BenachrichtigungenFeld **********************************/
 		
 		nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
-		benachrichtigungen_v = partyc.getBenachrichtigungen();
+		benachrichtigungen_v = partyc.xc.getBenachrichtigungen();
 		
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
@@ -254,7 +255,7 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				partyc.deleteBenachrichtigungen();
+				partyc.xc.deleteBenachrichtigungen();
 				updateNews();
 			}
 		});
@@ -270,7 +271,7 @@ public class PartyGUI extends JFrame {
 		
 		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
 		
-		subscriptions = partyc.getMySubscriptions();
+		subscriptions = partyc.xc.getMySubscriptions();
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
 		
 		for (String abo : subscriptions)
@@ -375,7 +376,7 @@ public class PartyGUI extends JFrame {
 				else
 				{
 					String abo = tree_abos.getSelectionPath().getLastPathComponent().toString();
-					partyc.unsubscribe(abo);
+					partyc.xc.unsubscribe(abo);
 					aboKuendigenPopup(abo);
 					updateAbos();
 					updatePublish();
@@ -387,7 +388,7 @@ public class PartyGUI extends JFrame {
 		{	
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				partyc.unsubscribeAll();
+				partyc.xc.unsubscribeAll();
 				aboKuendigenPopup("alle");
 				updateAbos();
 				updatePublish();
@@ -409,7 +410,7 @@ public class PartyGUI extends JFrame {
 		panel_search.add(panel_genre);
 		JLabel lblGenres = new JLabel("Genres");
 		
-		genres_liste = partyc.getGenres();
+		genres_liste = partyc.xc.getGenres();
 		list_genre = new JList(genres_liste);
 		list_genre.setBorder(b);
 
@@ -569,19 +570,19 @@ public class PartyGUI extends JFrame {
 				
 				else if ( !list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					partyc.subscribe(list_genre.getSelectedValue().toString());
+					partyc.xc.subscribe(list_genre.getSelectedValue().toString());
 					aboPopup(list_genre.getSelectedValue().toString());
 				}
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					partyc.subscribe(list_kategorien.getSelectedValue().toString());
+					partyc.xc.subscribe(list_kategorien.getSelectedValue().toString());
 					aboPopup(list_kategorien.getSelectedValue().toString());
 				}	
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
-					partyc.subscribe(list_themes.getSelectedValue().toString());
+					partyc.xc.subscribe(list_themes.getSelectedValue().toString());
 					aboPopup(list_themes.getSelectedValue().toString());
 					
 					list_genre.clearSelection();
@@ -763,7 +764,7 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String selection = comboBox_genre.getSelectedItem().toString();
-				Vector<String> newKats = partyc.getKategorien(selection); 
+				Vector<String> newKats = partyc.xc.getKategorien(selection); 
 				comboBox_kategorie.setModel(new DefaultComboBoxModel<String>(newKats));
 				
 				lblKategorie.setVisible(true);
@@ -791,13 +792,13 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String t_id = "t" + String.valueOf( partyc.anz_t );
+				String t_id = "t" + String.valueOf( partyc.xc.anz_t );
 				String g_id = comboBox_genre.getItemAt( comboBox_genre.getSelectedIndex() );
 				String k_id = comboBox_kategorie.getItemAt( comboBox_kategorie.getSelectedIndex() );
 				String id = t_id + "_" + k_id;
 								
-				partyc.createTopic( partyc.createTID(g_id, k_id) );
-				partyc.publish( id, "new Theme '" + id + "' created" );
+				partyc.xc.createTopic( partyc.xc.createTID(g_id, k_id) );
+				partyc.xc.publish( id, "new Theme '" + id + "' created" );
 				
 				speichernPopup( id );
 			}
@@ -810,7 +811,7 @@ public class PartyGUI extends JFrame {
 		// TODO: JID Problem 
 		
 		checkBox_subscriptions = new JComboBox();
-		Vector<String> subscriptions = partyc.getMySubscriptions();
+		Vector<String> subscriptions = partyc.xc.getMySubscriptions();
 		if ( subscriptions.isEmpty() )
 			subscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
 		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
@@ -859,7 +860,7 @@ public class PartyGUI extends JFrame {
 			{
 				String t_id = checkBox_subscriptions.getSelectedItem().toString();
 				String payload = dtrpnPayload.getText();
-				partyc.publish( t_id, payload );
+				partyc.xc.publish( t_id, payload );
 				
 				updateNews();
 			}
@@ -1125,13 +1126,13 @@ public class PartyGUI extends JFrame {
 	
 	private void changeKategorienContent(String selection)
 	{
-		Vector<String> neueKategorien = partyc.getKategorien(selection);
+		Vector<String> neueKategorien = partyc.xc.getKategorien(selection);
 		list_kategorien.setListData(neueKategorien);
 	}
 	
 	private void changeThemesContent(String selectionG, String selectionK)
 	{
-		Vector<String> neueThemes = partyc.getThemes(selectionG, selectionK);
+		Vector<String> neueThemes = partyc.xc.getThemes(selectionG, selectionK);
 		if ( neueThemes.isEmpty() )
 			neueThemes.add("Keine Themes vorhanden");
 		list_themes.setListData(neueThemes);
@@ -1139,7 +1140,7 @@ public class PartyGUI extends JFrame {
 	
 	private void updateNews()
 	{
-		benachrichtigungen_v = partyc.getBenachrichtigungen();
+		benachrichtigungen_v = partyc.xc.getBenachrichtigungen();
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
 		
@@ -1150,7 +1151,7 @@ public class PartyGUI extends JFrame {
 	
 	private void updateAbos()
 	{
-		subscriptions = partyc.getMySubscriptions();
+		subscriptions = partyc.xc.getMySubscriptions();
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
 		
 		for (String abo : subscriptions)

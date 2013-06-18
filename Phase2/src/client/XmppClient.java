@@ -27,10 +27,10 @@ public class XmppClient
 {
 	
 	private static RestClient rc;
-	
-	private static String user = "user1";
-	private static String pw = "user1user1";
-	private static String server = "localhost";
+//	
+//	private static String user = "user1";
+//	private static String pw = "user1user1";
+//	private static String server = "localhost";
 		
 	private ItemEventCoordinator iec = new ItemEventCoordinator();
 	
@@ -42,21 +42,21 @@ public class XmppClient
 	private Vector<LeafNode> topics;
 	public static Vector<String> benachrichtigungen = new Vector<String>();
 	
-	
-	public XmppClient()
+	public XmppClient(XMPPConnection con, RestClient rc)
 	{
-		try
-		{
-//			XMPPConnection.DEBUG_ENABLED=true;
-			con = new XMPPConnection( server );
-			con.connect();
-			con.login( user, pw );
-			System.out.println( "Login erfolgreich." );
-		} catch (XMPPException e) {
-			e.printStackTrace();
-			System.err.println("\nLogin fehlgeschlagen.");
-		}
+//		try
+//		{
+////			XMPPConnection.DEBUG_ENABLED=true;
+//			con = new XMPPConnection( server );
+//			con.connect();
+//			con.login( user, pw );
+//			System.out.println( "Login erfolgreich." );
+//		} catch (XMPPException e) {
+//			e.printStackTrace();
+//			System.err.println("\nLogin fehlgeschlagen.");
+//		}
 		
+		this.con = con;
 		this.rc = new RestClient();
 		this.pubsub_mgr = new PubSubManager( con, "pubsub." + con.getHost() );
 		this.topics = new Vector<LeafNode>();
@@ -336,8 +336,8 @@ public class XmppClient
 	
 	private String getMyJID()
 	{
-		return user + "@" + server;
-//		return con.getUser() + "@" + con.getHost();
+//		return user + "@" + server;
+		return con.getUser() + "@" + con.getHost();
 	}
 
 	private boolean isSubscribed(LeafNode abo)
@@ -421,12 +421,12 @@ public class XmppClient
 		}
 	}
 	
-	public void logout()
-	{
-		rc.disconnectRestSrv();
-		con.disconnect();
-		System.out.println( user + " ausgeloggt." );
-	}
+//	public void logout()
+//	{
+//		rc.disconnectRestSrv();
+//		con.disconnect();
+//		System.out.println( user + " ausgeloggt." );
+//	}
 	
 	public void publish(String t_id, String payload)
 	{	
