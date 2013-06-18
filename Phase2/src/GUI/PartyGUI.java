@@ -97,24 +97,21 @@ public class PartyGUI extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					PartyGUI frame = new PartyGUI();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+	public static void start() {
+	EventQueue.invokeLater(new Runnable() {
+		public void run() {
+			try {
+				PartyGUI frame = new PartyGUI();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		});
-	}
+		}
+	});
+}
 
-	/**
-	 * Create the frame.
-	 * @throws XMPPException 
-	 */
-	public PartyGUI() throws XMPPException {
+	public PartyGUI()
+	{
 		partyc = new PartyClient();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -131,7 +128,7 @@ public class PartyGUI extends JFrame {
 		
 		fixedMenue();
 		mainTabbedMenue();
-		login();		
+		login();
 	}
 	
 	private void fixedMenue()
@@ -201,7 +198,7 @@ public class PartyGUI extends JFrame {
 	
 	private void newsMenue(JPanel panel_news)
 	{
-		// TODO: Feld soll sich immer aktuallisieren, sobald es Neuigkeiten gibt, nicht nur, wenn der Nutzer sich das erste mal einloggt.
+		// TODO: Feld auch anzeigen, was Neues passiert ist während er offline war
 		
 		/**************************** BenachrichtigungenFeld **********************************/
 		

@@ -4,10 +4,13 @@ import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
+import GUI.PartyGUI;
+
 public class PartyClient {
 
 	public RestClient rc;
 	public XmppClient xc;
+	public PartyGUI pg;
 	
 	private String user = "user1";
 	private String pw = "user1user1";
@@ -39,3 +42,4 @@ public class PartyClient {
 		System.out.println( user + " ausgeloggt." );
 	}
 }
+	
