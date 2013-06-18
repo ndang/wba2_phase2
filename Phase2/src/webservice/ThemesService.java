@@ -155,14 +155,11 @@ public class ThemesService {
 	@POST
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_XML)
-	public String addTheme(Theme t) throws FileNotFoundException, JAXBException
+	public void addTheme(Theme t)
 	{
-		String t_id = "Test";
 		Themes daten = gibThemeDaten();		
 		daten.getTheme().add(t);
 		setzeThemeDaten(daten);
-	    
-		return t_id;
 	}
 	
 	/**

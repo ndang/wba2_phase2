@@ -87,7 +87,11 @@ public class PartyGUI extends JFrame {
 	JLabel lblZurZeitHaben;
 	JScrollPane scrollPane_news;
 	
+	// Tree
 	JTree tree_abos;
+	
+	// Checkbox
+	JComboBox checkBox_subscriptions;
  
 	/**
 	 * Launch the application.
@@ -265,7 +269,6 @@ public class PartyGUI extends JFrame {
 		JButton btnAlleAbonnementsKndigen = new JButton("Alle Abonnements k\u00FCndigen");
 		
 		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
-		//TODO: Liste soll sich aktuallisieren, sobald etwas neues abonniert wurde.
 		
 		subscriptions = partyc.getMySubscriptions();
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
@@ -374,6 +377,8 @@ public class PartyGUI extends JFrame {
 					String abo = tree_abos.getSelectionPath().getLastPathComponent().toString();
 					partyc.unsubscribe(abo);
 					aboKuendigenPopup(abo);
+					updateAbos();
+					updatePublish();
 				}				
 			}
 		});
@@ -384,6 +389,8 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				partyc.unsubscribeAll();
 				aboKuendigenPopup("alle");
+				updateAbos();
+				updatePublish();
 			}
 		});
 	}
@@ -581,6 +588,9 @@ public class PartyGUI extends JFrame {
 					list_kategorien.clearSelection();
 					list_themes.clearSelection();
 				}
+				
+				updateAbos();
+				updatePublish();
 			}
 		});
 	}
@@ -796,16 +806,21 @@ public class PartyGUI extends JFrame {
 
 	private void publishMenue(JPanel panel_publish)
 	{
-		final JComboBox checkBox_subscriptions = new JComboBox();
+		// TODO: update beim abonnieren.
+		// TODO: JID Problem 
+		
+		checkBox_subscriptions = new JComboBox();
 		Vector<String> subscriptions = partyc.getMySubscriptions();
-		checkBox_subscriptions.setModel(new DefaultComboBoxModel<String>(subscriptions));
+		if ( subscriptions.isEmpty() )
+			subscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
+		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
 		
 		final JEditorPane dtrpnPayload = new JEditorPane();
-		dtrpnPayload.setText("payload");
+		dtrpnPayload.setText( "payload" );
 		
-		JButton btnPublish = new JButton("publish");
+		JButton btnPublish = new JButton( "publish" );
 		
-		JLabel lblPublishTo = new JLabel("publish to:");
+		JLabel lblPublishTo = new JLabel( "publish to:" );
 		
 		GroupLayout gl_panel_publish = new GroupLayout(panel_publish);
 		gl_panel_publish.setHorizontalGroup(
@@ -844,7 +859,7 @@ public class PartyGUI extends JFrame {
 			{
 				String t_id = checkBox_subscriptions.getSelectedItem().toString();
 				String payload = dtrpnPayload.getText();
-				partyc.publish(t_id, payload);
+				partyc.publish( t_id, payload );
 				
 				updateNews();
 			}
@@ -1124,9 +1139,7 @@ public class PartyGUI extends JFrame {
 	
 	private void updateNews()
 	{
-//		nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
 		benachrichtigungen_v = partyc.getBenachrichtigungen();
-//		System.out.println(benachrichtigungen_v.get(0));
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
 		
@@ -1148,6 +1161,13 @@ public class PartyGUI extends JFrame {
 		DefaultTreeModel aktuallisiert = new DefaultTreeModel(root);
 		
 		tree_abos.setModel(aktuallisiert);
+	}
+	
+	private void updatePublish()
+	{
+		if ( subscriptions.isEmpty() )
+			subscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
+		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
 	}
 	
 	private void close()

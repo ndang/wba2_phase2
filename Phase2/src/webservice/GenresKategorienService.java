@@ -27,7 +27,6 @@ public class GenresKategorienService {
 	public Genres getGenres()
 	{
 		Genres genres_data = new Genres();
-		System.out.println("Start der get-Methode");
 		try
 		{
 			context = JAXBContext.newInstance(Genres.class);
@@ -43,36 +42,22 @@ public class GenresKategorienService {
 	@GET 
 	@Path("/{genre_id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public String getGenre( @PathParam( "genre_id" ) String genre_id )
+	public Genre getGenre( @PathParam( "genre_id" ) String genre_id )
 	{
 		
 		Genres genres_daten = getGenres();
 		Genre genre = null;
 		
 		for (Genre genre_item: genres_daten.getGenre()){
-			if (genre_item.getGenreId().compareTo(genre_id)==0){
+			if ( genre_item.getGenreId().equals(genre_id) ){
 				genre = genre_item;
 			}
 		}
 		
-		System.out.println("Nach for-Schleife");
-		
 		if ( genre == null )
 			System.err.println( "Das Genre existert nicht." );
-		
-//		/*** test***/
-//		try {
-//			
-//			JAXBContext context = JAXBContext.newInstance(Themes.class);
-//			Marshaller m = context.createMarshaller();		
-//			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-//			m.marshal(genre, new FileOutputStream( "XSD/genre_test.xml" ));
-//			
-//		} catch (FileNotFoundException | JAXBException e) {
-//			System.out.println( "Theme(s) konnte(n) nicht gespeichert werden." );
-//		}
-//		/*********/
-		return "hi";
+
+		return genre;
 	}
 	 
 	@GET

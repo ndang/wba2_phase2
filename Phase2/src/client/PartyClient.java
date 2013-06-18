@@ -1,5 +1,6 @@
 package client;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
@@ -9,6 +10,8 @@ import javax.xml.bind.JAXBException;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.FormType;
@@ -22,14 +25,17 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.Subscription;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 
+import app.Genre;
+import app.Kategorie;
+import app.Theme;
+
 import webservice.GenresKategorienService;
 import webservice.ThemesService;
 
-public class PartyClient {
+public class PartyClient
+{
 	
-	
-	private static GenresKategorienService gks;
-	private static ThemesService ts;
+	private static WebServiceClient wsc;
 	
 	private static String user = "user1";
 	private static String pw = "user1user1";
@@ -62,99 +68,103 @@ public class PartyClient {
 			System.err.println("\nLogin fehlgeschlagen.");
 		}
 		
-		this.gks = new GenresKategorienService();
-		this.ts = new ThemesService();
-		
+		this.wsc = new WebServiceClient();
 		this.pubsub_mgr = new PubSubManager( con, "pubsub." + con.getHost() );
 		this.topics = new Vector<LeafNode>();
 		this.benachrichtigungen = new Vector<String>();
+		this.anz_g = wsc.getGenres().getGenre().size();
+		for ( Genre g : wsc.getGenres().getGenre() )
+			this.anz_k += wsc.getKategorien( g.getGenreId() ).getKategorie().size();
+		this.anz_t = wsc.getThemes().getTheme().size();
 		
-		this.anz_g = gks.getGenres().getGenre().size();
-		for ( int i = 0; i<anz_g; i ++ )
-			this.anz_k += gks.getKategorien(gks.getGenres().getGenre().get(i).getGenreId()).getKategorie().size();
-		this.anz_t = ts.getThemes().getTheme().size();
-		
-		deleteAllTopics();
-//		initTopics();	
+//		deleteAllTopics();
+		initTopics();	
 
 	}
 	
-	/**
-	 *  Alle vorhandenen Topics holen
-	 * @throws XMPPException 
-	 * @throws JAXBException 
-	 */
 	private void initTopics()
 	{
 		topics.clear();
-//		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( con );
-//		DiscoverItems discovery_items;
-//		
-//		try
-//		{
-//			discovery_items = discovery_mgr.discoverItems( "pubsub." + con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
-//			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
-//			
-//			while (iterator.hasNext())
-//			{
-//				DiscoverItems.Item item = (DiscoverItems.Item) iterator.next();
-//				topics.addElement( (LeafNode) pubsub_mgr.getNode( item.getNode() ) );
-//			}
-//		} catch (XMPPException e) {
-//			e.printStackTrace();
-//			System.err.println("Topics konnten nicht initialisiert werden!");
-//		}
+		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( con );
+		DiscoverItems discovery_items;
+		
+		try
+		{
+			discovery_items = discovery_mgr.discoverItems( "pubsub." + con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
+			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
+			
+			while (iterator.hasNext())
+			{
+				DiscoverItems.Item item = (DiscoverItems.Item) iterator.next();
+				topics.addElement( (LeafNode) pubsub_mgr.getNode( item.getNode() ) );
+			}
+		} catch (XMPPException e) {
+			e.printStackTrace();
+			System.err.println("Topics konnten nicht initialisiert werden!");
+		}
 		
 		/* aller erste Initialisierung*/
 		//TODO muss noch gescheit geschrieben werden und nicht so manuell
-//		
-//		if ( anz_g+anz_k+anz_t != topics.size() ) 
-//		{
-//			deleteAllTopics();
-//			
-//			for( int i=0; i<anz_g; i++)
-//				createTopic("g"+i);
-//			
-//			createTopic("k0_g0");
-//			createTopic("k1_g0");
-//			createTopic("k0_g1");
-//			createTopic("k1_g1");
-//			createTopic("k0_g2");
-//			createTopic("k0_g3");
-//			createTopic("k1_g3");
-//			createTopic("k2_g3");
-//			
-//			createTopic("t0_k0_g0");
-//			createTopic("t1_k0_g0");
-//			createTopic("t2_k0_g0");			
-//		}
 		
-		addListeners();
-	}
-	
-	private void addListeners()
-	{
-		Vector<String> s = getMySubscriptions();
-		for (String name : s)
+		if ( anz_g+anz_k+anz_t != topics.size() ) 
 		{
-			try
-			{
-				pubsub_mgr.getNode(name).addItemEventListener(iec);
-			} catch (XMPPException e) {
-				e.printStackTrace();
-				System.err.println( "An die vorhandenen Abonnements können keine Listeners angehängt werden." );
-			}
+			deleteAllTopics();
+			
+			for( int i=0; i<anz_g; i++)
+				createTopic("g"+i);
+			
+			createTopic("k0_g0");
+			createTopic("k1_g0");
+			createTopic("k0_g1");
+			createTopic("k1_g1");
+			createTopic("k0_g2");
+			createTopic("k0_g3");
+			createTopic("k1_g3");
+			createTopic("k2_g3");
+			
+			createTopic("t0_k0_g0");
+			createTopic("t1_k0_g0");
+			createTopic("t2_k0_g0");	
+			
+//			for ( Genre g : wsc.getGenres().getGenre())
+//			{
+//				createTopic( g.getGenreId().toString() );
+//				
+//				for ( Kategorie k : wsc.getKategorien(g.getGenreId()).getKategorie() )
+//					createTopic( k.getKategorieId().toString() );
+//			}
+//			
+//			for ( Theme t : wsc.getThemes().getTheme() )
+//				createTopic( t.getAllgemeines().getThemeId().toString() );	
 		}
-	}
-	public String createGID()
-	{
-		return  "g"+(anz_g++);
+		
+//		addListeners();
 	}
 	
-	public String createKID(String g_id)
-	{
-		return "k"+(anz_k++)+"_"+g_id;
-	}
+//	private void addListeners()
+//	{
+//		Vector<String> s = getMySubscriptions();
+//		for (String name : s)
+//		{
+//			try
+//			{
+//				pubsub_mgr.getNode(name).addItemEventListener(iec);
+//			} catch (XMPPException e) {
+//				e.printStackTrace();
+//				System.err.println( "An die vorhandenen Abonnements können keine Listeners angehängt werden." );
+//			}
+//		}
+//	}
+	
+//	public String createGID()
+//	{
+//		return  "g"+(anz_g++);
+//	}s
+//	
+//	public String createKID(String g_id)
+//	{
+//		return "k"+(anz_k++)+"_"+g_id;
+//	}
 	
 	public String createTID(String g_id, String k_id)
 	{
@@ -174,13 +184,6 @@ public class PartyClient {
 		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
 		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
 		    form.setSubscribe(true); // ob man das subsciben kann
-			
-//			 form.setAccessModel(AccessModel.open);
-//		     form.setDeliverPayloads(true);
-//		     form.setNotifyRetract(true);
-//		     form.setPersistentItems(true);
-//		     form.setPublishModel(PublishModel.open);
-		      
 		      
 		    LeafNode topic = (LeafNode) pubsub_mgr.createNode(id, form);
 			topics.add(topic);	
@@ -234,15 +237,49 @@ public class PartyClient {
 		benachrichtigungen = new Vector<String>();
 	}
 
-	public void getTopicTitle(String typ)
+	public String getGenreTitel(String g_id)
 	{
-		// TODO: per WebServices!
-		for(LeafNode topic : topics)
-		{
-			if ( topic.getId().equals(typ) )
-				System.out.println(topic.getId()+" Titel");
-		}
+		return wsc.getGenre(g_id).getGenreTitel();
 	}
+	
+	public String getKategorieTitel(String g_id, String k_id)
+	{
+		return wsc.getKategorie(g_id, k_id).getKategorieTitel();
+	}
+	
+	public String getThemeTitel(String t_id)
+	{
+		return wsc.getTheme(t_id).getAllgemeines().getThemeTitel().toString();
+	}
+//	
+//	public Vector<String> getGenresTitles()
+//	{
+//		Vector<String> result = new Vector<String>();
+//		for (Genre g : wsc.getGenres().getGenre())
+//			result.add(g.getGenreId() + ") " + g.getGenreTitel());
+//		return result;
+//	}
+//	
+//	public Vector<String> getKategorienTitles(String g_id)
+//	{
+//		Vector<String> result = new Vector<String>();
+//		for (Kategorie k : wsc.getKategorien(g_id).getKategorie())
+//			result.add(k.getKategorieId() + ") " + k.getKategorieTitel());
+//		return result;
+//	}
+//	
+//	public Vector<String> getThemeTitles(String g_id, String k_id)
+//	{
+//		Vector<String> result = new Vector<String>();
+//		for (Theme t : wsc.getThemes().getTheme())
+//		{
+//			String t_id = t.getAllgemeines().getThemeId();
+//			if (g_id.equals(t_id.substring(6)) && k_id.equals(t_id.substring(3, 5)))
+//			result.add(t.getAllgemeines().getThemeId() + ") " + t.getAllgemeines().getThemeTitel().toString());
+//		}
+//			
+//		return result;
+//	}
 	
 	public Vector<String> getMySubscriptions()
 	{
@@ -270,14 +307,6 @@ public class PartyClient {
 			return benachrichtigungen;
 		else
 			return new Vector<String>();	
-	}
-	
-	public Vector<String> getTopicNames()
-	{
-		Vector<String> topic_names = new Vector<String>();
-		for ( LeafNode topic : topics )
-			topic_names.add( topic.getId() );
-		return topic_names;
 	}
 	
 	public Vector<String> getGenres()
@@ -318,15 +347,15 @@ public class PartyClient {
 	
 	private String getMyJID()
 	{
-		return user+"@"+server;
+		return user + "@" + server;
+//		return con.getUser() + "@" + con.getHost();
 	}
-	
+
 	private boolean isSubscribed(LeafNode abo)
 	{
 		try
 		{
-			List<Subscription> abonennten;
-			abonennten = abo.getSubscriptions();
+			List<Subscription> abonennten = abo.getSubscriptions();
 			for (Subscription curr_abonennt: abonennten)
 				if (curr_abonennt.getJid().equals(getMyJID()))
 					return true;
@@ -346,7 +375,6 @@ public class PartyClient {
 			if (!isSubscribed(abo))
 			{
 				abo.addItemEventListener( iec ); 
-				System.out.println("hi");
 //				if (abo.toString().substring(0,1).equals("t"))
 //					abo.addItemDeleteListener(new ItemDeleteCoordinator());
 				abo.subscribe(getMyJID());
@@ -397,7 +425,6 @@ public class PartyClient {
 					abo.unsubscribe(getMyJID());
 					System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
 				}
-					
 			}
 		} catch (XMPPException | NullPointerException e) {
 			e.printStackTrace();
@@ -407,8 +434,9 @@ public class PartyClient {
 	
 	public void logout()
 	{
+		wsc.disconnectRestSrv();
 		con.disconnect();
-		System.out.println(user + " ausgeloggt.");
+		System.out.println( user + " ausgeloggt." );
 	}
 	
 	public void publish(String t_id, String payload)
@@ -417,11 +445,11 @@ public class PartyClient {
 		
 		try
 		{
-			LeafNode theme = pubsub_mgr.getNode(t_id);
-			theme.send(new PayloadItem<SimplePayload>(new SimplePayload(payload, null, payload)));
-		} catch (XMPPException e) {
+			LeafNode theme = pubsub_mgr.getNode( t_id );
+			theme.send( new PayloadItem<SimplePayload>( new SimplePayload( payload, null, payload ) ) );
+		} catch ( XMPPException e ) {
 			e.printStackTrace();
-			System.err.println("Es konnte nichts gepublisht werden.");
+			System.err.println( "Es konnte nichts gepublisht werden." );
 		}
 	}
 	
@@ -439,17 +467,21 @@ public class PartyClient {
 
 	class ItemEventCoordinator implements ItemEventListener<Item>
     {
-		// TODO: persistente Speicherung 
+		// TODO: persistente Speicherung ?
         @Override
         public void handlePublishedItems(ItemPublishEvent<Item> items)
         {
         	List<Item> itemlist = items.getItems();
     		PayloadItem<SimplePayload> pi = null;
+//    		for ( Item item : itemlist )
+//    		{
+//    			benachrichtigungen.add( items.getPublishedDate()+", " + items.getNodeId() + ": " + item.getElementName().toString() + " " + item.getNode().toString());
+//    			System.out.println("New item arrived!");
+//    		}
     		for ( int i=0; i<itemlist.size(); i++ )
     		{
     			pi = (PayloadItem<SimplePayload>) itemlist.get(i);
-    			benachrichtigungen.add("Das ist neu: " + pi.getPayload().getElementName().toString());
-    			System.out.println(benachrichtigungen.get(i));
+    			benachrichtigungen.add( itemlist.get(i).getId()+": " + pi.getPayload().getElementName().toString());
     			System.out.println("New item arrived!");
     		}
 		}

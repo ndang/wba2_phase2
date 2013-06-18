@@ -71,7 +71,7 @@ public class KonsolenClient
 		
 			case 4:
 				System.out.println("Diese Genres sind verfügbar:");
-				app.getTopicTitle("g");
+//				app.getTopicTitle("g");
 				g_menue();
 				break;
 				
@@ -181,7 +181,7 @@ public class KonsolenClient
 				
 			case 2:
 				id = id_waehlen();
-				app.getTopicTitle("t");
+//				app.getTopicTitle("t");
 //				t_menue();
 				break;
 	

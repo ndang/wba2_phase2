@@ -264,4 +264,19 @@
             </kommentare>
         </interaktion>
     </theme>
+    <theme>
+        <allgemeines theme_id="test"/>
+    </theme>
+    <theme>
+        <allgemeines theme_id="test"/>
+        <module/>
+    </theme>
+    <theme>
+        <allgemeines theme_id="test"/>
+        <module/>
+    </theme>
+    <theme>
+        <allgemeines theme_id="test"/>
+        <module/>
+    </theme>
 </themes>
