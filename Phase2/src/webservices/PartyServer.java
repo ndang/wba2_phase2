@@ -1,4 +1,4 @@
-package webservice;
+package webservices;
 
 import com.sun.grizzly.http.SelectorThread;
 import com.sun.jersey.api.container.grizzly.GrizzlyServerFactory;

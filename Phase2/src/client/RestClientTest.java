@@ -9,13 +9,13 @@ import app.Theme.Interaktion.Kommentare;
 import app.Themes;
 
 
-public class RestTest {
+public class RestClientTest {
 
 	public static void main(String[] args)
 	{
 		/********** GET - Methoden ******************/
 		
-		WebServiceClient wsc = new WebServiceClient();
+		RestClient wsc = new RestClient();
 		
 		Genres gs = wsc.getGenres();
 		System.out.println(gs.getGenre().size());

@@ -1,4 +1,4 @@
-package webservice;
+package webservices;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,7 +52,7 @@ public class ThemesService {
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	static private Themes gibThemeDaten()
+	static public Themes gibThemeDaten()
 	{
 		Themes themes = null;
 		

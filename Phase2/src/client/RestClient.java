@@ -16,7 +16,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.container.grizzly.GrizzlyServerFactory;
 import org.junit.*;
 
-public class WebServiceClient
+public class RestClient
 {
 	
 	private static String urlSrvr = "http://localhost:4434";
@@ -27,7 +27,7 @@ public class WebServiceClient
 	
 	private WebResource wrs_Ts;
 
-	public WebServiceClient()
+	public RestClient()
 	{
 	    try
 	    {

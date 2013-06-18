@@ -1,4 +1,4 @@
-package webservice;
+package webservices;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -36,7 +36,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.jivesoftware.smack.XMPPException;
 
-import client.PartyClient;
+import client.XmppClient;
 
 public class PartyGUI extends JFrame {
 
@@ -53,7 +53,7 @@ public class PartyGUI extends JFrame {
 	private Popup fehlerPU;
 	
 	private Border b = new LineBorder(Color.black);
-	private PartyClient partyc;
+	private XmppClient partyc;
 		
 	// Buttons
 	JButton btnAusloggen;
@@ -114,7 +114,7 @@ public class PartyGUI extends JFrame {
 	 * @throws XMPPException 
 	 */
 	public PartyGUI() throws XMPPException {
-		partyc = new PartyClient();
+		partyc = new XmppClient();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 679, 460);

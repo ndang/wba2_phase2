@@ -9,11 +9,11 @@ public class KonsolenClient
 {
 	
 	Scanner in = new Scanner(System.in);
-	PartyClient app;
+	XmppClient app;
 
 	public KonsolenClient() throws XMPPException
 	{
-		this.app = new PartyClient();
+		this.app = new XmppClient();
 		home();
 	}
 	

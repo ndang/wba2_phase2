@@ -1,4 +1,4 @@
-//package client;
+//package xmpp;
 //
 //import java.io.FileNotFoundException;
 //import java.util.Iterator;
@@ -26,10 +26,12 @@
 //import org.jivesoftware.smackx.pubsub.listener.ItemDeleteListener;
 //import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 //
-//import webservice.GenresKategorienService;
-//import webservice.ThemesService;
+//import webservices.GenresKategorienService;
+//import webservices.ThemesService;
 //
-//public class Alt_PartyClient implements ItemDeleteListener,ItemEventListener<Item> {
+//
+//
+//public class Alt_xmppService implements ItemDeleteListener,ItemEventListener<Item> {
 //	
 ////	private static GenresKategorienService;
 ////	private static ThemesService;
@@ -48,7 +50,7 @@
 //	
 //	Scanner in = new Scanner(System.in);
 //	
-//	public Alt_PartyClient()
+//	public Alt_xmppService()
 //	{
 //		try
 //		{
