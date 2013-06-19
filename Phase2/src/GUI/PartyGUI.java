@@ -82,7 +82,15 @@ public class PartyGUI extends JFrame {
 	JTree tree_abos;
 	
 	// Checkbox
-	JComboBox checkBox_subscriptions;
+	JComboBox<String> checkBox_subscriptions;
+	JComboBox<String> comboBox_auswaehlen;
+	JComboBox<String> comboBox_genre;
+	JComboBox<String> comboBox_kategorie;
+	
+	//Labels
+	JLabel lblGenre;
+	JLabel lblThemeTitel;
+	JLabel lblKategorie;
  
 	/**
 	 * Launch the application.
@@ -138,7 +146,6 @@ public class PartyGUI extends JFrame {
 		{
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				partyc.logout();
 				close();
 			}
 		});
@@ -159,29 +166,29 @@ public class PartyGUI extends JFrame {
 		main_panel.add(mainTabbedPane);
 		
 		panel_news = new JPanel();
-		panel_news.setToolTipText("Benachrichtigungen");
 		mainTabbedPane.addTab("Benachrichtigungen", null, panel_news, null);
 		newsMenue(panel_news);
 		
 		panel_abos = new JPanel();
-		panel_abos.setToolTipText("Abonnemnets");
 		mainTabbedPane.addTab("Meine Abonnements", null, panel_abos, null);
 		aboMenue(panel_abos);
 		
 		panel_search = new JPanel();
-		panel_search.setToolTipText("Stöbern");
 		mainTabbedPane.addTab("Stöbern", null, panel_search, null);
 		searchMenue(panel_search);
 		
 		panel_create = new JPanel();
-		panel_create.setToolTipText("Theme erstellen");
-		mainTabbedPane.addTab("Theme erstellen", null, panel_create, null);
-		createMenue(panel_create);
+		mainTabbedPane.addTab("Theme bearbeiten/erstellen", null, panel_create, null);
+		themesMenue(panel_create);
 		
 		JPanel panel_publish = new JPanel();
 		panel_publish.setToolTipText("publish something");
 		mainTabbedPane.addTab("Publishing", null, panel_publish, null);
 		publishMenue(panel_publish);
+		
+		JLabel lblHinweisManMuss = new JLabel("Ein Theme muss abonniert sein, um es zu bearbeiten/dazu zu publishen.");
+		lblHinweisManMuss.setBounds(10, 380, 435, 14);
+		main_panel.add(lblHinweisManMuss);
 	}
 	
 	private void newsMenue(JPanel panel_news)
@@ -196,8 +203,8 @@ public class PartyGUI extends JFrame {
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
 		
-		lblZurZeitHaben = new JLabel(nachricht);;
-
+		lblZurZeitHaben = new JLabel(nachricht);
+		
 		list_benachrichtigungen = new JList( benachrichtigungen_v );
 		scrollPane_news = new JScrollPane( list_benachrichtigungen );
 		
@@ -248,7 +255,6 @@ public class PartyGUI extends JFrame {
 	private void aboMenue(JPanel panel_abos)
 	{
 		JButton btnThemeAnsehen = new JButton("Theme ansehen");
-		JButton btnThemeBearbeiten = new JButton("Theme bearbeiten");
 		JButton btnAbonnementKndigen = new JButton("Abonnement k\u00FCndigen");
 		JButton btnAlleAbonnementsKndigen = new JButton("Alle Abonnements k\u00FCndigen");
 		
@@ -301,7 +307,6 @@ public class PartyGUI extends JFrame {
 					.addGap(18)
 					.addGroup(gl_panel_abos.createParallelGroup(Alignment.LEADING)
 						.addComponent(btnThemeAnsehen, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
-						.addComponent(btnThemeBearbeiten, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
 						.addComponent(btnAbonnementKndigen, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
 						.addComponent(btnAlleAbonnementsKndigen, GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE))
 					.addContainerGap())
@@ -311,9 +316,7 @@ public class PartyGUI extends JFrame {
 				.addGroup(gl_panel_abos.createSequentialGroup()
 					.addGap(29)
 					.addComponent(btnThemeAnsehen)
-					.addGap(18)
-					.addComponent(btnThemeBearbeiten)
-					.addPreferredGap(ComponentPlacement.RELATED, 148, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED, 189, Short.MAX_VALUE)
 					.addComponent(btnAbonnementKndigen)
 					.addGap(18)
 					.addComponent(btnAlleAbonnementsKndigen)
@@ -332,19 +335,7 @@ public class PartyGUI extends JFrame {
 				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
 					InfoPopup.start("Bitte Theme auswählen.");
 				else
-					themeAnsehenPopup(tree_abos.getSelectionPath().getLastPathComponent().toString());			
-			}
-		});
-		
-		btnThemeBearbeiten.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
-					InfoPopup.start("Bitte Theme auswählen.");
-				else
-					themeBearbeitenPopup(tree_abos.getSelectionPath().getLastPathComponent().toString());
+					ThemeInfo.start( tree_abos.getSelectionPath().getLastPathComponent().toString() );			
 			}
 		});
 		
@@ -517,6 +508,7 @@ public class PartyGUI extends JFrame {
 					 
 					 list_kategorien.setVisible(true);
 		        	 lblKategorien.setVisible(true);
+		        	 
 				 } 
 			}
 		});
@@ -546,7 +538,7 @@ public class PartyGUI extends JFrame {
 				if ( list_themes.isSelectionEmpty() )
 					InfoPopup.start("Es muss ein Theme ausgewählt sein.");
 				else
-					themeAnsehenPopup(list_themes.getSelectedValue().toString());
+					ThemeInfo.start(list_themes.getSelectedValue().toString());
 			}
 		});
 		
@@ -582,29 +574,34 @@ public class PartyGUI extends JFrame {
 				
 				updateAbos();
 				updatePublish();
+				updateBearbeitbar();
 			}
 		});
 	}
 
-	private void createMenue(JPanel panel_create)
+	private void themesMenue(JPanel panel_create)
 	{
 		/***************************************LINKS*************************************************/
 		
-		JLabel lblThemeTitel = new JLabel("Theme Titel");
+		comboBox_auswaehlen = new JComboBox<>();
+		updateBearbeitbar();
+		
+		lblThemeTitel = new JLabel("Theme Titel");
+		lblThemeTitel.setVisible(false);
 		txtTitelHierEingeben = new JTextField();
-		
 		txtTitelHierEingeben.setText("Titel eingeben");
-		txtTitelHierEingeben.setColumns(10);
+		txtTitelHierEingeben.setVisible(false);
 		
-		JLabel lblGenre = new JLabel("Genre");
-		final JComboBox<String> comboBox_genre = new JComboBox<String>();
+		lblGenre = new JLabel("Genre");
+		lblGenre.setVisible(false);
+		comboBox_genre = new JComboBox<String>();
+		comboBox_genre.setVisible(false);
 		comboBox_genre.setModel(new DefaultComboBoxModel<String>(genres_liste));
 		
-		final JLabel lblKategorie = new JLabel("Kategorie");
-		final JComboBox<String> comboBox_kategorie = new JComboBox<String>();
-		comboBox_kategorie.setModel(new DefaultComboBoxModel<String>());
-		
+		lblKategorie = new JLabel("Kategorie");
 		lblKategorie.setVisible(false);
+		comboBox_kategorie = new JComboBox<String>();
+		comboBox_kategorie.setModel(new DefaultComboBoxModel<String>());
 		comboBox_kategorie.setVisible(false);
 		
 		JTabbedPane tabbedPane_module = new JTabbedPane(JTabbedPane.TOP);
@@ -613,6 +610,8 @@ public class PartyGUI extends JFrame {
 		JButton btnSpeichern = new JButton("speichern");
 		
 		/******************************************LAYOUT**********************************************/
+		
+		
 
 		GroupLayout gl_panel_create = new GroupLayout(panel_create);
 		gl_panel_create.setHorizontalGroup(
@@ -620,20 +619,37 @@ public class PartyGUI extends JFrame {
 				.addGroup(gl_panel_create.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_create.createSequentialGroup()
+						.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
 							.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
+									.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
+										.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
+											.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
+												.addGroup(Alignment.TRAILING, gl_panel_create.createSequentialGroup()
+													.addGroup(gl_panel_create.createParallelGroup(Alignment.TRAILING)
+														.addComponent(btnClear, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
+														.addComponent(btnSpeichern, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
+													.addPreferredGap(ComponentPlacement.RELATED))
+												.addGroup(gl_panel_create.createSequentialGroup()
+													.addComponent(lblKategorie)
+													.addPreferredGap(ComponentPlacement.RELATED)))
+											.addGroup(gl_panel_create.createSequentialGroup()
+												.addComponent(comboBox_genre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED)))
+										.addGroup(gl_panel_create.createSequentialGroup()
+											.addComponent(lblGenre)
+											.addPreferredGap(ComponentPlacement.RELATED)))
+									.addGroup(gl_panel_create.createSequentialGroup()
+										.addComponent(comboBox_kategorie, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED)))
+								.addGroup(gl_panel_create.createSequentialGroup()
+									.addComponent(txtTitelHierEingeben, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)))
+							.addGroup(gl_panel_create.createSequentialGroup()
 								.addComponent(lblThemeTitel)
-								.addComponent(txtTitelHierEingeben, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblGenre)
-								.addComponent(comboBox_genre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblKategorie)
-								.addComponent(comboBox_kategorie, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addGap(78))
+								.addPreferredGap(ComponentPlacement.RELATED)))
 						.addGroup(gl_panel_create.createSequentialGroup()
-							.addComponent(btnSpeichern, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addPreferredGap(ComponentPlacement.RELATED))
-						.addGroup(gl_panel_create.createSequentialGroup()
-							.addComponent(btnClear, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(comboBox_auswaehlen, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)))
 					.addComponent(tabbedPane_module, GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
 					.addContainerGap())
@@ -643,8 +659,10 @@ public class PartyGUI extends JFrame {
 				.addGroup(gl_panel_create.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-						.addComponent(tabbedPane_module, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-						.addGroup(gl_panel_create.createSequentialGroup()
+						.addGroup(gl_panel_create.createParallelGroup(Alignment.BASELINE)
+							.addComponent(tabbedPane_module, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+							.addComponent(comboBox_auswaehlen, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addGroup(Alignment.TRAILING, gl_panel_create.createSequentialGroup()
 							.addComponent(lblThemeTitel)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(txtTitelHierEingeben, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -656,97 +674,133 @@ public class PartyGUI extends JFrame {
 							.addComponent(lblKategorie)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(comboBox_kategorie, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
+							.addGap(41)
 							.addComponent(btnClear)
-							.addGap(18)
+							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnSpeichern)))
 					.addContainerGap())
 		);
 		
 		/*****************************************RECHTS***********************************************/
 
-		JPanel panel = new JPanel();
-		tabbedPane_module.addTab("Dekoration", null, panel, null);
+		JPanel panel_deko = new JPanel();
+		tabbedPane_module.addTab("Dekoration", null, panel_deko, null);
 		
-		final JEditorPane editorPane = new JEditorPane();
-		editorPane.setContentType("application/xml");
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+		final JEditorPane editorPane_deko = new JEditorPane();
+		editorPane_deko.setContentType("application/xml");
+		GroupLayout gl_panel_deko = new GroupLayout(panel_deko);
+		gl_panel_deko.setHorizontalGroup(
+			gl_panel_deko.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_deko, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
 		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+		gl_panel_deko.setVerticalGroup(
+			gl_panel_deko.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_deko, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 		);
-		panel.setLayout(gl_panel);
+		panel_deko.setLayout(gl_panel_deko);
 		
-		JPanel panel_1 = new JPanel();
-		tabbedPane_module.addTab("Location", null, panel_1, null);
+		JPanel panel_loca = new JPanel();
+		tabbedPane_module.addTab("Location", null, panel_loca, null);
 		
-		JEditorPane editorPane_1 = new JEditorPane();
-		editorPane_1.setContentType("application/xml");
-		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_1, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+		final JEditorPane editorPane_loca = new JEditorPane();
+		editorPane_loca.setContentType("application/xml");
+		GroupLayout gl_panel_loca = new GroupLayout(panel_loca);
+		gl_panel_loca.setHorizontalGroup(
+			gl_panel_loca.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_loca, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
 		);
-		gl_panel_1.setVerticalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_1, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+		gl_panel_loca.setVerticalGroup(
+			gl_panel_loca.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_loca, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 		);
-		panel_1.setLayout(gl_panel_1);
+		panel_loca.setLayout(gl_panel_loca);
 		
-		JPanel panel_2 = new JPanel();
-		tabbedPane_module.addTab("Catering", null, panel_2, null);
+		JPanel panel_cate = new JPanel();
+		tabbedPane_module.addTab("Catering", null, panel_cate, null);
 		
-		final JEditorPane editorPane_2 = new JEditorPane();
-		editorPane_2.setContentType("application/xml");
-		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
-		gl_panel_2.setHorizontalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_2, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+		final JEditorPane editorPane_cate = new JEditorPane();
+		editorPane_cate.setContentType("application/xml");
+		GroupLayout gl_panel_cate = new GroupLayout(panel_cate);
+		gl_panel_cate.setHorizontalGroup(
+			gl_panel_cate.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_cate, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
 		);
-		gl_panel_2.setVerticalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_2, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+		gl_panel_cate.setVerticalGroup(
+			gl_panel_cate.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_cate, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 		);
-		panel_2.setLayout(gl_panel_2);
+		panel_cate.setLayout(gl_panel_cate);
 		
-		JPanel panel_3 = new JPanel();
-		tabbedPane_module.addTab("Music", null, panel_3, null);
+		JPanel panel_music = new JPanel();
+		tabbedPane_module.addTab("Music", null, panel_music, null);
 		
-		final JEditorPane editorPane_3 = new JEditorPane();
-		editorPane_3.setContentType("application/xml");
-		GroupLayout gl_panel_3 = new GroupLayout(panel_3);
-		gl_panel_3.setHorizontalGroup(
-			gl_panel_3.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_3, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+		final JEditorPane editorPane_music = new JEditorPane();
+		editorPane_music.setContentType("application/xml");
+		GroupLayout gl_panel_music = new GroupLayout(panel_music);
+		gl_panel_music.setHorizontalGroup(
+			gl_panel_music.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_music, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
 		);
-		gl_panel_3.setVerticalGroup(
-			gl_panel_3.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_3, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+		gl_panel_music.setVerticalGroup(
+			gl_panel_music.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_music, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 		);
-		panel_3.setLayout(gl_panel_3);
+		panel_music.setLayout(gl_panel_music);
 		
-		JPanel panel_4 = new JPanel();
-		tabbedPane_module.addTab("Outfits", null, panel_4, null);
+		JPanel panel_outfit = new JPanel();
+		tabbedPane_module.addTab("Outfits", null, panel_outfit, null);
 		
-		final JEditorPane editorPane_4 = new JEditorPane();
-		editorPane_4.setContentType("application/XML");
-		GroupLayout gl_panel_4 = new GroupLayout(panel_4);
-		gl_panel_4.setHorizontalGroup(
-			gl_panel_4.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_4, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+		final JEditorPane editorPane_outfit = new JEditorPane();
+		editorPane_outfit.setContentType("application/XML");
+		GroupLayout gl_panel_outfit = new GroupLayout(panel_outfit);
+		gl_panel_outfit.setHorizontalGroup(
+			gl_panel_outfit.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_outfit, GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
 		);
-		gl_panel_4.setVerticalGroup(
-			gl_panel_4.createParallelGroup(Alignment.LEADING)
-				.addComponent(editorPane_4, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+		gl_panel_outfit.setVerticalGroup(
+			gl_panel_outfit.createParallelGroup(Alignment.LEADING)
+				.addComponent(editorPane_outfit, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 		);
-		panel_4.setLayout(gl_panel_4);
+		panel_outfit.setLayout(gl_panel_outfit);
 		panel_create.setLayout(gl_panel_create);
 	
 		/****************************************** ACTIONLISTENER *****************************************/
+		
+		comboBox_auswaehlen.addActionListener( new ActionListener()
+		{	
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				String auswahl = (String) comboBox_auswaehlen.getSelectedItem();
+				if ( auswahl.equals("Theme erstellen"))
+				{
+					lblThemeTitel.setVisible(true);
+					txtTitelHierEingeben.setVisible(true);
+					lblGenre.setVisible(true);
+					comboBox_genre.setVisible(true);
+					
+					editorPane_deko.setText( "" );
+					editorPane_cate.setText( "" );
+					editorPane_loca.setText( "" );
+					editorPane_music.setText( "" );
+					editorPane_outfit.setText( "" );
+				}
+				else
+				{
+					lblThemeTitel.setVisible(false);
+					txtTitelHierEingeben.setVisible(false);
+					lblGenre.setVisible(false);
+					comboBox_genre.setVisible(false);
+					
+//					Theme content = partyc.rc.getTheme(auswahl);
+					editorPane_deko.setText( partyc.rc.getTheme(auswahl).getModule().getDekoration().toString() );
+					editorPane_loca.setText( partyc.rc.getTheme(auswahl).getModule().getLocations().toString() );
+					editorPane_cate.setText( partyc.rc.getTheme(auswahl).getModule().getCatering().toString() );
+					editorPane_music.setText( partyc.rc.getTheme(auswahl).getModule().getMusik().toString() );
+					editorPane_outfit.setText( partyc.rc.getTheme(auswahl).getModule().getOutfits().toString() );
+				}
+			}
+		});
 		
 		comboBox_genre.addActionListener(new ActionListener()
 		{
@@ -768,10 +822,10 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				editorPane.setText("");
-				editorPane_2.setText("");
-				editorPane_3.setText("");
-				editorPane_4.setText("");
+				editorPane_deko.setText("");
+				editorPane_cate.setText("");
+				editorPane_music.setText("");
+				editorPane_outfit.setText("");
 			}
 		});
 		
@@ -783,8 +837,8 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String t_id = "t" + String.valueOf( partyc.xc.anz_t );
-				String g_id = comboBox_genre.getItemAt( comboBox_genre.getSelectedIndex() );
-				String k_id = comboBox_kategorie.getItemAt( comboBox_kategorie.getSelectedIndex() );
+				String g_id = (String) comboBox_genre.getItemAt( comboBox_genre.getSelectedIndex() );
+				String k_id = (String) comboBox_kategorie.getItemAt( comboBox_kategorie.getSelectedIndex() );
 				String id = t_id + "_" + k_id;
 								
 				partyc.xc.createTopic( partyc.xc.createTID(g_id, k_id) );
@@ -797,7 +851,6 @@ public class PartyGUI extends JFrame {
 
 	private void publishMenue(JPanel panel_publish)
 	{
-		// TODO: update beim abonnieren.
 		// TODO: JID Problem 
 		
 		checkBox_subscriptions = new JComboBox();
@@ -805,6 +858,8 @@ public class PartyGUI extends JFrame {
 		if ( subscriptions.isEmpty() )
 			subscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
 		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
+		
+		updateNews();
 		
 		final JEditorPane dtrpnPayload = new JEditorPane();
 		dtrpnPayload.setText( "payload" );
@@ -857,87 +912,6 @@ public class PartyGUI extends JFrame {
 		});
 		
 	}
-	
-	/*****************************************************/
-	/*************** Pop-Ups *****************************/
-	/*****************************************************/
-	
-
-	private void themeAnsehenPopup(String themeName)
-	{
-		// TODO: richtiger Theme Inhalt per Webservices!
-		
-		JPanel panel_ansehen = new JPanel();
-		JLabel ansehen_text = new JLabel("Theme '"+ themeName +"': ");
-		JButton btnOk = new JButton("Schliessen");
-		JEditorPane content = new JEditorPane();
-		
-		content.setEditable(false);
-		content.setText("Theme Inhalt");
-		
-		panel_ansehen.add(ansehen_text);
-		panel_ansehen.add(content);
-		panel_ansehen.add(btnOk);
-		panel_ansehen.setBorder(b);
-				
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		ansehenPU = factory.getPopup(this, panel_ansehen, 400, 300);
-		ansehenPU.show();
-		
-		/************************************* ACTIONLISTENER **************************************/
-		
-		btnOk.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				ansehenPU.hide();
-			}
-		});
-	}
-	
-	private void themeBearbeitenPopup(String theme)
-	{
-		// TODO: richtigen Theme Inhalt anzeigen
-		// TODO: Oberfläche angleichen an "Theme erstellen"
-		
-		JPanel panel_bearbeiten = new JPanel();
-		JLabel bearbeiten_text = new JLabel("Theme '"+ theme +"': ");
-		JButton btnOk = new JButton("Speichern");
-		JButton btnNotOk = new JButton("Abbrechen");
-		JEditorPane content = new JEditorPane();
-		
-		content.setText("Theme Inhalt");
-		
-		panel_bearbeiten.add(btnOk);
-		panel_bearbeiten.add(btnNotOk);
-		panel_bearbeiten.add(bearbeiten_text);
-		panel_bearbeiten.add(content);
-		panel_bearbeiten.setBorder(b);
-				
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		bearbeitenPU = factory.getPopup(this, panel_bearbeiten, 400, 300);
-		bearbeitenPU.show();
-		
-		/******************************************** ACTIONLISTENER ****************************************/
-		
-		btnOk.addActionListener(new ActionListener()
-		{
-			// TODO: Speichern und Publishen!
-			public void actionPerformed(ActionEvent e)
-			{
-//				partyc.
-				bearbeitenPU.hide();
-			}
-		});
-		
-		btnNotOk.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				bearbeitenPU.hide();
-			}
-		});
-	}
 
 	/*****************************************************/
 	/*************** HILFSFUNKTIONEN *********************/
@@ -962,8 +936,9 @@ public class PartyGUI extends JFrame {
 		benachrichtigungen_v = partyc.xc.getBenachrichtigungen();
 		if (!benachrichtigungen_v.isEmpty())
 			nachricht = "Sie haben " + benachrichtigungen_v.size() + " Benachrichtigung(en).";
-		
-		lblZurZeitHaben = new JLabel(nachricht);
+		else
+			nachricht = "Zur Zeit haben Sie keine Benachrichtigungen.";
+		lblZurZeitHaben.setText(nachricht);
 
 		list_benachrichtigungen.setListData(benachrichtigungen_v);
 	}
@@ -990,8 +965,21 @@ public class PartyGUI extends JFrame {
 		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
 	}
 	
+	private void updateBearbeitbar()
+	{
+		Vector<String> themes = partyc.xc.getMySubscriptions();
+		for ( String item : themes )
+		{
+			if ( !item.substring(0, 1).equals("t") )
+				themes.remove(item);
+		}
+		themes.add("Theme erstellen");
+		comboBox_auswaehlen.setModel( new DefaultComboBoxModel(themes) );
+	}
+	
 	private void close()
 	{
+		partyc.logout();
 		this.dispose();
 	}
 }

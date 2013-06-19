@@ -24,47 +24,22 @@ import xmpp.ItemEventCoordinator;
 import app.Genre;
 
 public class XmppClient
-{
-	
-	private static RestClient rc;
-//	
-//	private static String user = "user1";
-//	private static String pw = "user1user1";
-//	private static String server = "localhost";
-		
-	private ItemEventCoordinator iec = new ItemEventCoordinator();
-	
-	public static int anz_g = 0, anz_k = 0, anz_t = 0;
-	
-	private Connection con;
-	private PubSubManager pubsub_mgr;
-	
-	private Vector<LeafNode> topics;
+{	
 	public static Vector<String> benachrichtigungen = new Vector<String>();
+	public static int anz_g = 0, anz_k = 0, anz_t = 0;
+	private ItemEventCoordinator iec = new ItemEventCoordinator();
+	private PubSubManager pubsub_mgr;
+	private Vector<LeafNode> topics;
 	
-	public XmppClient(XMPPConnection con, RestClient rc)
-	{
-//		try
-//		{
-////			XMPPConnection.DEBUG_ENABLED=true;
-//			con = new XMPPConnection( server );
-//			con.connect();
-//			con.login( user, pw );
-//			System.out.println( "Login erfolgreich." );
-//		} catch (XMPPException e) {
-//			e.printStackTrace();
-//			System.err.println("\nLogin fehlgeschlagen.");
-//		}
-		
-		this.con = con;
-		this.rc = new RestClient();
-		this.pubsub_mgr = new PubSubManager( con, "pubsub." + con.getHost() );
+	public XmppClient()
+	{	
+		this.pubsub_mgr = new PubSubManager( PartyClient.con, "pubsub." + PartyClient.con.getHost() );
 		this.topics = new Vector<LeafNode>();
 		this.benachrichtigungen = new Vector<String>();
-		this.anz_g = rc.getGenres().getGenre().size();
-		for ( Genre g : rc.getGenres().getGenre() )
-			this.anz_k += rc.getKategorien( g.getGenreId() ).getKategorie().size();
-		this.anz_t = rc.getThemes().getTheme().size();
+		this.anz_g = PartyClient.rc.getGenres().getGenre().size();
+		for ( Genre g : PartyClient.rc.getGenres().getGenre() )
+			this.anz_k += PartyClient.rc.getKategorien( g.getGenreId() ).getKategorie().size();
+		this.anz_t = PartyClient.rc.getThemes().getTheme().size();
 		
 //		deleteAllTopics();
 		initTopics();	
@@ -74,12 +49,12 @@ public class XmppClient
 	private void initTopics()
 	{
 		topics.clear();
-		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( con );
+		ServiceDiscoveryManager discovery_mgr = ServiceDiscoveryManager.getInstanceFor( PartyClient.con );
 		DiscoverItems discovery_items;
 		
 		try
 		{
-			discovery_items = discovery_mgr.discoverItems( "pubsub." + con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
+			discovery_items = discovery_mgr.discoverItems( "pubsub." + PartyClient.con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
 			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
 			
 			while (iterator.hasNext())
@@ -94,27 +69,27 @@ public class XmppClient
 		
 		/* aller erste Initialisierung*/
 		//TODO muss noch gescheit geschrieben werden und nicht so manuell
-		
-		if ( anz_g+anz_k+anz_t != topics.size() ) 
-		{
-			deleteAllTopics();
-			
-			for( int i=0; i<anz_g; i++)
-				createTopic("g"+i);
-			
-			createTopic("k0_g0");
-			createTopic("k1_g0");
-			createTopic("k0_g1");
-			createTopic("k1_g1");
-			createTopic("k0_g2");
-			createTopic("k0_g3");
-			createTopic("k1_g3");
-			createTopic("k2_g3");
-			
-			createTopic("t0_k0_g0");
-			createTopic("t1_k0_g0");
-			createTopic("t2_k0_g0");	
-			
+//		
+//		if ( anz_g+anz_k+anz_t != topics.size() ) 
+//		{
+//			deleteAllTopics();
+//			
+//			for( int i=0; i<anz_g; i++)
+//				createTopic("g"+i);
+//			
+//			createTopic("k0_g0");
+//			createTopic("k1_g0");
+//			createTopic("k0_g1");
+//			createTopic("k1_g1");
+//			createTopic("k0_g2");
+//			createTopic("k0_g3");
+//			createTopic("k1_g3");
+//			createTopic("k2_g3");
+//			
+//			createTopic("t0_k0_g0");
+//			createTopic("t1_k0_g0");
+//			createTopic("t2_k0_g0");	
+//			
 //			for ( Genre g : wsc.getGenres().getGenre())
 //			{
 //				createTopic( g.getGenreId().toString() );
@@ -125,8 +100,8 @@ public class XmppClient
 //			
 //			for ( Theme t : wsc.getThemes().getTheme() )
 //				createTopic( t.getAllgemeines().getThemeId().toString() );	
-		}
-		
+//		}
+//		
 //		addListeners();
 	}
 	
@@ -143,16 +118,6 @@ public class XmppClient
 //				System.err.println( "An die vorhandenen Abonnements können keine Listeners angehängt werden." );
 //			}
 //		}
-//	}
-	
-//	public String createGID()
-//	{
-//		return  "g"+(anz_g++);
-//	}s
-//	
-//	public String createKID(String g_id)
-//	{
-//		return "k"+(anz_k++)+"_"+g_id;
 //	}
 	
 	public String createTID(String g_id, String k_id)
@@ -228,47 +193,18 @@ public class XmppClient
 
 	public String getGenreTitel(String g_id)
 	{
-		return rc.getGenre(g_id).getGenreTitel();
+		return PartyClient.rc.getGenre(g_id).getGenreTitel();
 	}
 	
 	public String getKategorieTitel(String g_id, String k_id)
 	{
-		return rc.getKategorie(g_id, k_id).getKategorieTitel();
+		return PartyClient.rc.getKategorie(g_id, k_id).getKategorieTitel();
 	}
 	
 	public String getThemeTitel(String t_id)
 	{
-		return rc.getTheme(t_id).getAllgemeines().getThemeTitel().toString();
+		return PartyClient.rc.getTheme(t_id).getAllgemeines().getThemeTitel().toString();
 	}
-//	
-//	public Vector<String> getGenresTitles()
-//	{
-//		Vector<String> result = new Vector<String>();
-//		for (Genre g : wsc.getGenres().getGenre())
-//			result.add(g.getGenreId() + ") " + g.getGenreTitel());
-//		return result;
-//	}
-//	
-//	public Vector<String> getKategorienTitles(String g_id)
-//	{
-//		Vector<String> result = new Vector<String>();
-//		for (Kategorie k : wsc.getKategorien(g_id).getKategorie())
-//			result.add(k.getKategorieId() + ") " + k.getKategorieTitel());
-//		return result;
-//	}
-//	
-//	public Vector<String> getThemeTitles(String g_id, String k_id)
-//	{
-//		Vector<String> result = new Vector<String>();
-//		for (Theme t : wsc.getThemes().getTheme())
-//		{
-//			String t_id = t.getAllgemeines().getThemeId();
-//			if (g_id.equals(t_id.substring(6)) && k_id.equals(t_id.substring(3, 5)))
-//			result.add(t.getAllgemeines().getThemeId() + ") " + t.getAllgemeines().getThemeTitel().toString());
-//		}
-//			
-//		return result;
-//	}
 	
 	public Vector<String> getMySubscriptions()
 	{
@@ -337,7 +273,7 @@ public class XmppClient
 	private String getMyJID()
 	{
 //		return user + "@" + server;
-		return con.getUser() + "@" + con.getHost();
+		return PartyClient.con.getUser() + "@" + PartyClient.con.getHost();
 	}
 
 	private boolean isSubscribed(LeafNode abo)
@@ -420,13 +356,6 @@ public class XmppClient
 			System.err.println("Abonemment konnte nicht gekündigt werden.");
 		}
 	}
-	
-//	public void logout()
-//	{
-//		rc.disconnectRestSrv();
-//		con.disconnect();
-//		System.out.println( user + " ausgeloggt." );
-//	}
 	
 	public void publish(String t_id, String payload)
 	{	

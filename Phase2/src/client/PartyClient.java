@@ -9,12 +9,11 @@ import GUI.PartyGUI;
 
 public class PartyClient {
 
-	public RestClient rc;
-	public XmppClient xc;
-	public PartyGUI pg;
-	
+	public static RestClient rc;
+	public static XmppClient xc;
+	public static PartyGUI pg;
+	public static Connection con;
 	private String server = "localhost";
-	private Connection con;
 
 	public PartyClient()
 	{
@@ -31,7 +30,7 @@ public class PartyClient {
 		}
 		
 		this.rc = new RestClient();
-		this.xc = new XmppClient( (XMPPConnection)con, rc);
+		this.xc = new XmppClient();
 	}
 	
 	public void logout()
