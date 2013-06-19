@@ -22,14 +22,21 @@ public class Login extends JFrame {
 	private JPanel contentPane;
 	private JTextField textField_user;
 	private JPasswordField textField_passw;
+	
+	private static String user;
+	private static String passw;
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
+	public static void start ()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
 					Login frame = new Login();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -115,12 +122,24 @@ public class Login extends JFrame {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				user = textField_user.getText();
+				passw = textField_passw.getText();
+				
 				PartyGUI.start();
 				close();
 			}
 		});
 	}
 	
+	
+	public static String getUser() {
+		return user;
+	}
+
+	public static String getPassw() {
+		return passw;
+	}
+
 	private void close()
 	{
 		this.dispose();

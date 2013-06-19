@@ -1,7 +1,6 @@
 package GUI;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -34,24 +33,15 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.jivesoftware.smack.XMPPException;
-
 import client.PartyClient;
-import client.XmppClient;
 
 public class PartyGUI extends JFrame {
 
-	private JFrame frame_login;
 	private JPanel contentPane;
 	private JPanel main_panel;
 	private JTextField txtTitelHierEingeben;
-	private Popup hilfePU;
 	private Popup ansehenPU;
 	private Popup bearbeitenPU;
-	private Popup kuendigenPU;
-	private Popup aboPU;
-	private Popup speichernPU;
-	private Popup fehlerPU;
 	
 	private Border b = new LineBorder(Color.black);
 	private PartyClient partyc;
@@ -97,14 +87,18 @@ public class PartyGUI extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void start() {
-	EventQueue.invokeLater(new Runnable() {
-		public void run() {
-			try {
-				PartyGUI frame = new PartyGUI();
-				frame.setVisible(true);
-			} catch (Exception e) {
-				e.printStackTrace();
+	public static void start()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					PartyGUI frame = new PartyGUI();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
 			}
 		}
 	});
@@ -117,34 +111,28 @@ public class PartyGUI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 679, 460);
 		
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-		
 		main_panel = new JPanel();
-		contentPane.add(main_panel);
 		main_panel.setLayout(null);
+		contentPane = new JPanel();
+		contentPane.setBorder( new EmptyBorder(5, 5, 5, 5) );
+		contentPane.setLayout( new BoxLayout(contentPane, BoxLayout.X_AXIS) );
+		contentPane.add(main_panel);
 		
+		setContentPane(contentPane);
 		fixedMenue();
 		mainTabbedMenue();
-		login();
 	}
 	
 	private void fixedMenue()
 	{
-		// Content
 		btnAusloggen = new JButton("Logout");
 		btnAusloggen.setBounds(554, 376, 89, 23);
-		main_panel.add(btnAusloggen);
-		
 		btnHilfe = new JButton("Hilfe");
 		btnHilfe.setBounds(455, 376, 89, 23);
+		main_panel.add(btnAusloggen);
 		main_panel.add(btnHilfe);
 		
-		/*****************************************************/
 		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
 		
 		btnAusloggen.addActionListener(new ActionListener()
 		{
@@ -159,7 +147,7 @@ public class PartyGUI extends JFrame {
 		{
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				hilfePopup();
+				InfoPopup.start("In WBA verdienen wir eine 1,0..!");
 			}
 		});
 	}
@@ -213,12 +201,10 @@ public class PartyGUI extends JFrame {
 		list_benachrichtigungen = new JList( benachrichtigungen_v );
 		scrollPane_news = new JScrollPane( list_benachrichtigungen );
 		
-		
-		/**************************** Löschen ************************************************/
-		
 		JButton btnAllesLoeschen = new JButton("Benachrichtigungen löschen");
 		
-		// LAYOUT
+		/**************************** LAYOUT ************************************************/
+		
 		GroupLayout gl_panel_news = new GroupLayout(panel_news);
 		gl_panel_news.setHorizontalGroup(
 			gl_panel_news.createParallelGroup(Alignment.TRAILING)
@@ -344,7 +330,7 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
-					fehlerPopup("Bitte Theme auswählen.");
+					InfoPopup.start("Bitte Theme auswählen.");
 				else
 					themeAnsehenPopup(tree_abos.getSelectionPath().getLastPathComponent().toString());			
 			}
@@ -356,7 +342,7 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
-					fehlerPopup("Bitte Theme auswählen.");
+					InfoPopup.start("Bitte Theme auswählen.");
 				else
 					themeBearbeitenPopup(tree_abos.getSelectionPath().getLastPathComponent().toString());
 			}
@@ -369,12 +355,12 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				if ( tree_abos.isSelectionEmpty() )
-					fehlerPopup("Bitte ein Element auswählen.");
+					InfoPopup.start("Bitte ein Element auswählen.");
 				else
 				{
 					String abo = tree_abos.getSelectionPath().getLastPathComponent().toString();
 					partyc.xc.unsubscribe(abo);
-					aboKuendigenPopup(abo);
+					InfoPopup.start( abo + " wurde erfolgreich gekündigt" );
 					updateAbos();
 					updatePublish();
 				}				
@@ -384,11 +370,18 @@ public class PartyGUI extends JFrame {
 		btnAlleAbonnementsKndigen.addActionListener(new ActionListener()
 		{	
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				partyc.xc.unsubscribeAll();
-				aboKuendigenPopup("alle");
-				updateAbos();
-				updatePublish();
+			public void actionPerformed(ActionEvent arg0)
+			{
+				// TODO: muss korrigiert werden
+				if ( partyc.xc.getMySubscriptions().isEmpty() )
+					InfoPopup.start("Sie haben gar keine Abos...");
+				else
+				{
+					partyc.xc.unsubscribeAll();
+					InfoPopup.start("Alle Abonnements wurden gekündigt.");
+					updateAbos();
+					updatePublish();
+				}
 			}
 		});
 	}
@@ -551,7 +544,7 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0)
 			{
 				if ( list_themes.isSelectionEmpty() )
-					fehlerPopup("Es muss ein Theme ausgewählt sein.");
+					InfoPopup.start("Es muss ein Theme ausgewählt sein.");
 				else
 					themeAnsehenPopup(list_themes.getSelectedValue().toString());
 			}
@@ -563,24 +556,24 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				if ( list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty())
-					fehlerPopup("Es muss ein Topic ausgewählt sein.");
+					InfoPopup.start("Es muss ein Topic ausgewählt sein.");
 				
 				else if ( !list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
 					partyc.xc.subscribe(list_genre.getSelectedValue().toString());
-					aboPopup(list_genre.getSelectedValue().toString());
+					InfoPopup.start(list_genre.getSelectedValue().toString() + " wurde erfolgreich abonniert.");
 				}
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
 					partyc.xc.subscribe(list_kategorien.getSelectedValue().toString());
-					aboPopup(list_kategorien.getSelectedValue().toString());
+					InfoPopup.start(list_kategorien.getSelectedValue().toString() + " wurde erfolgreich abonniert.");
 				}	
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
 					partyc.xc.subscribe(list_themes.getSelectedValue().toString());
-					aboPopup(list_themes.getSelectedValue().toString());
+					InfoPopup.start(list_themes.getSelectedValue().toString() + " wurde erfolgreich abonniert.");
 					
 					list_genre.clearSelection();
 					list_kategorien.clearSelection();
@@ -797,7 +790,7 @@ public class PartyGUI extends JFrame {
 				partyc.xc.createTopic( partyc.xc.createTID(g_id, k_id) );
 				partyc.xc.publish( id, "new Theme '" + id + "' created" );
 				
-				speichernPopup( id );
+				InfoPopup.start( id + " wurde ererstellt.");
 			}
 		});
 	}
@@ -869,32 +862,6 @@ public class PartyGUI extends JFrame {
 	/*************** Pop-Ups *****************************/
 	/*****************************************************/
 	
-	private void hilfePopup()
-	{	
-		JPanel panel_hilfe = new JPanel();
-		
-		JLabel hilfe_text = new JLabel("In WBA2 verdienen wir eine 1,0.");
-		panel_hilfe.add(hilfe_text);
-		
-		JButton btnOk = new JButton("Auf jeden!");
-		panel_hilfe.add(btnOk);
-		
-		panel_hilfe.setBorder(b);
-				
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		hilfePU = factory.getPopup(this, panel_hilfe, 400, 300);
-		hilfePU.show();
-		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
-		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				hilfePU.hide();
-			}
-		});
-	}
 
 	private void themeAnsehenPopup(String themeName)
 	{
@@ -971,155 +938,10 @@ public class PartyGUI extends JFrame {
 			}
 		});
 	}
-	
-	private void aboKuendigenPopup(String unsubbed)
-	{
-		String abo = unsubbed;
-		JPanel panel_kuendigen = new JPanel();
-		JLabel text_kuendigen = new JLabel("Ihr Abonemment für " + abo + " wurde gekündigt.");
-		panel_kuendigen.add(text_kuendigen);
-		
-		JButton btnOk = new JButton("Gut");
-		panel_kuendigen.add(btnOk);
-		
-		panel_kuendigen.setBorder(b);
-				
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		kuendigenPU = factory.getPopup(this, panel_kuendigen, 400, 300);
-		kuendigenPU.show();
-		
-		/********************************** ACTIONLISTENER *******************************************/
-		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				kuendigenPU.hide();
-			}
-		});
-	}
-	
-	private void aboPopup(String abo_gewählt)
-	{
-		String abo = abo_gewählt;
-		JPanel panel_abo = new JPanel();
-		JLabel text_abo = new JLabel(abo + " wurde abonniert.");
-		panel_abo.add(text_abo);
-		
-		JButton btnOk = new JButton("Gut");
-		panel_abo.add(btnOk);
-				
-		panel_abo.setBorder(b);
-		
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		aboPU = factory.getPopup(this, panel_abo, 400, 300);
-		aboPU.show();
-		
-		/*****************************************************/
-		/**************** ACTIONLISTENER *********************/
-		/*****************************************************/
-		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aboPU.hide();
-			}
-		});
-	}
-	
-	private void speichernPopup(String theme)
-	{
-		JPanel panel_speichern = new JPanel();
-		JLabel text = new JLabel(theme + " wurde gespeichert und veröffentlicht.");
-		JButton btnOk = new JButton("Gut");
-		
-		panel_speichern.add(text);
-		panel_speichern.add(btnOk);
-		panel_speichern.setBorder(b);
-				
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		speichernPU = factory.getPopup(this, panel_speichern, 400, 300);
-		speichernPU.show();
-		
-		/**************** ACTIONLISTENER *********************/
-		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				speichernPU.hide();
-			}
-		});
-	}
-	
-	private void login()
-	{
-		//TODO: Werte eingeben und an client übergeben
-		
-//		JPanel panel_login = new JPanel(new GridBagLayout());
-//        GridBagConstraints cs = new GridBagConstraints();
-// 
-//        cs.fill = GridBagConstraints.HORIZONTAL;
-// 
-//        JLabel lbUsername = new JLabel("Username: ");
-//        cs.gridx = 0;
-//        cs.gridy = 0;
-//        cs.gridwidth = 1;
-//        panel_login.add(lbUsername, cs);
-// 
-//        JTextField tfUsername = new JTextField(20);
-//        cs.gridx = 1;
-//        cs.gridy = 0;
-//        cs.gridwidth = 2;
-//        panel_login.add(tfUsername, cs);
-// 
-//        JLabel lbPassword = new JLabel("Password: ");
-//        cs.gridx = 0;
-//        cs.gridy = 1;
-//        cs.gridwidth = 1;
-//        panel_login.add(lbPassword, cs);
-// 
-//        JPasswordField pfPassword = new JPasswordField(20);
-//        cs.gridx = 1;
-//        cs.gridy = 1;
-//        cs.gridwidth = 2;
-//        panel_login.add(pfPassword, cs);
-//        panel_login.setBorder(new LineBorder(Color.GRAY));
-//        
-//        frame_login.add(panel_login);
-	}
-	
-	private void fehlerPopup(String meldung)
-	{
-		String theme =":)";
-		JPanel panel_fehler = new JPanel();
-		JLabel text = new JLabel(meldung);
-		panel_fehler.add(text);
-		
-		JButton btnOk = new JButton("Nagut");
-		panel_fehler.add(btnOk);
-		
-		panel_fehler.setBorder(b);
-				
-		PopupFactory factory = PopupFactory.getSharedInstance();
-		fehlerPU = factory.getPopup(this, panel_fehler, 400, 300);
-		fehlerPU.show();
-		
-		/**************** ACTIONLISTENER *********************/
-		
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				fehlerPU.hide();
-			}
-		});
-	}
-	
+
 	/*****************************************************/
 	/*************** HILFSFUNKTIONEN *********************/
 	/*****************************************************/
-	
-	private void changeVis(Component c)
-	{
-		if (c.isVisible())
-			c.setVisible(false);
-		else
-			c.setVisible(true);
-	}
 	
 	private void changeKategorienContent(String selection)
 	{

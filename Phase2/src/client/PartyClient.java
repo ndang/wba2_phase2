@@ -4,6 +4,7 @@ import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
+import GUI.Login;
 import GUI.PartyGUI;
 
 public class PartyClient {
@@ -12,8 +13,6 @@ public class PartyClient {
 	public XmppClient xc;
 	public PartyGUI pg;
 	
-	private String user = "user1";
-	private String pw = "user1user1";
 	private String server = "localhost";
 	private Connection con;
 
@@ -24,7 +23,7 @@ public class PartyClient {
 //			XMPPConnection.DEBUG_ENABLED=true;
 			con = new XMPPConnection( server );
 			con.connect();
-			con.login( user, pw );
+			con.login( Login.getUser(), Login.getPassw() );
 			System.out.println( "Login erfolgreich." );
 		} catch (XMPPException e) {
 			e.printStackTrace();
@@ -39,7 +38,7 @@ public class PartyClient {
 	{
 		rc.disconnectRestSrv();
 		con.disconnect();
-		System.out.println( user + " ausgeloggt." );
+		System.out.println( Login.getUser() + " ausgeloggt." );
 	}
 }
 	
