@@ -77,6 +77,15 @@ public class PartyClient {
 		return name;
 	}
 	
+	public String getTitle(String id)
+	{
+		if ( isGenre(id) )
+			return id + " " + getGenreTitel(id);
+		else if ( isKategorie(id) )
+			return id + " " + getKategorieTitel( id.substring(3), id);
+		return id + " " + getThemeTitel(id);
+	}
+	
 	public String getGenreTitel(String g_id)
 	{
 		return rc.getGenre(g_id).getGenreTitel();
@@ -113,7 +122,15 @@ public class PartyClient {
 		return false;
 	}
 
-	public Vector<String> genresTitles()
+	public Vector<String> getTitles(Vector<String> ids)
+	{
+		Vector<String> names = new Vector<String>();
+		for ( String id : ids )
+			names.add( getTitle(id) );
+		return names;
+	}
+ 	
+	public Vector<String> getGenresTitles()
 	{
 		Vector<String> genres_liste = new Vector<String>();
 		for (Genre g : rc.getGenres().getGenre())
@@ -121,7 +138,7 @@ public class PartyClient {
 		return genres_liste;
 	}
 	
-	public Vector<String> kategorienTitles(String g_id)
+	public Vector<String> getKategorienTitles(String g_id)
 	{
 		Vector<String> kategorien_liste = new Vector<String>();
 		for ( Kategorie k : rc.getKategorien(g_id).getKategorie() )
@@ -129,14 +146,15 @@ public class PartyClient {
 		return kategorien_liste;
 	}
 	
-	public Vector<String> themesTitles( String g_id, String k_id )
+	public Vector<String> getThemesTitles( String g_id, String k_id )
 	{
 		Vector<String> theme_liste = new Vector<String>();
 		for (Theme t : rc.getThemes().getTheme())
 		{
+			System.out.println( t.getAllgemeines().getThemeId().substring(6));
 			if ( t.getAllgemeines().getThemeId().substring(6).equals(g_id) )
 			{
-				if (t.getAllgemeines().getThemeId().substring(3,5).equals(k_id) )
+				if (t.getAllgemeines().getThemeId().substring(3).equals(k_id) )
 					theme_liste.add( t.getAllgemeines().getThemeId() + " " + t.getAllgemeines().getThemeTitel() );
 			}		
 		}
@@ -144,6 +162,24 @@ public class PartyClient {
 		if ( theme_liste.isEmpty() ) theme_liste.add("keine Themes vorhanden");
 			
 		return theme_liste;
+	}
+
+	public Vector<String> getBenachrichtigungen()
+	{
+		if( !xc.benachrichtigungen.isEmpty() )
+			return xc.benachrichtigungen;
+		else
+			return new Vector<String>();	
+	}
+	
+	public void deleteBenachrichtigungen()
+	{
+		xc.benachrichtigungen = new Vector<String>();
+	}
+
+	public Vector<String> getMySubscriptions()
+	{
+		return xc.getSubscriptions();
 	}
 }
 	

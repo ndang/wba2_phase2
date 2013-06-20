@@ -103,7 +103,7 @@ public class XmppClient
 	
 	private void initListeners()
 	{
-		Vector<String> s = getMySubscriptions();
+		Vector<String> s = getSubscriptions();
 		for (String name : s)
 		{
 			try
@@ -188,12 +188,7 @@ public class XmppClient
 		System.out.println( "Topic Anzahl ist wieder auf "+ topics.size() );
 	}
 	
-	public void deleteBenachrichtigungen()
-	{
-		benachrichtigungen = new Vector<String>();
-	}
-	
-	public Vector<String> getMySubscriptions()
+	public Vector<String> getSubscriptions()
 	{
 		Vector<String> abos = new Vector<String>();
 		List<Subscription> abonennten = null;
@@ -211,14 +206,6 @@ public class XmppClient
 					abos.add(topic.getId());
 		}
 		return abos;
-	}
-	
-	public Vector<String> getBenachrichtigungen()
-	{
-		if( !benachrichtigungen.isEmpty() )
-			return benachrichtigungen;
-		else
-			return new Vector<String>();	
 	}
 	
 //	public Vector<String> getGenresNodes()
@@ -336,7 +323,7 @@ public class XmppClient
 	{
 		try
 		{
-			Vector<String> subscriptions = getMySubscriptions();
+			Vector<String> subscriptions = getSubscriptions();
 			for( String abo_name : subscriptions )
 			{
 				LeafNode abo = pubsub_mgr.getNode(abo_name);
