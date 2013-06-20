@@ -19,7 +19,7 @@ public class PartyClient {
 	{
 		try
 		{
-//			XMPPConnection.DEBUG_ENABLED=true;
+//			XMPPConnection.DEBUG_ENABLED = true;
 			con = new XMPPConnection( server );
 			con.connect();
 			con.login( Login.getUser(), Login.getPassw() );

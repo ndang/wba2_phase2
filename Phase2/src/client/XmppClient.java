@@ -1,5 +1,7 @@
 package client;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -13,6 +15,8 @@ import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.FormType;
+import org.jivesoftware.smackx.pubsub.Item;
+import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
@@ -21,6 +25,7 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.Subscription;
 
 import xmpp.ItemEventCoordinator;
+import GUI.Login;
 import app.Genre;
 
 public class XmppClient
@@ -41,9 +46,10 @@ public class XmppClient
 			this.anz_k += PartyClient.rc.getKategorien( g.getGenreId() ).getKategorie().size();
 		this.anz_t = PartyClient.rc.getThemes().getTheme().size();
 		
-//		deleteAllTopics();
-		initTopics();	
 
+		initTopics();
+//		deleteAllTopics();
+//		unsubscribeAllUsers();
 	}
 	
 	private void initTopics()
@@ -54,7 +60,8 @@ public class XmppClient
 		
 		try
 		{
-			discovery_items = discovery_mgr.discoverItems( "pubsub." + PartyClient.con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
+//			discovery_items = discovery_mgr.discoverItems( "pubsub." + PartyClient.con.getHost() ); // Returns the discovered items of a given XMPP entity (Service) addressed by its JID.
+			discovery_items = discovery_mgr.discoverItems( "pubsub.localhost" );
 			Iterator<org.jivesoftware.smackx.packet.DiscoverItems.Item> iterator = discovery_items.getItems();
 			
 			while (iterator.hasNext())
@@ -67,9 +74,9 @@ public class XmppClient
 			System.err.println("Topics konnten nicht initialisiert werden!");
 		}
 		
-		/* aller erste Initialisierung*/
+		/* aller erste Initialisierung, bei Bedarf einkommentieren*/
 		//TODO muss noch gescheit geschrieben werden und nicht so manuell
-//		
+		
 //		if ( anz_g+anz_k+anz_t != topics.size() ) 
 //		{
 //			deleteAllTopics();
@@ -89,36 +96,24 @@ public class XmppClient
 //			createTopic("t0_k0_g0");
 //			createTopic("t1_k0_g0");
 //			createTopic("t2_k0_g0");	
-//			
-//			for ( Genre g : wsc.getGenres().getGenre())
-//			{
-//				createTopic( g.getGenreId().toString() );
-//				
-//				for ( Kategorie k : wsc.getKategorien(g.getGenreId()).getKategorie() )
-//					createTopic( k.getKategorieId().toString() );
-//			}
-//			
-//			for ( Theme t : wsc.getThemes().getTheme() )
-//				createTopic( t.getAllgemeines().getThemeId().toString() );	
-//		}
-//		
-//		addListeners();
+			
+		initListeners();
 	}
 	
-//	private void addListeners()
-//	{
-//		Vector<String> s = getMySubscriptions();
-//		for (String name : s)
-//		{
-//			try
-//			{
-//				pubsub_mgr.getNode(name).addItemEventListener(iec);
-//			} catch (XMPPException e) {
-//				e.printStackTrace();
-//				System.err.println( "An die vorhandenen Abonnements können keine Listeners angehängt werden." );
-//			}
-//		}
-//	}
+	private void initListeners()
+	{
+		Vector<String> s = getMySubscriptions();
+		for (String name : s)
+		{
+			try
+			{
+				pubsub_mgr.getNode(name).addItemEventListener(iec);
+			} catch (XMPPException e) {
+				e.printStackTrace();
+				System.err.println( "An die vorhandenen Abonnements können keine Listeners angehängt werden." );
+			}
+		}
+	}
 	
 	public String createTID(String g_id, String k_id)
 	{
@@ -130,14 +125,20 @@ public class XmppClient
 		try
 		{
 		    ConfigureForm form = new ConfigureForm(FormType.submit);
-		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
-		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
-		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
-		    form.setPersistentItems(true); // ???
-		    form.setPublishModel(PublishModel.open); // jeder darf publishen
-		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
-		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
-		    form.setSubscribe(true); // ob man das subsciben kann
+//		    form.setAccessModel(AccessModel.authorize); // nur Leute, die supcripton request must be approves and only subscribers may retrieve items
+//		    form.setDeliverPayloads(true); // Sets whether the node will deliver payloads with event notifications.
+//		    form.setNotifyRetract(true); // Determines whether subscribers should be notified when items are deleted from the node.
+//		    form.setPersistentItems(true); // ???
+//		    form.setPublishModel(PublishModel.open); // jeder darf publishen
+//		    form.setNotifyDelete(true); // wenn node gelöscht wird, wir subscriber benachrichtigt
+//		    form.setNotifyRetract(true); // wenn items des nodes gelöscht werden
+//		    form.setSubscribe(true); // ob man das subsciben kann
+		    
+		    form.setAccessModel(AccessModel.open);
+	        form.setDeliverPayloads(false);
+	        form.setNotifyRetract(true);
+	        form.setPersistentItems(true);
+	        form.setPublishModel(PublishModel.open);
 		      
 		    LeafNode topic = (LeafNode) pubsub_mgr.createNode(id, form);
 			topics.add(topic);	
@@ -234,7 +235,7 @@ public class XmppClient
 			return new Vector<String>();	
 	}
 	
-	public Vector<String> getGenres()
+	public Vector<String> getGenresNodes()
 	{
 		Vector<String> topic_names = new Vector<String>();
 		for (LeafNode topic : topics)
@@ -246,7 +247,7 @@ public class XmppClient
 		return topic_names;
 	}
 	
-	public Vector<String> getKategorien(String genre)
+	public Vector<String> getKategorienNodes(String genre)
 	{
 		Vector<String> topic_names = new Vector<String>();
 		for (LeafNode topic : topics)
@@ -258,13 +259,13 @@ public class XmppClient
 		return topic_names;
 	}
 	
-	public Vector<String> getThemes(String genre, String kategorie)
+	public Vector<String> getThemesNodes(String genre, String kategorie)
 	{
 		Vector<String> topic_names = new Vector<String>();
 		for (LeafNode topic : topics)
 		{
 			String name = topic.getId();
-			if( name.substring(0,1).equals("t") && name.substring(3,5).equals(kategorie) && name.substring(6).equals(genre))
+			if( name.substring(0,1).equals("t") && name.substring(3,5).equals(kategorie) && name.substring(6).equals(genre) )
 				topic_names.add(name);
 		}
 		return topic_names;
@@ -272,11 +273,13 @@ public class XmppClient
 	
 	private String getMyJID()
 	{
-//		return user + "@" + server;
-		return PartyClient.con.getUser() + "@" + PartyClient.con.getHost();
+		String id = PartyClient.con.getUser();
+//		String id = PartyClient.con.getUser() + "@" + PartyClient.con.getHost();
+//		String id = Login.getUser() + "@" + PartyClient.con.getHost();
+		return id;
 	}
 
-	private boolean isSubscribed(LeafNode abo)
+	public boolean isSubscribed(LeafNode abo)
 	{
 		try
 		{
@@ -286,9 +289,20 @@ public class XmppClient
 					return true;
 		} catch (XMPPException e) {
 			e.printStackTrace();
-			System.err.println("Abonnement konnte nicht überprüft werden.");
+			System.err.println("Abonnement konnte nicht überprüft werden!");
 		}
 		return false;
+	}
+	
+	public boolean isSubscribed(String abo_name)
+	{
+		try {
+			return isSubscribed( (LeafNode) pubsub_mgr.getNode(abo_name));
+		} catch (XMPPException e) {
+			e.printStackTrace();
+			System.err.println("Topic konnte nicht auf Subsciption gerüft werden.");
+			return false;
+		}
 	}
 
 	public void subscribe(String topic_id)
@@ -303,7 +317,6 @@ public class XmppClient
 //				if (abo.toString().substring(0,1).equals("t"))
 //					abo.addItemDeleteListener(new ItemDeleteCoordinator());
 				abo.subscribe(getMyJID());
-				System.out.println(abo.getId() + " wurde abonniert.");
 			}
 			else
 				System.err.println("Dieses Topic wurde bereits abonniert.");
@@ -319,18 +332,17 @@ public class XmppClient
 		{
 			LeafNode abo = pubsub_mgr.getNode(topic_id);
 			if (!isSubscribed(abo))
-				System.err.println("Dieser Topic wurde gar nicht abonniert.");
+				System.err.println("Dieser Topic wurde gar nicht abonniert!");
 			else
 			{
 				abo.removeItemEventListener(iec);
 //				if (abo.toString().substring(0,1).equals("t")) // falls dies ein Theme ist
 //					abo.removeItemDeleteListener(this);
 				abo.unsubscribe(getMyJID());
-				System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
 			}
 		} catch (XMPPException | NullPointerException e) {
 			e.printStackTrace();
-			System.err.println("Abonemment konnte nicht gekündigt werden.");
+			System.err.println("Abonemment konnte nicht gekündigt werden!");
 		}
 	}
 
@@ -343,35 +355,65 @@ public class XmppClient
 			{
 				LeafNode abo = pubsub_mgr.getNode(abo_name);
 				if ( !isSubscribed(abo) )
-					System.err.println("Dieser Topic wurde gar nicht abonniert.");
+					System.err.println("Dieser Topic wurde gar nicht abonniert!");
 				else
 				{
 					abo.removeItemEventListener(iec);
 					abo.unsubscribe(getMyJID());
-					System.out.println("Ihr Abo wurde erfolgreich gekündigt.");
 				}
 			}
 		} catch (XMPPException | NullPointerException e) {
 			e.printStackTrace();
-			System.err.println("Abonemment konnte nicht gekündigt werden.");
+			System.err.println("Abonemment konnte nicht gekündigt werden!");
 		}
 	}
 	
-	public void publish(String t_id, String payload)
-	{	
-		payload = "<" + payload + "/>";
+	private void unsubscribeAllUsers()
+	{
+		try{
+			for (LeafNode topic : topics)
+			{
+				LeafNode node = pubsub_mgr.getNode(topic.getId());
+				List<Subscription> sups = node.getSubscriptions();
+				for (Subscription user : sups) 
+				{
+					try { node.unsubscribe(user.getJid()); } catch (Exception e){ System.err.println("ging nicht.");}
+					finally {continue;}
+				}
+					
+			}
+		} catch (Exception e) {
+			System.err.println("geht nit.");
+		}
+	}
+	
+	public boolean publish(String t_id, String payload)
+	{			
+		payload = "<payload>" + payload + "</payload>";
 		
 		try
 		{
 			LeafNode theme = pubsub_mgr.getNode( t_id );
-			theme.send( new PayloadItem<SimplePayload>( new SimplePayload( payload, null, payload ) ) );
+			PayloadItem item = new PayloadItem<SimplePayload>( null, new SimplePayload( "<payload>", "", payload ) );
+			theme.send( item );
+			
+			List<Item> item_list = new ArrayList();
+			item_list.add(item);
+			ItemPublishEvent<Item> ipe = new ItemPublishEvent<Item>(t_id, item_list, null, new Date()) ;
+			iec.handlePublishedItems( ipe );
+			
+			return true;
+			
 		} catch ( XMPPException e ) {
+			
 			e.printStackTrace();
-			System.err.println( "Es konnte nichts gepublisht werden." );
+			System.err.println( "Es konnte nichts gepublisht werden!" );
+			
+			return false;
 		}
 	}
 	
-//	public void theme_item_loeschen(String t_id, String item_id)
+//	public void publishDelete(String t_id, String item_id)
 //	{
 //		try
 //		{

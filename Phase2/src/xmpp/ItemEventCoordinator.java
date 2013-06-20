@@ -17,17 +17,17 @@ public class ItemEventCoordinator implements ItemEventListener<Item>
     public void handlePublishedItems(ItemPublishEvent<Item> items)
     {
     	List<Item> itemlist = items.getItems();
-		PayloadItem<SimplePayload> pi = null;
-//		for ( Item item : itemlist )
-//		{
-//			benachrichtigungen.add( items.getPublishedDate()+", " + items.getNodeId() + ": " + item.getElementName().toString() + " " + item.getNode().toString());
-//			System.out.println("New item arrived!");
-//		}
+		PayloadItem<SimplePayload> pi;
+
 		for ( int i=0; i<itemlist.size(); i++ )
-		{
-			pi = (PayloadItem<SimplePayload>) itemlist.get(i);
-			XmppClient.benachrichtigungen.add( itemlist.get(i).getId()+": " + pi.getPayload().getElementName().toString());
-			System.out.println("New item arrived!"); 
+		{	
+			pi = (PayloadItem<SimplePayload>) itemlist.get(i);			
+			System.out.println(  );
+			for (String s :  items.getSubscriptions() )
+				System.out.println(s + " hi");
+			
+			String text = pi.getPayload().toString().substring(52);
+			XmppClient.benachrichtigungen.add( items.getPublishedDate() + ", " + items.getNodeId()+": " + text);
 		}
 	}
    

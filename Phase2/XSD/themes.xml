@@ -48,6 +48,10 @@
                     <rezeptname>Perlige Hochzeits-Torte</rezeptname>
                     <rezept_link>http://www.chefkoch.de</rezept_link>
                 </gericht>
+                <gericht>
+                    <rezeptname>Kiba</rezeptname>
+                    <rezept_link>http://www.chefkoch.de/kiba</rezept_link>
+                </gericht>
             </catering>
             <locations>
                 <location>

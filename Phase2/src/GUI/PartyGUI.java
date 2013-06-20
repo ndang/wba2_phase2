@@ -23,8 +23,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.Popup;
-import javax.swing.PopupFactory;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -40,8 +38,6 @@ public class PartyGUI extends JFrame {
 	private JPanel contentPane;
 	private JPanel main_panel;
 	private JTextField txtTitelHierEingeben;
-	private Popup ansehenPU;
-	private Popup bearbeitenPU;
 	
 	private Border b = new LineBorder(Color.black);
 	private PartyClient partyc;
@@ -61,7 +57,6 @@ public class PartyGUI extends JFrame {
 	
 	//Listen
 	JList list_benachrichtigungen;
-	Vector<String> subscriptions;
 	
 	Vector<String> genres_liste;
 	JList list_genre;
@@ -77,6 +72,7 @@ public class PartyGUI extends JFrame {
 	String nachricht;
 	JLabel lblZurZeitHaben;
 	JScrollPane scrollPane_news;
+	Vector<String> mySubscriptions;
 	
 	// Tree
 	JTree tree_abos;
@@ -92,9 +88,6 @@ public class PartyGUI extends JFrame {
 	JLabel lblThemeTitel;
 	JLabel lblKategorie;
  
-	/**
-	 * Launch the application.
-	 */
 	public static void start()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -115,6 +108,7 @@ public class PartyGUI extends JFrame {
 	public PartyGUI()
 	{
 		partyc = new PartyClient();
+		mySubscriptions = partyc.xc.getMySubscriptions();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 679, 460);
@@ -259,11 +253,10 @@ public class PartyGUI extends JFrame {
 		JButton btnAlleAbonnementsKndigen = new JButton("Alle Abonnements k\u00FCndigen");
 		
 		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
-		
-		subscriptions = partyc.xc.getMySubscriptions();
+
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
 		
-		for (String abo : subscriptions)
+		for (String abo : mySubscriptions)
 		{
 			root.add(new DefaultMutableTreeNode(abo));
 		}
@@ -353,7 +346,6 @@ public class PartyGUI extends JFrame {
 					partyc.xc.unsubscribe(abo);
 					InfoPopup.start( abo + " wurde erfolgreich gekündigt" );
 					updateAbos();
-					updatePublish();
 				}				
 			}
 		});
@@ -363,15 +355,13 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				// TODO: muss korrigiert werden
-				if ( partyc.xc.getMySubscriptions().isEmpty() )
+				if ( mySubscriptions.isEmpty() )
 					InfoPopup.start("Sie haben gar keine Abos...");
 				else
 				{
 					partyc.xc.unsubscribeAll();
 					InfoPopup.start("Alle Abonnements wurden gekündigt.");
 					updateAbos();
-					updatePublish();
 				}
 			}
 		});
@@ -379,7 +369,7 @@ public class PartyGUI extends JFrame {
 
 	private void searchMenue(JPanel panel_search)
 	{
-		// TODO: Selection-Exceptions behandeln  bei Umwahl!
+		// TODO: Exceptions behandeln  bei abonnieren!
 		
 		panel_search.setLayout(new GridLayout(0, 3, 0, 0));
 		JButton btnAbonnieren = new JButton("abonnieren");
@@ -391,7 +381,7 @@ public class PartyGUI extends JFrame {
 		panel_search.add(panel_genre);
 		JLabel lblGenres = new JLabel("Genres");
 		
-		genres_liste = partyc.xc.getGenres();
+		genres_liste = partyc.xc.getGenresNodes();
 		list_genre = new JList(genres_liste);
 		list_genre.setBorder(b);
 
@@ -546,35 +536,54 @@ public class PartyGUI extends JFrame {
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
-			{
+			{		
+				String selection;
 				if ( list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty())
 					InfoPopup.start("Es muss ein Topic ausgewählt sein.");
 				
 				else if ( !list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					partyc.xc.subscribe(list_genre.getSelectedValue().toString());
-					InfoPopup.start(list_genre.getSelectedValue().toString() + " wurde erfolgreich abonniert.");
+					selection = list_genre.getSelectedValue().toString();
+					if ( !partyc.xc.isSubscribed( selection ) )
+					{
+						partyc.xc.subscribe( selection );
+						InfoPopup.start( selection + " wurde erfolgreich abonniert." );
+					}
+					else
+						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");
+					
 				}
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					partyc.xc.subscribe(list_kategorien.getSelectedValue().toString());
-					InfoPopup.start(list_kategorien.getSelectedValue().toString() + " wurde erfolgreich abonniert.");
+					selection = list_kategorien.getSelectedValue().toString();
+					if ( !partyc.xc.isSubscribed( selection ) )
+					{
+						partyc.xc.subscribe( selection );
+						InfoPopup.start( selection + " wurde erfolgreich abonniert.");
+					}
+					else
+						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");
 				}	
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
-					partyc.xc.subscribe(list_themes.getSelectedValue().toString());
-					InfoPopup.start(list_themes.getSelectedValue().toString() + " wurde erfolgreich abonniert.");
+					selection = list_themes.getSelectedValue().toString();
+					if ( !partyc.xc.isSubscribed( selection ) )
+					{
+						partyc.xc.subscribe( selection );
+						InfoPopup.start( selection + " wurde erfolgreich abonniert.");
+						list_genre.clearSelection();
+						list_kategorien.clearSelection();
+						list_themes.clearSelection();
+					}
+					else
+						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");
 					
-					list_genre.clearSelection();
-					list_kategorien.clearSelection();
-					list_themes.clearSelection();
+					
 				}
 				
 				updateAbos();
-				updatePublish();
-				updateBearbeitbar();
 			}
 		});
 	}
@@ -583,13 +592,12 @@ public class PartyGUI extends JFrame {
 	{
 		/***************************************LINKS*************************************************/
 		
-		comboBox_auswaehlen = new JComboBox<>();
+		comboBox_auswaehlen = new JComboBox<String>();
 		updateBearbeitbar();
 		
 		lblThemeTitel = new JLabel("Theme Titel");
 		lblThemeTitel.setVisible(false);
-		txtTitelHierEingeben = new JTextField();
-		txtTitelHierEingeben.setText("Titel eingeben");
+		txtTitelHierEingeben = new JTextField("Titel eingeben");
 		txtTitelHierEingeben.setVisible(false);
 		
 		lblGenre = new JLabel("Genre");
@@ -609,9 +617,34 @@ public class PartyGUI extends JFrame {
 		JButton btnClear = new JButton("zurücksetzten");
 		JButton btnSpeichern = new JButton("speichern");
 		
+		/*****************************************RECHTS***********************************************/
+
+		JPanel panel_deko = new JPanel();
+		tabbedPane_module.addTab("Dekoration", null, panel_deko, null);
+		final JEditorPane editorPane_deko = new JEditorPane();
+		editorPane_deko.setContentType("text/plain");
+		
+		JPanel panel_loca = new JPanel();
+		tabbedPane_module.addTab("Location", null, panel_loca, null);
+		final JEditorPane editorPane_loca = new JEditorPane();
+		editorPane_loca.setContentType("text/plain");
+		
+		JPanel panel_cate = new JPanel();
+		tabbedPane_module.addTab("Catering", null, panel_cate, null);
+		final JEditorPane editorPane_cate = new JEditorPane();
+		editorPane_cate.setContentType("text/plain");
+		
+		JPanel panel_music = new JPanel();
+		tabbedPane_module.addTab("Music", null, panel_music, null);
+		final JEditorPane editorPane_music = new JEditorPane();
+		editorPane_music.setContentType("text/plain");
+		
+		JPanel panel_outfit = new JPanel();
+		tabbedPane_module.addTab("Outfits", null, panel_outfit, null);
+		final JEditorPane editorPane_outfit = new JEditorPane();
+		editorPane_outfit.setContentType("text/plain");
+		
 		/******************************************LAYOUT**********************************************/
-		
-		
 
 		GroupLayout gl_panel_create = new GroupLayout(panel_create);
 		gl_panel_create.setHorizontalGroup(
@@ -680,14 +713,7 @@ public class PartyGUI extends JFrame {
 							.addComponent(btnSpeichern)))
 					.addContainerGap())
 		);
-		
-		/*****************************************RECHTS***********************************************/
-
-		JPanel panel_deko = new JPanel();
-		tabbedPane_module.addTab("Dekoration", null, panel_deko, null);
-		
-		final JEditorPane editorPane_deko = new JEditorPane();
-		editorPane_deko.setContentType("application/xml");
+				
 		GroupLayout gl_panel_deko = new GroupLayout(panel_deko);
 		gl_panel_deko.setHorizontalGroup(
 			gl_panel_deko.createParallelGroup(Alignment.LEADING)
@@ -698,12 +724,7 @@ public class PartyGUI extends JFrame {
 				.addComponent(editorPane_deko, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 		);
 		panel_deko.setLayout(gl_panel_deko);
-		
-		JPanel panel_loca = new JPanel();
-		tabbedPane_module.addTab("Location", null, panel_loca, null);
-		
-		final JEditorPane editorPane_loca = new JEditorPane();
-		editorPane_loca.setContentType("application/xml");
+			
 		GroupLayout gl_panel_loca = new GroupLayout(panel_loca);
 		gl_panel_loca.setHorizontalGroup(
 			gl_panel_loca.createParallelGroup(Alignment.LEADING)
@@ -715,11 +736,6 @@ public class PartyGUI extends JFrame {
 		);
 		panel_loca.setLayout(gl_panel_loca);
 		
-		JPanel panel_cate = new JPanel();
-		tabbedPane_module.addTab("Catering", null, panel_cate, null);
-		
-		final JEditorPane editorPane_cate = new JEditorPane();
-		editorPane_cate.setContentType("application/xml");
 		GroupLayout gl_panel_cate = new GroupLayout(panel_cate);
 		gl_panel_cate.setHorizontalGroup(
 			gl_panel_cate.createParallelGroup(Alignment.LEADING)
@@ -731,11 +747,6 @@ public class PartyGUI extends JFrame {
 		);
 		panel_cate.setLayout(gl_panel_cate);
 		
-		JPanel panel_music = new JPanel();
-		tabbedPane_module.addTab("Music", null, panel_music, null);
-		
-		final JEditorPane editorPane_music = new JEditorPane();
-		editorPane_music.setContentType("application/xml");
 		GroupLayout gl_panel_music = new GroupLayout(panel_music);
 		gl_panel_music.setHorizontalGroup(
 			gl_panel_music.createParallelGroup(Alignment.LEADING)
@@ -747,11 +758,6 @@ public class PartyGUI extends JFrame {
 		);
 		panel_music.setLayout(gl_panel_music);
 		
-		JPanel panel_outfit = new JPanel();
-		tabbedPane_module.addTab("Outfits", null, panel_outfit, null);
-		
-		final JEditorPane editorPane_outfit = new JEditorPane();
-		editorPane_outfit.setContentType("application/XML");
 		GroupLayout gl_panel_outfit = new GroupLayout(panel_outfit);
 		gl_panel_outfit.setHorizontalGroup(
 			gl_panel_outfit.createParallelGroup(Alignment.LEADING)
@@ -793,11 +799,11 @@ public class PartyGUI extends JFrame {
 					comboBox_genre.setVisible(false);
 					
 //					Theme content = partyc.rc.getTheme(auswahl);
-					editorPane_deko.setText( partyc.rc.getTheme(auswahl).getModule().getDekoration().toString() );
-					editorPane_loca.setText( partyc.rc.getTheme(auswahl).getModule().getLocations().toString() );
-					editorPane_cate.setText( partyc.rc.getTheme(auswahl).getModule().getCatering().toString() );
-					editorPane_music.setText( partyc.rc.getTheme(auswahl).getModule().getMusik().toString() );
-					editorPane_outfit.setText( partyc.rc.getTheme(auswahl).getModule().getOutfits().toString() );
+					editorPane_deko.setText( ThemeInfo.getDeko(partyc.rc.getTheme(auswahl)) );
+					editorPane_loca.setText( ThemeInfo.getLoca(partyc.rc.getTheme(auswahl)) );
+					editorPane_cate.setText( ThemeInfo.getCatering(partyc.rc.getTheme(auswahl)) );
+					editorPane_music.setText( ThemeInfo.getMusic(partyc.rc.getTheme(auswahl)) );
+					editorPane_outfit.setText( ThemeInfo.getOutfit(partyc.rc.getTheme(auswahl)) );
 				}
 			}
 		});
@@ -808,7 +814,7 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String selection = comboBox_genre.getSelectedItem().toString();
-				Vector<String> newKats = partyc.xc.getKategorien(selection); 
+				Vector<String> newKats = partyc.xc.getKategorienNodes(selection); 
 				comboBox_kategorie.setModel(new DefaultComboBoxModel<String>(newKats));
 				
 				lblKategorie.setVisible(true);
@@ -851,18 +857,17 @@ public class PartyGUI extends JFrame {
 
 	private void publishMenue(JPanel panel_publish)
 	{
-		// TODO: JID Problem 
+		// TODO: publish Problem 
 		
 		checkBox_subscriptions = new JComboBox();
-		Vector<String> subscriptions = partyc.xc.getMySubscriptions();
-		if ( subscriptions.isEmpty() )
-			subscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
-		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
+		if ( mySubscriptions.isEmpty() )
+			mySubscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
+		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( mySubscriptions ) );
 		
 		updateNews();
 		
 		final JEditorPane dtrpnPayload = new JEditorPane();
-		dtrpnPayload.setText( "payload" );
+		dtrpnPayload.setText( "enter data here!" );
 		
 		JButton btnPublish = new JButton( "publish" );
 		
@@ -905,7 +910,11 @@ public class PartyGUI extends JFrame {
 			{
 				String t_id = checkBox_subscriptions.getSelectedItem().toString();
 				String payload = dtrpnPayload.getText();
-				partyc.xc.publish( t_id, payload );
+				
+				if ( partyc.xc.publish( t_id, payload ) ) 
+					InfoPopup.start( "Publishing erfolgreich." );
+				else
+					InfoPopup.start( "FEHLER! Publishing  nicht erfolgreich!" );
 				
 				updateNews();
 			}
@@ -913,19 +922,17 @@ public class PartyGUI extends JFrame {
 		
 	}
 
-	/*****************************************************/
-	/*************** HILFSFUNKTIONEN *********************/
-	/*****************************************************/
+	/***************************************************************************************** HILFSFUNKTIONEN *********************/
 	
 	private void changeKategorienContent(String selection)
 	{
-		Vector<String> neueKategorien = partyc.xc.getKategorien(selection);
+		Vector<String> neueKategorien = partyc.xc.getKategorienNodes(selection);
 		list_kategorien.setListData(neueKategorien);
 	}
 	
 	private void changeThemesContent(String selectionG, String selectionK)
 	{
-		Vector<String> neueThemes = partyc.xc.getThemes(selectionG, selectionK);
+		Vector<String> neueThemes = partyc.xc.getThemesNodes(selectionG, selectionK);
 		if ( neueThemes.isEmpty() )
 			neueThemes.add("Keine Themes vorhanden");
 		list_themes.setListData(neueThemes);
@@ -945,10 +952,10 @@ public class PartyGUI extends JFrame {
 	
 	private void updateAbos()
 	{
-		subscriptions = partyc.xc.getMySubscriptions();
+		mySubscriptions = partyc.xc.getMySubscriptions();
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
 		
-		for (String abo : subscriptions)
+		for (String abo : mySubscriptions)
 		{
 			root.add(new DefaultMutableTreeNode(abo));
 		}
@@ -956,22 +963,24 @@ public class PartyGUI extends JFrame {
 		DefaultTreeModel aktuallisiert = new DefaultTreeModel(root);
 		
 		tree_abos.setModel(aktuallisiert);
+		updateBearbeitbar();
+		updatePublish();
 	}
 	
 	private void updatePublish()
 	{
-		if ( subscriptions.isEmpty() )
-			subscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
-		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( subscriptions ) );
+		if ( mySubscriptions.isEmpty() )
+			mySubscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
+		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( mySubscriptions ) );
 	}
 	
 	private void updateBearbeitbar()
 	{
-		Vector<String> themes = partyc.xc.getMySubscriptions();
-		for ( String item : themes )
+		Vector<String> themes = new Vector<String>();
+		for ( String item : mySubscriptions )
 		{
-			if ( !item.substring(0, 1).equals("t") )
-				themes.remove(item);
+			if ( item.substring(0, 1).equals("t") )
+				themes.add(item);
 		}
 		themes.add("Theme erstellen");
 		comboBox_auswaehlen.setModel( new DefaultComboBoxModel(themes) );
