@@ -24,7 +24,6 @@ public class RestClient
 	private static String urlClnt_T = urlSrvr + "/themes";
 	private static String appxml = MediaType.APPLICATION_XML;
 	private static SelectorThread srv;
-	
 	private WebResource wrs_Ts;
 
 	public RestClient()

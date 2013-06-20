@@ -23,9 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -42,8 +40,6 @@ public class PartyGUI extends JFrame {
 	private JPanel contentPane;
 	private JPanel main_panel;
 	private JTextField txtTitelHierEingeben;
-	
-	private Border b = new LineBorder(Color.black);
 	private PartyClient partyc;
 		
 	// Buttons
@@ -61,17 +57,13 @@ public class PartyGUI extends JFrame {
 	
 	//Listen
 	JList list_benachrichtigungen;
-	
 	Vector<String> genres_liste;
 	JList list_genre;
-	
 	Vector<String> kategorien_liste;
 	JList list_kategorien;
-	
 	Vector<String> theme_topics;
 	JList list_themes;
 	JScrollPane scrollPane_theme;
-	
 	Vector<String> benachrichtigungen_v;
 	String nachricht;
 	JLabel lblZurZeitHaben;
@@ -89,6 +81,8 @@ public class PartyGUI extends JFrame {
 	
 	//Labels
 	JLabel lblGenre;
+	JLabel lblKategorien;
+	JLabel lblThemes;
 	JLabel lblThemeTitel;
 	JLabel lblKategorie;
  
@@ -256,17 +250,20 @@ public class PartyGUI extends JFrame {
 		JButton btnAbonnementKndigen = new JButton("Abonnement k\u00FCndigen");
 		JButton btnAlleAbonnementsKndigen = new JButton("Alle Abonnements k\u00FCndigen");
 		
+		tree_abos = new JTree();
+		
 		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
-
+		
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
+		
+//		updateAbos();
 		
 		for (String abo : mySubscriptions)
 		{
-			root.add(new DefaultMutableTreeNode(abo));
+			root.add(new DefaultMutableTreeNode( partyc.getNameByID( abo ) ));
 		}
 		
-		tree_abos = new JTree();
-		tree_abos.setModel(new DefaultTreeModel(root));
+		tree_abos.setModel(new DefaultTreeModel(root));		
 		
 		// ORGINAL
 //		JTree tree = new JTree();
@@ -329,27 +326,29 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				if (tree_abos.isSelectionEmpty() || !(tree_abos.getSelectionPath().getLastPathComponent().toString().substring(0,1).equals("t")))
+				String selection = tree_abos.getSelectionPath().getLastPathComponent().toString();
+				if ( tree_abos.isSelectionEmpty() || !( partyc.isTheme( selection ) ))
 					InfoPopup.start("Bitte Theme auswählen.");
 				else
-					ThemeInfo.start( tree_abos.getSelectionPath().getLastPathComponent().toString() );			
+					ThemeInfo.start( partyc.getIDByName( selection ) );			
 			}
 		});
 		
 		btnAbonnementKndigen.addActionListener(new ActionListener()
 		{
-			
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				if ( tree_abos.isSelectionEmpty() )
-					InfoPopup.start("Bitte ein Element auswählen.");
+					InfoPopup.start( "Bitte ein Element auswählen." );
 				else
 				{
-					String abo = tree_abos.getSelectionPath().getLastPathComponent().toString();
+					String abo = partyc.getIDByName( tree_abos.getSelectionPath().getLastPathComponent().toString() );
 					partyc.xc.unsubscribe(abo);
-					InfoPopup.start( abo + " wurde erfolgreich gekündigt" );
+					InfoPopup.start( abo + " wurde erfolgreich gekündigt." );
 					updateAbos();
+					updateBearbeitbar();
+					updatePublish();
 				}				
 			}
 		});
@@ -366,15 +365,15 @@ public class PartyGUI extends JFrame {
 					partyc.xc.unsubscribeAll();
 					InfoPopup.start("Alle Abonnements wurden gekündigt.");
 					updateAbos();
+					updateBearbeitbar();
+					updatePublish();
 				}
 			}
 		});
 	}
 
 	private void searchMenue(JPanel panel_search)
-	{
-		// TODO: Exceptions behandeln  bei abonnieren!
-		
+	{		
 		panel_search.setLayout(new GridLayout(0, 3, 0, 0));
 		JButton btnAbonnieren = new JButton("abonnieren");
 		JButton btnAnsehen = new JButton("ansehen");
@@ -382,12 +381,12 @@ public class PartyGUI extends JFrame {
 		/************************************ GENRES ******************************************/
 		
 		JPanel panel_genre = new JPanel();
-		panel_search.add(panel_genre);
 		JLabel lblGenres = new JLabel("Genres");
 		
-		list_genre = new JList(genresTitles());
-		list_genre.setBorder(b);
+		list_genre = new JList( partyc.genresTitles() );
 
+		panel_search.add(panel_genre);
+		
 		GroupLayout gl_panel_genre = new GroupLayout(panel_genre);
 		gl_panel_genre.setHorizontalGroup(
 			gl_panel_genre.createParallelGroup(Alignment.LEADING)
@@ -413,14 +412,13 @@ public class PartyGUI extends JFrame {
 		/************************************ Kategorien ******************************************/
 
 		JPanel panel_kategorie = new JPanel();
-		panel_search.add(panel_kategorie);	
-		final JLabel lblKategorien = new JLabel("Kategorien");
-		
+		lblKategorien = new JLabel("Kategorien");
 		list_kategorien = new JList();
-		list_kategorien.setBorder(b);
 		
 		lblKategorien.setVisible(false);
-		list_kategorien.setVisible(false);		
+		list_kategorien.setVisible(false);
+		
+		panel_search.add(panel_kategorie);	
 		
 		GroupLayout gl_panel_kategorie = new GroupLayout(panel_kategorie);
 		gl_panel_kategorie.setHorizontalGroup(
@@ -447,16 +445,14 @@ public class PartyGUI extends JFrame {
 		/************************************ Themes ******************************************/
 
 		JPanel panel_themes = new JPanel();
-		panel_search.add(panel_themes);
-		final JLabel lblThemes = new JLabel("Themes");
-		
+		lblThemes = new JLabel("Themes");
 		list_themes = new JList();
-		
 		scrollPane_theme = new JScrollPane(list_themes);
-		scrollPane_theme.setBorder(b);
 		
 		scrollPane_theme.setVisible(false);
 		lblThemes.setVisible(false);
+		
+		panel_search.add(panel_themes);
 		
 		GroupLayout gl_panel_themes = new GroupLayout(panel_themes);
 		gl_panel_themes.setHorizontalGroup(
@@ -496,7 +492,7 @@ public class PartyGUI extends JFrame {
 			{
 				 if ( !list_genre.isSelectionEmpty() )
 				 {
-					 String selection = list_genre.getSelectedValue().toString().substring(0,2);
+					 String selection = partyc.getIDByName( list_genre.getSelectedValue().toString() );
 					 
 					 changeKategorienContent( selection );
 					 
@@ -514,8 +510,8 @@ public class PartyGUI extends JFrame {
 			{
 				if ( !list_kategorien.isSelectionEmpty() )
 				{
-					String selectionG =  list_genre.getSelectedValue().toString().substring(0,2);
-					String selectionK =  list_kategorien.getSelectedValue().toString().substring(0, 2);
+					String selectionG =  partyc.getIDByName( list_genre.getSelectedValue().toString() );
+					String selectionK =  partyc.getIDByName( list_kategorien.getSelectedValue().toString() );
 	
 					changeThemesContent(selectionG, selectionK);
 					
@@ -530,9 +526,9 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0)
 			{
 				if ( list_themes.isSelectionEmpty() )
-					InfoPopup.start("Es muss ein Theme ausgewählt sein.");
+					InfoPopup.start( "Es muss ein Theme ausgewählt sein." );
 				else
-					ThemeInfo.start(list_themes.getSelectedValue().toString());
+					ThemeInfo.start( partyc.getIDByName(list_themes.getSelectedValue().toString()) );
 			}
 		});
 		
@@ -542,12 +538,12 @@ public class PartyGUI extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{		
 				String selection;
-				if ( list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty())
+				if ( list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 					InfoPopup.start("Es muss ein Topic ausgewählt sein.");
 				
 				else if ( !list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					selection = list_genre.getSelectedValue().toString().substring(0,2);
+					selection = partyc.getIDByName( list_genre.getSelectedValue().toString() );
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
 						partyc.xc.subscribe( selection );
@@ -555,12 +551,11 @@ public class PartyGUI extends JFrame {
 					}
 					else
 						InfoPopup.start( "Fehler! '" + list_genre.getSelectedValue() + "' wurde bereits abonniert.");
-					
 				}
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					selection = list_kategorien.getSelectedValue().toString().substring(0,5);
+					selection = partyc.getIDByName( list_kategorien.getSelectedValue().toString() );
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
 						partyc.xc.subscribe( selection );
@@ -572,7 +567,7 @@ public class PartyGUI extends JFrame {
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
-					selection = list_themes.getSelectedValue().toString().substring(0,2);
+					selection = partyc.getIDByName( list_themes.getSelectedValue().toString() );
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
 						partyc.xc.subscribe( selection );
@@ -582,12 +577,12 @@ public class PartyGUI extends JFrame {
 						list_themes.clearSelection();
 					}
 					else
-						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");
-					
-					
+						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");	
 				}
 				
 				updateAbos();
+				updateBearbeitbar();
+				updatePublish();
 			}
 		});
 	}
@@ -781,8 +776,8 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String auswahl = (String) comboBox_auswaehlen.getSelectedItem();
-				if ( auswahl.equals("Theme erstellen"))
+				String auswahl = comboBox_auswaehlen.getSelectedItem().toString();
+				if ( auswahl.equals("Theme erstellen") )
 				{
 					lblThemeTitel.setVisible(true);
 					txtTitelHierEingeben.setVisible(true);
@@ -797,12 +792,12 @@ public class PartyGUI extends JFrame {
 				}
 				else
 				{
+					auswahl = partyc.getIDByName( comboBox_auswaehlen.getSelectedItem().toString() );
 					lblThemeTitel.setVisible(false);
 					txtTitelHierEingeben.setVisible(false);
 					lblGenre.setVisible(false);
 					comboBox_genre.setVisible(false);
 					
-//					Theme content = partyc.rc.getTheme(auswahl);
 					editorPane_deko.setText( ThemeInfo.getDeko(partyc.rc.getTheme(auswahl)) );
 					editorPane_loca.setText( ThemeInfo.getLoca(partyc.rc.getTheme(auswahl)) );
 					editorPane_cate.setText( ThemeInfo.getCatering(partyc.rc.getTheme(auswahl)) );
@@ -817,9 +812,9 @@ public class PartyGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String selection = comboBox_genre.getSelectedItem().toString();
-				Vector<String> newKats = partyc.xc.getKategorienNodes(selection); 
-				comboBox_kategorie.setModel(new DefaultComboBoxModel<String>(newKats));
+				String selection = partyc.getIDByName( comboBox_genre.getSelectedItem().toString() );
+				Vector<String> newKats = kategorienTitles( selection ); 
+				comboBox_kategorie.setModel(new DefaultComboBoxModel<String>( newKats ));
 				
 				lblKategorie.setVisible(true);
 				comboBox_kategorie.setVisible(true);
@@ -860,22 +855,15 @@ public class PartyGUI extends JFrame {
 	}
 
 	private void publishMenue(JPanel panel_publish)
-	{
-		// TODO: publish Problem 
-		
+	{		
 		checkBox_subscriptions = new JComboBox();
-		if ( mySubscriptions.isEmpty() )
-			mySubscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
-		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( mySubscriptions ) );
-		
-		updateNews();
-		
+		JButton btnPublish = new JButton( "publish" );
+		JLabel lblPublishTo = new JLabel( "publish to:" );
 		final JEditorPane dtrpnPayload = new JEditorPane();
 		dtrpnPayload.setText( "enter data here!" );
 		
-		JButton btnPublish = new JButton( "publish" );
-		
-		JLabel lblPublishTo = new JLabel( "publish to:" );
+		updatePublish();
+		updateNews();
 		
 		GroupLayout gl_panel_publish = new GroupLayout(panel_publish);
 		gl_panel_publish.setHorizontalGroup(
@@ -912,10 +900,10 @@ public class PartyGUI extends JFrame {
 		{
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String t_id = checkBox_subscriptions.getSelectedItem().toString();
+				String id = partyc.getIDByName(checkBox_subscriptions.getSelectedItem().toString());
 				String payload = dtrpnPayload.getText();
-				
-				if ( partyc.xc.publish( t_id, payload ) ) 
+
+				if ( partyc.xc.publish( id, payload ) ) 
 					InfoPopup.start( "Publishing erfolgreich." );
 				else
 					InfoPopup.start( "FEHLER! Publishing  nicht erfolgreich!" );
@@ -925,8 +913,9 @@ public class PartyGUI extends JFrame {
 		});
 		
 	}
-
+	
 	/***************************************************************************************** HILFSFUNKTIONEN *********************/
+	
 	
 	private void changeKategorienContent(String selection)
 	{
@@ -954,24 +943,47 @@ public class PartyGUI extends JFrame {
 	{
 		mySubscriptions = partyc.xc.getMySubscriptions();
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Party-Themes");
-		
+
 		for (String abo : mySubscriptions)
 		{
-			root.add(new DefaultMutableTreeNode(abo));
+			String name = "";
+			if ( abo.substring(0,1).equals("g") )
+			{
+				name = abo + " " + partyc.xc.getGenreTitel(abo);
+				root.add(new DefaultMutableTreeNode( name ));
+			}
+			else if ( abo.substring(0,1).equals("k") )
+			{
+				name = abo + " " + partyc.xc.getKategorieTitel( abo.substring(3, 5), abo.substring(0,5));
+				root.add( new DefaultMutableTreeNode( name ));
+			}
+			else if ( abo.substring(0,1).equals("t") )
+			{
+				name = abo + " " + partyc.xc.getThemeTitel(abo);
+				root.add( new DefaultMutableTreeNode( name ));
+			}
 		}
 		
 		DefaultTreeModel aktuallisiert = new DefaultTreeModel(root);
-		
 		tree_abos.setModel(aktuallisiert);
-		updateBearbeitbar();
-		updatePublish();
 	}
 	
 	private void updatePublish()
 	{
+		Vector<String> topics = new Vector<String>();
 		if ( mySubscriptions.isEmpty() )
+		{
 			mySubscriptions.add( "Zur Zeit keine Abonnements vorhanden." );
-		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( mySubscriptions ) );
+			topics = mySubscriptions;
+		}
+		else
+		{
+			for ( String item : mySubscriptions )
+				topics.add( partyc.xc.getTitle(item) );
+			
+			topics.add("Theme erstellen");
+		}
+		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( topics ) );
 	}
 	
 	private void updateBearbeitbar()
@@ -980,46 +992,12 @@ public class PartyGUI extends JFrame {
 		for ( String item : mySubscriptions )
 		{
 			if ( item.substring(0, 1).equals("t") )
-				themes.add(item);
+				themes.add( partyc.xc.getTitle(item) );
 		}
 		themes.add("Theme erstellen");
 		comboBox_auswaehlen.setModel( new DefaultComboBoxModel(themes) );
 	}
-	
-	private Vector<String> genresTitles()
-	{
-		genres_liste = new Vector<String>();
-		for (Genre g : PartyClient.rc.getGenres().getGenre())
-			genres_liste.add( g.getGenreId() + " " + g.getGenreTitel() );
-		return genres_liste;
-	}
-	
-	private Vector<String> kategorienTitles(String g_id)
-	{
-		kategorien_liste = new Vector<String>();
-		for ( Kategorie k : PartyClient.rc.getKategorien(g_id).getKategorie() )
-			kategorien_liste.add( k.getKategorieId() + " " + k.getKategorieTitel() );
-		return kategorien_liste;
-	}
-	
-	private Vector<String> themesTitles( String g_id, String k_id )
-	{
-		Vector<String> theme_liste = new Vector<String>();
-		for (Theme t : PartyClient.rc.getThemes().getTheme())
-		{
-			if ( t.getAllgemeines().getThemeId().substring(6).equals(g_id) )
-			{
-				if (t.getAllgemeines().getThemeId().substring(3,5).equals(k_id) )
-					theme_liste.add( t.getAllgemeines().getThemeId() + " " + t.getAllgemeines().getThemeTitel() );
-			}
-				
-		}
-		
-		if ( theme_liste.isEmpty() ) theme_liste.add("keine Themes vorhanden");
-			
-		return theme_liste;
-	}
-	
+
 	private void close()
 	{
 		partyc.logout();

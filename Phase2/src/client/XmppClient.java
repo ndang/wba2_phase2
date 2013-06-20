@@ -192,21 +192,6 @@ public class XmppClient
 	{
 		benachrichtigungen = new Vector<String>();
 	}
-
-	public String getGenreTitel(String g_id)
-	{
-		return PartyClient.rc.getGenre(g_id).getGenreTitel();
-	}
-	
-	public String getKategorieTitel(String g_id, String k_id)
-	{
-		return PartyClient.rc.getKategorie(g_id, k_id).getKategorieTitel();
-	}
-	
-	public String getThemeTitel(String t_id)
-	{
-		return PartyClient.rc.getTheme(t_id).getAllgemeines().getThemeTitel().toString();
-	}
 	
 	public Vector<String> getMySubscriptions()
 	{
@@ -236,41 +221,41 @@ public class XmppClient
 			return new Vector<String>();	
 	}
 	
-	public Vector<String> getGenresNodes()
-	{
-		Vector<String> topic_names = new Vector<String>();
-		for (LeafNode topic : topics)
-		{
-			String name = topic.getId();
-			if( name.substring(0,1).equals("g"))
-				topic_names.add(name);
-		}
-		return topic_names;
-	}
-	
-	public Vector<String> getKategorienNodes(String genre)
-	{
-		Vector<String> topic_names = new Vector<String>();
-		for (LeafNode topic : topics)
-		{
-			String name = topic.getId();			
-			if( name.substring(0,1).equals("k") && name.substring(3).equals(genre))
-				topic_names.add(name);
-		}
-		return topic_names;
-	}
-	
-	public Vector<String> getThemesNodes(String genre, String kategorie)
-	{
-		Vector<String> topic_names = new Vector<String>();
-		for (LeafNode topic : topics)
-		{
-			String name = topic.getId();
-			if( name.substring(0,1).equals("t") && name.substring(3,5).equals(kategorie) && name.substring(6).equals(genre) )
-				topic_names.add(name);
-		}
-		return topic_names;
-	}
+//	public Vector<String> getGenresNodes()
+//	{
+//		Vector<String> topic_names = new Vector<String>();
+//		for (LeafNode topic : topics)
+//		{
+//			String name = topic.getId();
+//			if( name.substring(0,1).equals("g"))
+//				topic_names.add(name);
+//		}
+//		return topic_names;
+//	}
+//	
+//	public Vector<String> getKategorienNodes(String genre)
+//	{
+//		Vector<String> topic_names = new Vector<String>();
+//		for (LeafNode topic : topics)
+//		{
+//			String name = topic.getId();			
+//			if( name.substring(0,1).equals("k") && name.substring(3).equals(genre))
+//				topic_names.add(name);
+//		}
+//		return topic_names;
+//	}
+//	
+//	public Vector<String> getThemesNodes(String genre, String kategorie)
+//	{
+//		Vector<String> topic_names = new Vector<String>();
+//		for (LeafNode topic : topics)
+//		{
+//			String name = topic.getId();
+//			if( name.substring(0,1).equals("t") && name.substring(3,5).equals(kategorie) && name.substring(6).equals(genre) )
+//				topic_names.add(name);
+//		}
+//		return topic_names;
+//	}
 	
 	private String getMyJID()
 	{
