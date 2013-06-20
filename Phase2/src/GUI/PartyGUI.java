@@ -31,6 +31,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import app.Genre;
+import app.Kategorie;
+import app.Theme;
+
 import client.PartyClient;
 
 public class PartyGUI extends JFrame {
@@ -61,7 +65,7 @@ public class PartyGUI extends JFrame {
 	Vector<String> genres_liste;
 	JList list_genre;
 	
-	Vector<String> kategorien_list;
+	Vector<String> kategorien_liste;
 	JList list_kategorien;
 	
 	Vector<String> theme_topics;
@@ -381,8 +385,7 @@ public class PartyGUI extends JFrame {
 		panel_search.add(panel_genre);
 		JLabel lblGenres = new JLabel("Genres");
 		
-		genres_liste = partyc.xc.getGenresNodes();
-		list_genre = new JList(genres_liste);
+		list_genre = new JList(genresTitles());
 		list_genre.setBorder(b);
 
 		GroupLayout gl_panel_genre = new GroupLayout(panel_genre);
@@ -493,8 +496,9 @@ public class PartyGUI extends JFrame {
 			{
 				 if ( !list_genre.isSelectionEmpty() )
 				 {
-					 String selection = list_genre.getSelectedValue().toString();
-					 changeKategorienContent(selection);
+					 String selection = list_genre.getSelectedValue().toString().substring(0,2);
+					 
+					 changeKategorienContent( selection );
 					 
 					 list_kategorien.setVisible(true);
 		        	 lblKategorien.setVisible(true);
@@ -510,7 +514,7 @@ public class PartyGUI extends JFrame {
 			{
 				if ( !list_kategorien.isSelectionEmpty() )
 				{
-					String selectionG =  list_genre.getSelectedValue().toString();
+					String selectionG =  list_genre.getSelectedValue().toString().substring(0,2);
 					String selectionK =  list_kategorien.getSelectedValue().toString().substring(0, 2);
 	
 					changeThemesContent(selectionG, selectionK);
@@ -543,20 +547,20 @@ public class PartyGUI extends JFrame {
 				
 				else if ( !list_genre.isSelectionEmpty() && list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					selection = list_genre.getSelectedValue().toString();
+					selection = list_genre.getSelectedValue().toString().substring(0,2);
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
 						partyc.xc.subscribe( selection );
-						InfoPopup.start( selection + " wurde erfolgreich abonniert." );
+						InfoPopup.start( "'" + list_genre.getSelectedValue() + "'  wurde erfolgreich abonniert." );
 					}
 					else
-						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");
+						InfoPopup.start( "Fehler! '" + list_genre.getSelectedValue() + "' wurde bereits abonniert.");
 					
 				}
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && list_themes.isSelectionEmpty() )
 				{
-					selection = list_kategorien.getSelectedValue().toString();
+					selection = list_kategorien.getSelectedValue().toString().substring(0,5);
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
 						partyc.xc.subscribe( selection );
@@ -568,7 +572,7 @@ public class PartyGUI extends JFrame {
 				
 				else if ( !list_genre.isSelectionEmpty() && !list_kategorien.isSelectionEmpty() && !list_themes.isSelectionEmpty() )
 				{
-					selection = list_themes.getSelectedValue().toString();
+					selection = list_themes.getSelectedValue().toString().substring(0,2);
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
 						partyc.xc.subscribe( selection );
@@ -926,16 +930,12 @@ public class PartyGUI extends JFrame {
 	
 	private void changeKategorienContent(String selection)
 	{
-		Vector<String> neueKategorien = partyc.xc.getKategorienNodes(selection);
-		list_kategorien.setListData(neueKategorien);
+		list_kategorien.setListData( kategorienTitles(selection) );
 	}
 	
 	private void changeThemesContent(String selectionG, String selectionK)
 	{
-		Vector<String> neueThemes = partyc.xc.getThemesNodes(selectionG, selectionK);
-		if ( neueThemes.isEmpty() )
-			neueThemes.add("Keine Themes vorhanden");
-		list_themes.setListData(neueThemes);
+		list_themes.setListData( themesTitles(selectionG, selectionK) );
 	}
 	
 	private void updateNews()
@@ -984,6 +984,40 @@ public class PartyGUI extends JFrame {
 		}
 		themes.add("Theme erstellen");
 		comboBox_auswaehlen.setModel( new DefaultComboBoxModel(themes) );
+	}
+	
+	private Vector<String> genresTitles()
+	{
+		genres_liste = new Vector<String>();
+		for (Genre g : PartyClient.rc.getGenres().getGenre())
+			genres_liste.add( g.getGenreId() + " " + g.getGenreTitel() );
+		return genres_liste;
+	}
+	
+	private Vector<String> kategorienTitles(String g_id)
+	{
+		kategorien_liste = new Vector<String>();
+		for ( Kategorie k : PartyClient.rc.getKategorien(g_id).getKategorie() )
+			kategorien_liste.add( k.getKategorieId() + " " + k.getKategorieTitel() );
+		return kategorien_liste;
+	}
+	
+	private Vector<String> themesTitles( String g_id, String k_id )
+	{
+		Vector<String> theme_liste = new Vector<String>();
+		for (Theme t : PartyClient.rc.getThemes().getTheme())
+		{
+			if ( t.getAllgemeines().getThemeId().substring(6).equals(g_id) )
+			{
+				if (t.getAllgemeines().getThemeId().substring(3,5).equals(k_id) )
+					theme_liste.add( t.getAllgemeines().getThemeId() + " " + t.getAllgemeines().getThemeTitel() );
+			}
+				
+		}
+		
+		if ( theme_liste.isEmpty() ) theme_liste.add("keine Themes vorhanden");
+			
+		return theme_liste;
 	}
 	
 	private void close()

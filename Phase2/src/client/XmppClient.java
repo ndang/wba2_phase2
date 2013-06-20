@@ -77,26 +77,27 @@ public class XmppClient
 		/* aller erste Initialisierung, bei Bedarf einkommentieren*/
 		//TODO muss noch gescheit geschrieben werden und nicht so manuell
 		
-//		if ( anz_g+anz_k+anz_t != topics.size() ) 
-//		{
-//			deleteAllTopics();
-//			
-//			for( int i=0; i<anz_g; i++)
-//				createTopic("g"+i);
-//			
-//			createTopic("k0_g0");
-//			createTopic("k1_g0");
-//			createTopic("k0_g1");
-//			createTopic("k1_g1");
-//			createTopic("k0_g2");
-//			createTopic("k0_g3");
-//			createTopic("k1_g3");
-//			createTopic("k2_g3");
-//			
-//			createTopic("t0_k0_g0");
-//			createTopic("t1_k0_g0");
-//			createTopic("t2_k0_g0");	
+		if ( anz_g+anz_k+anz_t != topics.size() ) 
+		{
+			deleteAllTopics();
 			
+			for( int i=0; i<anz_g; i++)
+				createTopic("g"+i);
+			
+			createTopic("k0_g0");
+			createTopic("k1_g0");
+			createTopic("k0_g1");
+			createTopic("k1_g1");
+			createTopic("k0_g2");
+			createTopic("k0_g3");
+			createTopic("k1_g3");
+			createTopic("k2_g3");
+			
+			createTopic("t0_k0_g0");
+			createTopic("t1_k0_g0");
+			createTopic("t2_k0_g0");	
+		}
+		
 		initListeners();
 	}
 	
