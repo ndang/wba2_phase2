@@ -120,7 +120,10 @@ public class ThemeInfo extends JFrame {
 		JLabel lblKategorie = new JLabel("Kategorie");
 		
 		// TODO: richtigen Daten
-		
+		/**
+		 * Greift auf Partyclient zu, der wiederrum auf den RESTclient zugreift
+		 * um das Theme zu laden
+		 */
 		t = PartyClient.rc.getTheme(theme_id);
 		
 		JLabel lblThemeTitel = new JLabel( t.getAllgemeines().getThemeTitel().toString() );
@@ -159,7 +162,11 @@ public class ThemeInfo extends JFrame {
 			}
 		});
 	}
-	
+	/**
+	 * Holt Modul aus Theme
+	 * @param t theme
+	 * @return gibt entsprechend Catering aus
+	 */
 	static protected String getCatering( Theme t )
 	{
 		String catering = "";
@@ -170,7 +177,11 @@ public class ThemeInfo extends JFrame {
 			catering += item.getRezeptname() + ", " + item.getRezeptLink() + "/ ";
 		return catering;
 	}
-	
+	/**
+	 * Holt Modul aus Theme
+	 * @param t theme
+	 * @return gibt Music Modul zurück
+	 */
 	static protected String getMusic( Theme t )
 	{
 		String music = "";
@@ -178,7 +189,11 @@ public class ThemeInfo extends JFrame {
 			music += item.getSongInterpret() + " - " + item.getSongTitel() + ": " + item.getSongTitel() + "   ";
 		return music;
 	}
-	
+	/**
+	 * Holt Modul aus Theme
+	 * @param t theme
+	 * @return gibt Location Modul zurück
+	 */
 	static protected String getLoca( Theme t )
 	{
 		String location = "";
@@ -186,7 +201,11 @@ public class ThemeInfo extends JFrame {
 			location += item.getTitel() + ", " + item.getBild() + ", " + item.getText() + "   ";
 		return location;
 	}
-	
+	/**
+	 * Holt Modul aus Theme
+	 * @param t theme
+	 * @return gibt Outfit Modul zurück
+	 */
 	static protected String getOutfit( Theme t )
 	{
 		String outfit = "";
@@ -194,7 +213,11 @@ public class ThemeInfo extends JFrame {
 			outfit += item.getTitel() + ", " + item.getBild() + ", " + item.getText() + "   ";
 		return outfit;
 	}
-	
+	/**
+	 * Holt Modul aus Theme
+	 * @param t theme
+	 * @return gibt Outfit Modul zurück
+	 */
 	static protected String getDeko( Theme t )
 	{
 		String deko = "";
