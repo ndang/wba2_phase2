@@ -51,7 +51,10 @@ public class XmppClient
 //		deleteAllTopics();
 //		unsubscribeAllUsers();
 	}
-	
+	/**
+	 * inititalisiert alle Topics falls vorhanden,
+	 * wenn nicht vorhanden, werden Topics angelegt.
+	 */
 	private void initTopics()
 	{
 		topics.clear();
@@ -100,7 +103,9 @@ public class XmppClient
 		
 		initListeners();
 	}
-	
+	/**
+	 * Hängt Listeners an Nodes an(Abonnements)
+	 */
 	private void initListeners()
 	{
 		Vector<String> s = getSubscriptions();
@@ -115,12 +120,20 @@ public class XmppClient
 			}
 		}
 	}
-	
+	/**
+	 * Erstellt topicID aus Genre und Kategorien ID
+	 * @param g_id genre ID
+	 * @param k_id KategorienID
+	 * @return gitb TopicID zurück
+	 */
 	public String createTID(String g_id, String k_id)
 	{
 		return "t"+(anz_t++)+"_"+k_id+g_id;
 	}
-	
+	/**
+	 * Erstellt Tpoic mit angepasster Configuartion
+	 * @param id
+	 */
 	public void createTopic(String id)
 	{
 		try
@@ -148,7 +161,10 @@ public class XmppClient
 			System.err.println("Topic konnte nicht angelegt werden.");
 		}	
 	}
-		
+	/**
+	 * Löscht ein Topic	
+	 * @param topic
+	 */
 	public void deleteTopic(String topic)
 	{
 		// TODO: anz_x anpassen und Typ abfragen
@@ -170,7 +186,9 @@ public class XmppClient
 			System.err.println("Topic konnte nicht gelöscht werden.");
 		}
 	}
-	
+	/**
+	 * Löscht alle Topics
+	 */
 	private void deleteAllTopics()
 	{
 		for(LeafNode curr_topic: topics)
@@ -187,7 +205,10 @@ public class XmppClient
 		topics.clear();
 		System.out.println( "Topic Anzahl ist wieder auf "+ topics.size() );
 	}
-	
+	/**
+	 * Vektor wird erstellt, in dem die Abonnements gespeichert werden.
+	 * @return gibt Abos zurück
+	 */
 	public Vector<String> getSubscriptions()
 	{
 		Vector<String> abos = new Vector<String>();
@@ -243,7 +264,10 @@ public class XmppClient
 //		}
 //		return topic_names;
 //	}
-	
+	/**
+	 * Stellt Verbindung zum Partyclient her um USER abzurufen
+	 * @return ID wird zurückgegeben
+	 */
 	private String getMyJID()
 	{
 		String id = PartyClient.con.getUser();
@@ -251,7 +275,11 @@ public class XmppClient
 //		String id = Login.getUser() + "@" + PartyClient.con.getHost();
 		return id;
 	}
-
+	/**
+	 * Prüft, ob Abo, abonniert ist
+	 * @param abo
+	 * @return true wenn wahr
+	 */
 	public boolean isSubscribed(LeafNode abo)
 	{
 		try
@@ -266,7 +294,11 @@ public class XmppClient
 		}
 		return false;
 	}
-	
+	/**
+	 * Überprüft ob Topic abonniert ist
+	 * @param abo_name
+	 * @return
+	 */
 	public boolean isSubscribed(String abo_name)
 	{
 		try {
@@ -277,7 +309,11 @@ public class XmppClient
 			return false;
 		}
 	}
-
+	/**
+	 * Abonniert Topic mit bestimmter ID
+	 * Wenn noch nicht Abonniert, wird abonniert
+	 * @param topic_id
+	 */
 	public void subscribe(String topic_id)
 	{
 		try
@@ -298,7 +334,10 @@ public class XmppClient
 			System.err.println("Topic konnte nicht abonniert werden.");
 		}	
 	}
-	
+	/**
+	 * Abonnements werden gekündigt
+	 * @param topic_id
+	 */
 	public void unsubscribe(String topic_id) 
 	{
 		try
@@ -318,7 +357,9 @@ public class XmppClient
 			System.err.println("Abonemment konnte nicht gekündigt werden!");
 		}
 	}
-
+	/**
+	 * Alle Abos werden gekündigt
+	 */
 	public void unsubscribeAll()
 	{
 		try
@@ -340,7 +381,9 @@ public class XmppClient
 			System.err.println("Abonemment konnte nicht gekündigt werden!");
 		}
 	}
-	
+	/**
+	 * Alle Abonnenten werden entfernt
+	 */
 	private void unsubscribeAllUsers()
 	{
 		try{
@@ -359,7 +402,13 @@ public class XmppClient
 			System.err.println("geht nit.");
 		}
 	}
-	
+	/**
+	 * Theme wird gepublished mit angehängtem Payload
+	 * wird über send statt publish gelöst
+	 * @param t_id
+	 * @param payload
+	 * @return boolean
+	 */
 	public boolean publish(String t_id, String payload)
 	{			
 		payload = "<payload>" + payload + "</payload>";
