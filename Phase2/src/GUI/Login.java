@@ -102,7 +102,9 @@ public class Login extends JFrame {
 		contentPane.add(btnClose, "8, 14");
 		
 		/************************************************************************ ACTIONS ************/
-		
+		/**
+		 * Actionlistener wird dem Button hinzugefügt
+		 */
 		btnClose.addActionListener(new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent arg0)

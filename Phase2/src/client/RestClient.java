@@ -24,13 +24,20 @@ public class RestClient
 	private static String appxml = MediaType.APPLICATION_XML;
 	private static RestServer srv;
 	private WebResource wrs_Ts;
-
+	/**
+ 	* Erstellt einen Grizzly Server
+ 	*/
 	public RestClient()
 	{
 		srv = new RestServer();
 	    wrs_Ts = Client.create().resource( urlClnt_T );
 	}
-		
+	/**
+	 * Erstellt mihilfe des Jersey Frameworks aus Ressourcen
+	 * Java Objekte. Dafür wird die URI benötigt, die über ressource übergeben wird.
+	 * Als mimetype appxml. Beim get muss Typ des Rückgabeobjektes übergeben werden.	
+	 * @return gibt Objekt der Ressource zurück
+	 */
 	public Genres getGenres()
 	{
 		try {
@@ -42,7 +49,11 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * Wie in public Genres getGenres(), nur dass path um die genre ID erweitert wurde.
+	 * @param g_id GEnre ID
+	 * @return Gibt Objekt der Ressource zurück
+	 */
 	public Genre getGenre(String g_id) 
 	{
 		try {
@@ -54,7 +65,11 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * Wie obere Methoden, nur das aus Kategorien Objekte erstellt werden 
+	 * @param g_id Genre ID
+	 * @return gibt Objekt der Ressource zurück
+	 */
 	public Kategorien getKategorien(String g_id)
 	{
 		try {
@@ -66,7 +81,12 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * 
+	 * @param g_id Genre ID
+	 * @param k_id Kategorien ID
+	 * @return
+	 */
 	public Kategorie getKategorie(String g_id, String k_id)
 	{
 		try {
@@ -78,7 +98,10 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * erstellt mit Jersey Framework aus Theme Ressource, Theme Java Objekt
+	 * @return
+	 */
 	public Themes getThemes()
 	{
 		try {
@@ -90,7 +113,10 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * Post wird aufgerufen
+	 * @param t theme
+	 */
 	public void postTheme(Theme t)
 	{
 		try {
@@ -101,7 +127,11 @@ public class RestClient
 			System.err.println("Also als ich die Methode getestet habe, hat es funktioniert. ;)");
 		}
 	}
-	
+	/**
+	 * siehe obige Methoden
+	 * @param t_id themeID
+	 * @return
+	 */
 	public Theme getTheme(String t_id)
 	{
 		try {
@@ -113,7 +143,11 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * wie obige methoden, nur mit PUT
+	 * @param t
+	 * @param t_id
+	 */
 	public void putTheme(Theme t, String t_id)
 	{
 		try {
@@ -124,7 +158,10 @@ public class RestClient
 			System.err.println("Also als ich die Methode getestet habe, hat es funktioniert. ;)");
 		}
 	}
-	
+	/**
+	 * Wie oben, nur mit DELETE
+	 * @param t_id
+	 */
 	public void deleteTheme(String t_id)
 	{
 		try {
@@ -135,7 +172,11 @@ public class RestClient
 			System.err.println("Also als ich die Methode getestet habe, hat es funktioniert. ;)");
 		}
 	}
-	
+	/**
+	 * 
+	 * @param t_id
+	 * @return
+	 */
 	public Kommentare getKommentare(String t_id)
 	{
 		try {
@@ -147,7 +188,12 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * 
+	 * @param t_id	ThemeID
+	 * @param ko_id kommentarID
+	 * @return
+	 */
 	public Kommentar getKommentar(String t_id, String ko_id)
 	{
 		try {
@@ -159,7 +205,9 @@ public class RestClient
 			return null;
 		}
 	}
-	
+	/**
+	 * Rest Server beenden
+	 */
 	public void disconnectRestSrv()
 	{
 		srv.disconnect();

@@ -102,7 +102,10 @@ public class PartyGUI extends JFrame {
 		}
 	});
 }
-
+	/**
+	 * Constructor 
+	 * holt aus dem Vektor die Abonnements
+	 */
 	public PartyGUI()
 	{
 		partyc = new PartyClient();
@@ -243,7 +246,10 @@ public class PartyGUI extends JFrame {
 		});
 		
 	}
-
+	/**
+	 * 
+	 * @param panel_abos
+	 */
 	private void aboMenue(JPanel panel_abos)
 	{
 		JButton btnThemeAnsehen = new JButton("Theme ansehen");
@@ -324,6 +330,9 @@ public class PartyGUI extends JFrame {
 		btnThemeAnsehen.addActionListener(new ActionListener()
 		{
 			@Override
+			/**
+			 * Holt Alle Themes via Partyclient, wenn diese noch nicht im Auswahlfeld sind
+			 */
 			public void actionPerformed(ActionEvent e)
 			{
 				String selection = tree_abos.getSelectionPath().getLastPathComponent().toString();
@@ -337,6 +346,11 @@ public class PartyGUI extends JFrame {
 		btnAbonnementKndigen.addActionListener(new ActionListener()
 		{
 			@Override
+			/**
+			 * Holt Abo Liste von Partyclient über IDByName
+			 * kündigt Abo über XMPP client
+			 * aktualisiert die Liste
+			 */
 			public void actionPerformed(ActionEvent e)
 			{
 				if ( tree_abos.isSelectionEmpty() )
@@ -355,6 +369,11 @@ public class PartyGUI extends JFrame {
 		
 		btnAlleAbonnementsKndigen.addActionListener(new ActionListener()
 		{	
+			/**
+			 * Prüft ob Aboliste vorhanden, wenn ja werden alle Abos
+			 * via partyc.xc über XMPP-client
+			 * AKtualisiert  anschließend die liste
+			 */
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
@@ -488,6 +507,11 @@ public class PartyGUI extends JFrame {
 		list_genre.addListSelectionListener(new ListSelectionListener()
 		{
 			@Override
+			/**
+			 * SelectionListener wird erzeugt,um bei Auswahl eines Genre,
+			 * die Liste zu aktualisieren, damit die Kategorien angezeigt werden
+			 * Informationen werden über die Methode getIDByName vom Partyclient geholt
+			 */
 			public void valueChanged(ListSelectionEvent e)
 			{
 				 if ( !list_genre.isSelectionEmpty() )
@@ -502,7 +526,11 @@ public class PartyGUI extends JFrame {
 				 } 
 			}
 		});
-		
+		/**
+		 * SelectionListener wird erzeugt,um bei Auswahl einer Kategorie,
+		 * die Liste zu aktualisieren, damit die Themes angezeigt werden
+		 * Via getIDByName von partyclient
+		 */
 		list_kategorien.addListSelectionListener(new ListSelectionListener()
 		{
 			@Override
@@ -520,7 +548,9 @@ public class PartyGUI extends JFrame {
 				}
 			}
 		});
-		
+		/**
+		 * falls ein theme ausgewählt wird, wird ThemeInfo.java gestartet
+		 */
 		btnAnsehen.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent arg0)
@@ -531,7 +561,15 @@ public class PartyGUI extends JFrame {
 					ThemeInfo.start( partyc.getIDByName(list_themes.getSelectedValue().toString()) );
 			}
 		});
-		
+		/**
+		 * In dieser Methode werden verschiedene Meldungen ausgeben,
+		 * wenn bei den Überprüfungen, die verschiedenen Fälle zutreffen.
+		 * z.B. wird in der ersten if Bedingung geguckt, ob die Listen von Genres,
+		 * Kategorien und Themes leer sind, falls ja kommt ein Pop-up fenster,dass Topic noch
+		 * ausgewählt werden muss.
+		 *
+		 *Anschließend werden die Listen aktualisiert.
+		 */
 		btnAbonnieren.addActionListener(new ActionListener()
 		{
 			@Override
@@ -775,6 +813,10 @@ public class PartyGUI extends JFrame {
 		comboBox_auswaehlen.addActionListener( new ActionListener()
 		{	
 			@Override
+			/**
+			 * Prüft ob Auswahl = Theme erstellen ist, wenn ja werden entsprechende
+			 * Felder sichtbar gemacht.
+			 */
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String auswahl = comboBox_auswaehlen.getSelectedItem().toString();
@@ -812,6 +854,11 @@ public class PartyGUI extends JFrame {
 		comboBox_genre.addActionListener(new ActionListener()
 		{
 			@Override
+			/**
+			 * Legt einen Vektor an in dem alle Kategoren gespeichert werden,
+			 * die zuvor ausgewählt wurden
+			 * Neue Kategorien Combobox wird erstellt und sichtbar gesetzt.
+			 */
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String selection = partyc.getIDByName( comboBox_genre.getSelectedItem().toString() );
@@ -841,6 +888,11 @@ public class PartyGUI extends JFrame {
 			// TODO: gesamt
 			
 			@Override
+			/**
+			 * Beim Speichern des Themes, wird dem Theme eine neue ID aus, gID und kID
+			 * hinzugefügt und über XMPP.client ein neues Topic mit entsprechneder ID
+			 * erstellt und gepublished
+			 */
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String t_id = "t" + String.valueOf( partyc.xc.anz_t ); // TODO: hier createID benutzen!!
@@ -897,7 +949,9 @@ public class PartyGUI extends JFrame {
 		panel_publish.setLayout(gl_panel_publish);
 		
 		/************************* ActionListener ******************************/
-		
+		/**
+		 * Published ein Item mit ID und Payload über XMPP client
+		 */
 		btnPublish.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent arg0)
@@ -918,17 +972,31 @@ public class PartyGUI extends JFrame {
 	
 	/***************************************************************************************** HILFSFUNKTIONEN *********************/
 	
-	
+	/**
+	 * Ändert den Inhalt der Auswahl
+	 * @param selection
+	 */
 	private void changeKategorienContent(String selection)
 	{
 		list_kategorien.setListData( partyc.getKategorienTitles(selection) );
 	}
-	
+	/**
+	 * Ändert den Inhalt der Auswahl
+	 * @param selectionG
+	 * @param selectionK
+	 */
 	private void changeThemesContent(String selectionG, String selectionK)
 	{
 		list_themes.setListData( partyc.getThemesTitles(selectionG, selectionK) );
 	}
+	/**
+	 * Die folgenden update Methoden aktualisieren die Oberfläche
+	 * je nach Interaktion.
+	 */
 	
+	/**
+	 * Gibt Anzahl der neuen Nachrichten aus, falls welche vorhanden
+	 */
 	private void updateNews()
 	{
 		benachrichtigungen_v = partyc.getBenachrichtigungen();
@@ -940,7 +1008,9 @@ public class PartyGUI extends JFrame {
 
 		list_benachrichtigungen.setListData(benachrichtigungen_v);
 	}
-	
+	/**
+	 * Aktualisiert die Abonnements
+	 */
 	private void updateAbos()
 	{
 		mySubscriptions = partyc.getMySubscriptions();
@@ -969,7 +1039,10 @@ public class PartyGUI extends JFrame {
 		DefaultTreeModel aktuallisiert = new DefaultTreeModel(root);
 		tree_abos.setModel(aktuallisiert);
 	}
-	
+	/**
+	 * Prüft, ob im Vektor Abonnements abgespeichert sind, wenn nicht wird ein neues
+	 * erstellt.
+	 */
 	private void updatePublish()
 	{
 		Vector<String> topics = new Vector<String>();
@@ -985,7 +1058,9 @@ public class PartyGUI extends JFrame {
 		}
 		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( topics ) );
 	}
-	
+	/**
+	 * 
+	 */
 	private void updateBearbeitbar()
 	{
 		Vector<String> themes = new Vector<String>();
