@@ -46,28 +46,6 @@ public class ThemesService {
 	}
 	
 	/**
-	 * Unmarshallt "themes.xml" zum Bearbeiten zu einem Java-Objekt.
-	 * 
-	 * @return gibt das die unmarshallte "themes.xml" als Typ Themes zurück
-	 * @throws JAXBException
-	 * @throws FileNotFoundException
-	 */
-	static public Themes gibThemeDaten()
-	{
-		Themes themes = null;
-		
-		try
-		{
-			themes = (Themes) um.unmarshal(new FileInputStream("XSD/themes.xml"));
-		} catch (JAXBException | FileNotFoundException e) {
-			e.printStackTrace();
-			System.err.println("Themes konnten nicht aus den XML-Dateien gelesen werden!");
-		}
-	    
-		return themes;
-	}
-	
-	/**
 	 * Marshallt (speichert) die evtl. veränderte "themes.xml".
 	 * 
 	 * @param t veränderte Liste der Themes als Java Objekt, welches gemarshallt werden soll
@@ -97,7 +75,17 @@ public class ThemesService {
 	@Produces( MediaType.APPLICATION_XML )
 	public Themes getThemes()
 	{	
-		return gibThemeDaten();
+		Themes themes = null;
+		
+		try
+		{
+			themes = (Themes) um.unmarshal(new FileInputStream("XSD/themes.xml"));
+		} catch (JAXBException | FileNotFoundException e) {
+			e.printStackTrace();
+			System.err.println("Themes konnten nicht aus den XML-Dateien gelesen werden!");
+		}
+	    
+		return themes;
 	}
 	
 	/**
@@ -113,7 +101,7 @@ public class ThemesService {
 	@Produces( MediaType.APPLICATION_XML )
 	public Theme getTheme( @PathParam("theme_id") String theme_id )
 	{
-		Themes themes_daten = gibThemeDaten();
+		Themes themes_daten = getThemes();
 		Theme t = null;
 		
 		for (int i=0; i<themes_daten.getTheme().size(); i++)
@@ -137,7 +125,7 @@ public class ThemesService {
 	@Produces(MediaType.APPLICATION_XML)
 	public Response deleteTheme(@PathParam("theme_id") String theme_id) throws FileNotFoundException, JAXBException
 	{
-		Themes daten = gibThemeDaten();
+		Themes daten = getThemes();
 		for ( int i=0; i<daten.getTheme().size(); i++ )
 		{
 			if( theme_id.equals(daten.getTheme().get(i).getAllgemeines().getThemeId()) )
@@ -157,7 +145,7 @@ public class ThemesService {
 	@Consumes(MediaType.APPLICATION_XML)
 	public void addTheme(Theme t)
 	{
-		Themes daten = gibThemeDaten();		
+		Themes daten = getThemes();		
 		daten.getTheme().add(t);
 		setzeThemeDaten(daten);
 	}
@@ -178,7 +166,7 @@ public class ThemesService {
 	@Consumes(MediaType.APPLICATION_XML)
 	public Response replaceTheme(@PathParam("theme_id") String theme_id, Theme v_theme) throws FileNotFoundException, JAXBException
 	{
-		Themes daten = gibThemeDaten();
+		Themes daten = getThemes();
 		Theme zu_ersetzen = null;
 		
 		for ( int i=0; i<daten.getTheme().size(); i++)
@@ -254,7 +242,7 @@ public class ThemesService {
 	{
 	    Kommentare k_list = getKommentare(theme_id);
 	    k_list.getKommentar().add(new_kommi);
-	    setzeThemeDaten(gibThemeDaten());
+	    setzeThemeDaten(getThemes());
 		return Response.status(201).build();
 	}
 }

@@ -1,41 +1,33 @@
 package client;
 
-import java.io.IOException;
-
 import javax.ws.rs.core.MediaType;
 
-import app.*;
+import webservices.RestServer;
+import app.Genre;
+import app.Genres;
+import app.Kategorie;
+import app.Kategorien;
+import app.Theme;
 import app.Theme.Interaktion.Kommentare;
 import app.Theme.Interaktion.Kommentare.Kommentar;
+import app.Themes;
 
-
-import com.sun.grizzly.http.SelectorThread;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.container.grizzly.GrizzlyServerFactory;
-import org.junit.*;
 
 public class RestClient
 {
-	
 	private static String urlSrvr = "http://localhost:4434";
 	private static String urlClnt_G = urlSrvr + "/genres";
 	private static String urlClnt_T = urlSrvr + "/themes";
 	private static String appxml = MediaType.APPLICATION_XML;
-	private static SelectorThread srv;
+	private static RestServer srv;
 	private WebResource wrs_Ts;
 
 	public RestClient()
 	{
-	    try
-	    {
-			srv = GrizzlyServerFactory.create( urlSrvr );
-		} catch (IllegalArgumentException | IOException e) {
-			e.printStackTrace();
-			System.err.println("\n\n:(\n\n");
-		}
-	    
+		srv = new RestServer();
 	    wrs_Ts = Client.create().resource( urlClnt_T );
 	}
 		
@@ -170,7 +162,7 @@ public class RestClient
 	
 	public void disconnectRestSrv()
 	{
-		srv.stopEndpoint();
+		srv.disconnect();
 	}
 
 }
