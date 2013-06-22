@@ -990,6 +990,11 @@ public class PartyGUI extends JFrame {
 		list_themes.setListData( partyc.getThemesTitles(selectionG, selectionK) );
 	}
 	/**
+	 * Die folgenden update Methoden aktualisieren die Oberfläche
+	 * je nach Interaktion.
+	 */
+	
+	/**
 	 * Gibt Anzahl der neuen Nachrichten aus, falls welche vorhanden
 	 */
 	private void updateNews()
@@ -1004,8 +1009,7 @@ public class PartyGUI extends JFrame {
 		list_benachrichtigungen.setListData(benachrichtigungen_v);
 	}
 	/**
-	 * Schaut sich die Abonnements an und vergleicht diese und
-	 * fügt neuen Nodes an die
+	 * Aktualisiert die Abonnements
 	 */
 	private void updateAbos()
 	{
@@ -1036,7 +1040,8 @@ public class PartyGUI extends JFrame {
 		tree_abos.setModel(aktuallisiert);
 	}
 	/**
-	 * 
+	 * Prüft, ob im Vektor Abonnements abgespeichert sind, wenn nicht wird ein neues
+	 * erstellt.
 	 */
 	private void updatePublish()
 	{
@@ -1053,7 +1058,9 @@ public class PartyGUI extends JFrame {
 		}
 		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( topics ) );
 	}
-	
+	/**
+	 * 
+	 */
 	private void updateBearbeitbar()
 	{
 		Vector<String> themes = new Vector<String>();
