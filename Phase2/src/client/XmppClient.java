@@ -120,16 +120,7 @@ public class XmppClient
 			}
 		}
 	}
-	/**
-	 * Erstellt topicID aus Genre und Kategorien ID
-	 * @param g_id genre ID
-	 * @param k_id KategorienID
-	 * @return gitb TopicID zurück
-	 */
-	public String createTID(String g_id, String k_id)
-	{
-		return "t"+(anz_t++)+"_"+k_id+g_id;
-	}
+
 	/**
 	 * Erstellt Tpoic mit angepasster Configuartion
 	 * @param id
@@ -229,41 +220,6 @@ public class XmppClient
 		return abos;
 	}
 	
-//	public Vector<String> getGenresNodes()
-//	{
-//		Vector<String> topic_names = new Vector<String>();
-//		for (LeafNode topic : topics)
-//		{
-//			String name = topic.getId();
-//			if( name.substring(0,1).equals("g"))
-//				topic_names.add(name);
-//		}
-//		return topic_names;
-//	}
-//	
-//	public Vector<String> getKategorienNodes(String genre)
-//	{
-//		Vector<String> topic_names = new Vector<String>();
-//		for (LeafNode topic : topics)
-//		{
-//			String name = topic.getId();			
-//			if( name.substring(0,1).equals("k") && name.substring(3).equals(genre))
-//				topic_names.add(name);
-//		}
-//		return topic_names;
-//	}
-//	
-//	public Vector<String> getThemesNodes(String genre, String kategorie)
-//	{
-//		Vector<String> topic_names = new Vector<String>();
-//		for (LeafNode topic : topics)
-//		{
-//			String name = topic.getId();
-//			if( name.substring(0,1).equals("t") && name.substring(3,5).equals(kategorie) && name.substring(6).equals(genre) )
-//				topic_names.add(name);
-//		}
-//		return topic_names;
-//	}
 	/**
 	 * Stellt Verbindung zum Partyclient her um USER abzurufen
 	 * @return ID wird zurückgegeben
@@ -271,8 +227,6 @@ public class XmppClient
 	private String getMyJID()
 	{
 		String id = PartyClient.con.getUser();
-//		String id = PartyClient.con.getUser() + "@" + PartyClient.con.getHost();
-//		String id = Login.getUser() + "@" + PartyClient.con.getHost();
 		return id;
 	}
 	/**

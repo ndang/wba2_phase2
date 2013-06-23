@@ -880,13 +880,12 @@ public class PartyGUI extends JFrame {
 				editorPane_cate.setText("");
 				editorPane_music.setText("");
 				editorPane_outfit.setText("");
+				editorPane_loca.setText("");
 			}
 		});
 		
 		btnSpeichern.addActionListener(new ActionListener()
-		{
-			// TODO: gesamt
-			
+		{			
 			@Override
 			/**
 			 * Beim Speichern des Themes, wird dem Theme eine neue ID aus, gID und kID
@@ -895,15 +894,38 @@ public class PartyGUI extends JFrame {
 			 */
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String t_id = "t" + String.valueOf( partyc.xc.anz_t ); // TODO: hier createID benutzen!!
-				String g_id = (String) comboBox_genre.getItemAt( comboBox_genre.getSelectedIndex() );
-				String k_id = (String) comboBox_kategorie.getItemAt( comboBox_kategorie.getSelectedIndex() );
-				String id = t_id + "_" + k_id;
-								
-				partyc.xc.createTopic( partyc.xc.createTID(g_id, k_id) );
-				partyc.xc.publish( id, "new Theme '" + id + "' created" );
+				String t_id;
+				String deko = editorPane_deko.getText();
+				String cate = editorPane_cate.getText();
+				String music = editorPane_music.getText();
+				String outfit = editorPane_outfit.getText();
+				String loca = editorPane_loca.getText();
 				
-				InfoPopup.start( id + " wurde ererstellt.");
+				if ( comboBox_auswaehlen.getSelectedItem().equals( "Theme erstellen" ) )
+				{
+					if ( comboBox_genre.getSelectedItem() == null || comboBox_kategorie.getSelectedItem() == null)
+						InfoPopup.start( "Genre und Kategorie muss ausgewählt sein!" );
+					else 
+					{
+						String g_id = partyc.getIDByName( comboBox_genre.getSelectedItem().toString() );
+						String k_id = partyc.getIDByName( comboBox_kategorie.getSelectedItem().toString() );
+						String titel = txtTitelHierEingeben.getText();
+						t_id = partyc.postTheme( g_id, k_id, titel, deko, cate, music, outfit, loca );
+						InfoPopup.start( t_id + " wurde ererstellt.");
+					}	
+				}
+				
+				else if ( comboBox_auswaehlen.getSelectedItem() != null )
+				{
+					t_id = partyc.getIDByName( comboBox_auswaehlen.getSelectedItem().toString() );
+					partyc.putTheme( t_id, deko, cate, music, outfit, loca );
+					InfoPopup.start( "Änderungen für " + t_id + " wurden übernommen.");
+				}
+				
+				else if ( comboBox_auswaehlen.getSelectedItem() == null )
+				{
+					InfoPopup.start( "Wählen Sie etwas aus dem Dropdown Menü aus!");
+				}
 			}
 		});
 	}
@@ -980,6 +1002,7 @@ public class PartyGUI extends JFrame {
 	{
 		list_kategorien.setListData( partyc.getKategorienTitles(selection) );
 	}
+	
 	/**
 	 * Ändert den Inhalt der Auswahl
 	 * @param selectionG
@@ -1008,6 +1031,7 @@ public class PartyGUI extends JFrame {
 
 		list_benachrichtigungen.setListData(benachrichtigungen_v);
 	}
+	
 	/**
 	 * Aktualisiert die Abonnements
 	 */
@@ -1039,6 +1063,7 @@ public class PartyGUI extends JFrame {
 		DefaultTreeModel aktuallisiert = new DefaultTreeModel(root);
 		tree_abos.setModel(aktuallisiert);
 	}
+	
 	/**
 	 * Prüft, ob im Vektor Abonnements abgespeichert sind, wenn nicht wird ein neues
 	 * erstellt.
@@ -1058,6 +1083,7 @@ public class PartyGUI extends JFrame {
 		}
 		checkBox_subscriptions.setModel( new DefaultComboBoxModel<String>( topics ) );
 	}
+	
 	/**
 	 * 
 	 */

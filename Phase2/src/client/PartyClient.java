@@ -1,14 +1,31 @@
 package client;
 
+import java.util.List;
 import java.util.Vector;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
+import app.Beschreibung;
+import app.Beschreibung.Text;
 import app.Genre;
 import app.Kategorie;
+import app.Rezept;
 import app.Theme;
+import app.Theme.Allgemeines;
+import app.Theme.Allgemeines.Genres;
+import app.Theme.Allgemeines.Kategorien;
+import app.Theme.Module;
+import app.Theme.Module.Catering;
+import app.Theme.Module.Dekoration;
+import app.Theme.Module.Locations;
+import app.Theme.Module.Musik;
+import app.Theme.Module.Musik.Song;
+import app.Theme.Module.Outfits;
 
 import GUI.Login;
 import GUI.PartyGUI;
@@ -251,6 +268,7 @@ public class PartyClient {
 	{
 		xc.benachrichtigungen = new Vector<String>();
 	}
+	
 	/**
 	 * Greift auf den XMPP Client zu undgibt alle subcriptions aus
 	 * @return
@@ -258,6 +276,112 @@ public class PartyClient {
 	public Vector<String> getMySubscriptions()
 	{
 		return xc.getSubscriptions();
+	}
+	
+	/**
+	 * Erstellt topicID aus Genre und Kategorien ID
+	 * @param g_id genre ID
+	 * @param k_id KategorienID
+	 * @return gitb TopicID zurück
+	 */
+	public String createTID(String g_id, String k_id)
+	{
+		return "t" + ( xc.anz_t++ ) + "_" + k_id + g_id;
+	}
+	
+	public boolean putTheme(String t_id, String deko, String cate, String music, String outfits, String loca)
+	{
+		Theme t = rc.getTheme(t_id);
+		
+		List<Beschreibung> d_list = t.getModule().getDekoration().getDekorationElement();
+		for ( Beschreibung b : t.getModule().getDekoration().getDekorationElement())
+			t.getModule().getDekoration().getDekorationElement().remove(b);
+		Beschreibung b_D = new Beschreibung();
+		b_D.setText(new Text ()); // !!! FEHLER
+		b_D.setTitel(deko);
+		t.getModule().getDekoration().getDekorationElement().add(b_D);
+		
+		List<Rezept> r_list = t.getModule().getCatering().getGericht();
+		for (Rezept r : r_list)
+			t.getModule().getCatering().getGericht().remove(r);
+		Rezept r1 = new Rezept();
+		r1.setRezeptname(cate);
+		r1.setRezeptLink("www.chefkoch.de");
+		t.getModule().getCatering().getGericht().add(r1);
+		
+		List<Song> m_list = t.getModule().getMusik().getSong();
+		for (Song s : m_list)
+			t.getModule().getMusik().getSong().remove(s);
+		Song s1 = new Song();
+		s1.setLink("www.youtube.de");
+		s1.setSongInterpret("Interpret");
+		s1.setSongTitel(music);
+		t.getModule().getMusik().getSong().add(s1);
+		
+		List<Beschreibung> o_list = t.getModule().getOutfits().getOutfit();
+		for (Beschreibung b : o_list)
+			 t.getModule().getOutfits().getOutfit().remove(b);
+		Beschreibung b_O = new Beschreibung();
+		b_O.setText(new Text());// !!! FEHLER
+		b_O.setTitel(outfits);	
+		t.getModule().getOutfits().getOutfit().add(b_O);
+		
+		List<Beschreibung> l_list = t.getModule().getLocations().getLocation();
+		for (Beschreibung b : l_list)
+			t.getModule().getLocations().getLocation().remove(b);
+		Beschreibung b_L = new Beschreibung();
+		b_L.setText(new Text());// !!! FEHLER
+		b_L.setTitel(loca);
+		t.getModule().getLocations().getLocation().add(b_L);
+		
+		return true;
+	}
+	
+	public String postTheme(String g_id, String k_id, String titel, String deko, String cate, String music, String outfits, String loca)
+	{
+		String id = createTID( g_id, k_id );
+		Theme t = new Theme();
+		
+		t.setAllgemeines(new Allgemeines());
+		t.getAllgemeines().setBewertung(0);
+		t.getAllgemeines().setGenres(new Genres());
+		t.getAllgemeines().getGenres().getGenre().get(0).setValue(g_id);  // Fehler im Schema! können keine Werte übergeben!
+		t.getAllgemeines().setKategorien(new Kategorien());
+		t.getAllgemeines().getKategorien().getKategorie().get(0).setValue(k_id); // Fehler im Schema! können keine Werte übergeben!
+		t.getAllgemeines().setThemeId(id);
+		t.getAllgemeines().setThemeTitel(titel);
+		
+		t.setModule(new Module());
+		t.getModule().setCatering(new Catering());
+		Rezept r = new Rezept();
+		r.setRezeptname(cate);
+		r.setRezeptLink("www.chefkoch.de");
+		t.getModule().getCatering().getGericht().add(r);
+		
+		t.getModule().setDekoration(new Dekoration());
+		Beschreibung b = new Beschreibung();
+		b.setText( new Text() ); // Fehler im Schema! können keine Werte übergeben!
+		b.setTitel(deko);
+		t.getModule().getDekoration().getDekorationElement().add(b);
+		
+		t.getModule().setMusik(new Musik());
+		t.getModule().getMusik().getSong().add(new Song()); // Fehler im Schema! können keine Werte übergeben!
+		
+		t.getModule().setOutfits(new Outfits());
+		Beschreibung b1 = new Beschreibung();
+		b1.setText(new Text());
+		b1.setTitel(outfits);
+		t.getModule().getOutfits().getOutfit().add(b1);
+		
+		t.getModule().setLocations(new Locations());
+		Beschreibung b2 = new Beschreibung();
+		b2.setText(new Text());// Fehler im Schema! können keine Werte übergeben!
+		b2.setTitel(loca);
+		t.getModule().getLocations().getLocation().add(b2);
+		
+		rc.postTheme(t);
+		
+		return id;
 	}
 }
 	
