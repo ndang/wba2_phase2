@@ -1,6 +1,5 @@
 package GUI;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -29,12 +28,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import app.Genre;
-import app.Kategorie;
-import app.Theme;
-
 import client.PartyClient;
 
+@SuppressWarnings("serial")
 public class PartyGUI extends JFrame {
 
 	private JPanel contentPane;
@@ -56,13 +52,13 @@ public class PartyGUI extends JFrame {
 	JPanel panel_create;
 	
 	//Listen
-	JList list_benachrichtigungen;
+	JList<String> list_benachrichtigungen;
 	Vector<String> genres_liste;
-	JList list_genre;
+	JList<String> list_genre;
 	Vector<String> kategorien_liste;
-	JList list_kategorien;
+	JList<String> list_kategorien;
 	Vector<String> theme_topics;
-	JList list_themes;
+	JList<String> list_themes;
 	JScrollPane scrollPane_theme;
 	Vector<String> benachrichtigungen_v;
 	String nachricht;
@@ -86,6 +82,9 @@ public class PartyGUI extends JFrame {
 	JLabel lblThemeTitel;
 	JLabel lblKategorie;
  
+	/**
+	 * Startet die GUI.
+	 */
 	public static void start()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -98,13 +97,13 @@ public class PartyGUI extends JFrame {
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
+				}
 			}
-		}
-	});
-}
+		});
+	}
+	
 	/**
-	 * Constructor 
-	 * holt aus dem Vektor die Abonnements
+	 * Die GUI startet den PartyClient und baut nach und nach die GUI Elemente auf.
 	 */
 	public PartyGUI()
 	{
@@ -126,6 +125,9 @@ public class PartyGUI extends JFrame {
 		mainTabbedMenue();
 	}
 	
+	/**
+	 * Immer sichtbarer Teil des GUI.
+	 */
 	private void fixedMenue()
 	{
 		btnAusloggen = new JButton("Logout");
@@ -149,11 +151,14 @@ public class PartyGUI extends JFrame {
 		{
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				InfoPopup.start("In WBA verdienen wir eine 1,0..!");
+				InfoPopup.start( "In WBA verdienen wir eine 1,0..!" );
 			}
 		});
 	}
 
+	/**
+	 * Hauptmenü
+	 */
 	private void mainTabbedMenue()
 	{
 		mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -246,10 +251,7 @@ public class PartyGUI extends JFrame {
 		});
 		
 	}
-	/**
-	 * 
-	 * @param panel_abos
-	 */
+	
 	private void aboMenue(JPanel panel_abos)
 	{
 		JButton btnThemeAnsehen = new JButton("Theme ansehen");
@@ -261,17 +263,13 @@ public class PartyGUI extends JFrame {
 		//TODO: Genres, Kategorien und Themes sollen hierarschisch angezeigt werden.
 		
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Meine Abos");
-		
-//		updateAbos();
-		
+				
 		for (String abo : mySubscriptions)
-		{
 			root.add(new DefaultMutableTreeNode( partyc.getNameByID( abo ) ));
-		}
 		
 		tree_abos.setModel(new DefaultTreeModel(root));		
 		
-		// ORGINAL
+		// ORGINAL - Hierarchischer Baum
 //		JTree tree = new JTree();
 //		tree.setModel(new DefaultTreeModel(
 //			new DefaultMutableTreeNode("Meine Party Themes") {
@@ -330,9 +328,6 @@ public class PartyGUI extends JFrame {
 		btnThemeAnsehen.addActionListener(new ActionListener()
 		{
 			@Override
-			/**
-			 * Holt Alle Themes via Partyclient, wenn diese noch nicht im Auswahlfeld sind
-			 */
 			public void actionPerformed(ActionEvent e)
 			{
 				String selection = tree_abos.getSelectionPath().getLastPathComponent().toString();
@@ -346,11 +341,6 @@ public class PartyGUI extends JFrame {
 		btnAbonnementKndigen.addActionListener(new ActionListener()
 		{
 			@Override
-			/**
-			 * Holt Abo Liste von Partyclient über IDByName
-			 * kündigt Abo über XMPP client
-			 * aktualisiert die Liste
-			 */
 			public void actionPerformed(ActionEvent e)
 			{
 				if ( tree_abos.isSelectionEmpty() )
@@ -358,8 +348,10 @@ public class PartyGUI extends JFrame {
 				else
 				{
 					String abo = partyc.getIDByName( tree_abos.getSelectionPath().getLastPathComponent().toString() );
-					partyc.xc.unsubscribe(abo);
-					InfoPopup.start( abo + " wurde erfolgreich gekündigt." );
+					if ( partyc.xc.unsubscribe(abo) )
+						InfoPopup.start( abo + " wurde erfolgreich gekündigt." );
+					else
+						InfoPopup.start( abo + " konnte nicht gekündigt werden!" );
 					updateAbos();
 					updateBearbeitbar();
 					updatePublish();
@@ -381,8 +373,10 @@ public class PartyGUI extends JFrame {
 					InfoPopup.start("Sie haben gar keine Abos...");
 				else
 				{
-					partyc.xc.unsubscribeAll();
-					InfoPopup.start("Alle Abonnements wurden gekündigt.");
+					if ( partyc.xc.unsubscribeAll() )
+						InfoPopup.start("Alle Abonnements wurden gekündigt.");
+					else
+						InfoPopup.start("Abonnements konnte nicht gekündigt werden!");
 					updateAbos();
 					updateBearbeitbar();
 					updatePublish();
@@ -608,12 +602,15 @@ public class PartyGUI extends JFrame {
 					selection = partyc.getIDByName( list_themes.getSelectedValue().toString() );
 					if ( !partyc.xc.isSubscribed( selection ) )
 					{
-						partyc.xc.subscribe( selection );
-						InfoPopup.start( selection + " wurde erfolgreich abonniert.");
-						
-						list_genre.clearSelection();
-						list_kategorien.clearSelection();
-						list_themes.clearSelection();
+						if ( partyc.xc.subscribe( selection ) )
+						{
+							InfoPopup.start( selection + " wurde erfolgreich abonniert.");
+							list_genre.clearSelection();
+							list_kategorien.clearSelection();
+							list_themes.clearSelection();
+						}
+						else
+							InfoPopup.start( selection + " konnte nicht abonniert werden!");
 					}
 					else
 						InfoPopup.start( "Fehler! " + selection + " wurde bereits abonniert.");	
@@ -690,38 +687,16 @@ public class PartyGUI extends JFrame {
 				.addGroup(gl_panel_create.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-							.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-									.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-											.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-												.addGroup(Alignment.TRAILING, gl_panel_create.createSequentialGroup()
-													.addGroup(gl_panel_create.createParallelGroup(Alignment.TRAILING)
-														.addComponent(btnClear, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
-														.addComponent(btnSpeichern, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
-													.addPreferredGap(ComponentPlacement.RELATED))
-												.addGroup(gl_panel_create.createSequentialGroup()
-													.addComponent(lblKategorie)
-													.addPreferredGap(ComponentPlacement.RELATED)))
-											.addGroup(gl_panel_create.createSequentialGroup()
-												.addComponent(comboBox_genre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addPreferredGap(ComponentPlacement.RELATED)))
-										.addGroup(gl_panel_create.createSequentialGroup()
-											.addComponent(lblGenre)
-											.addPreferredGap(ComponentPlacement.RELATED)))
-									.addGroup(gl_panel_create.createSequentialGroup()
-										.addComponent(comboBox_kategorie, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED)))
-								.addGroup(gl_panel_create.createSequentialGroup()
-									.addComponent(txtTitelHierEingeben, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)))
-							.addGroup(gl_panel_create.createSequentialGroup()
-								.addComponent(lblThemeTitel)
-								.addPreferredGap(ComponentPlacement.RELATED)))
-						.addGroup(gl_panel_create.createSequentialGroup()
-							.addComponent(comboBox_auswaehlen, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)))
+						.addComponent(btnClear, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
+						.addComponent(btnSpeichern, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
+						.addComponent(lblGenre)
+						.addComponent(lblThemeTitel)
+						.addComponent(txtTitelHierEingeben, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
+						.addComponent(lblKategorie)
+						.addComponent(comboBox_genre, 0, 158, Short.MAX_VALUE)
+						.addComponent(comboBox_kategorie, 0, 158, Short.MAX_VALUE)
+						.addComponent(comboBox_auswaehlen, 0, 158, Short.MAX_VALUE))
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(tabbedPane_module, GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
 					.addContainerGap())
 		);
@@ -729,11 +704,11 @@ public class PartyGUI extends JFrame {
 			gl_panel_create.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_create.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(gl_panel_create.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_create.createParallelGroup(Alignment.BASELINE)
-							.addComponent(tabbedPane_module, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-							.addComponent(comboBox_auswaehlen, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGroup(Alignment.TRAILING, gl_panel_create.createSequentialGroup()
+					.addGroup(gl_panel_create.createParallelGroup(Alignment.TRAILING)
+						.addComponent(tabbedPane_module, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+						.addGroup(gl_panel_create.createSequentialGroup()
+							.addComponent(comboBox_auswaehlen, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(lblThemeTitel)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(txtTitelHierEingeben, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -907,10 +882,9 @@ public class PartyGUI extends JFrame {
 						InfoPopup.start( "Genre und Kategorie muss ausgewählt sein!" );
 					else 
 					{
-						String g_id = partyc.getIDByName( comboBox_genre.getSelectedItem().toString() );
 						String k_id = partyc.getIDByName( comboBox_kategorie.getSelectedItem().toString() );
 						String titel = txtTitelHierEingeben.getText();
-						t_id = partyc.postTheme( g_id, k_id, titel, deko, cate, music, outfit, loca );
+						t_id = partyc.postTheme( k_id, titel, deko, cate, music, outfit, loca );
 						InfoPopup.start( t_id + " wurde ererstellt.");
 					}	
 				}

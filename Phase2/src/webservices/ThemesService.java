@@ -19,10 +19,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import app.Theme;
-import app.Theme.Interaktion.Kommentare;
-import app.Theme.Interaktion.Kommentare.Kommentar;
-import app.Themes;
+import jaxb.Theme;
+import jaxb.Themes;
+import jaxb.Theme.Interaktion.Kommentare;
+import jaxb.Theme.Interaktion.Kommentare.Kommentar;
+
 
 
 @Path("/themes")

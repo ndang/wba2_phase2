@@ -6,7 +6,7 @@
 //
 
 
-package app;
+package jaxb;
 
 import java.util.ArrayList;
 import java.util.List;

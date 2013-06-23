@@ -12,10 +12,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import app.Genre;
-import app.Genres;
-import app.Kategorie;
-import app.Kategorien;
+import jaxb.Genre;
+import jaxb.Genres;
+import jaxb.Kategorie;
+import jaxb.Kategorien;
+
 
 @Path("/genres")
 public class GenresKategorienService {

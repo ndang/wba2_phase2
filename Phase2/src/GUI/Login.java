@@ -17,6 +17,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
+@SuppressWarnings("serial")
 public class Login extends JFrame {
 
 	private JPanel contentPane;
@@ -115,6 +116,7 @@ public class Login extends JFrame {
 		
 		btnLogin.addActionListener(new ActionListener()
 		{
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e)
 			{
 				user = textField_user.getText();

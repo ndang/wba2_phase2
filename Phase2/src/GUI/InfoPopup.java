@@ -11,13 +11,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+@SuppressWarnings("serial")
 public class InfoPopup extends JFrame
 {
 	private static String text;
 	
-	/**
-	 * Launch the application.
-	 */
 	public static void start(String meldung)
 	{
 		text = meldung;
@@ -33,9 +31,6 @@ public class InfoPopup extends JFrame
 		});
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public InfoPopup(String meldung)
 	{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,37 +1,37 @@
 package client;
 
-import java.util.List;
 import java.util.Vector;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
+import jaxb.Beschreibung;
+import jaxb.Beschreibung.Text;
+import jaxb.Genre;
+import jaxb.Kategorie;
+import jaxb.Rezept;
+import jaxb.Theme;
+import jaxb.Theme.Allgemeines;
+import jaxb.Theme.Allgemeines.Genres;
+import jaxb.Theme.Allgemeines.Kategorien;
+import jaxb.Theme.Module;
+import jaxb.Theme.Module.Catering;
+import jaxb.Theme.Module.Dekoration;
+import jaxb.Theme.Module.Locations;
+import jaxb.Theme.Module.Musik;
+import jaxb.Theme.Module.Musik.Song;
+import jaxb.Theme.Module.Outfits;
 
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
-import app.Beschreibung;
-import app.Beschreibung.Text;
-import app.Genre;
-import app.Kategorie;
-import app.Rezept;
-import app.Theme;
-import app.Theme.Allgemeines;
-import app.Theme.Allgemeines.Genres;
-import app.Theme.Allgemeines.Kategorien;
-import app.Theme.Module;
-import app.Theme.Module.Catering;
-import app.Theme.Module.Dekoration;
-import app.Theme.Module.Locations;
-import app.Theme.Module.Musik;
-import app.Theme.Module.Musik.Song;
-import app.Theme.Module.Outfits;
-
 import GUI.Login;
 import GUI.PartyGUI;
 
-public class PartyClient {
-
+/**
+ * Client der Party-App. Dient als Schnittstelle zwischen der GUI und den Services.
+ *
+ */
+public class PartyClient
+{
 	public static RestClient rc;
 	public static XmppClient xc;
 	public static PartyGUI pg;
@@ -39,10 +39,11 @@ public class PartyClient {
 	private String server = "localhost";
 
 	/**
-	 * Eine Verbindung zum REST-Client und XMPP Client wird hergestellt
-	 * Login Daten werden angefordert: Login Name + Passwort
-	 * Bei erfolgreichem Einloggen, entsprechende Meldung
-	 * Bei falschen Daten, entsprechende Meldung 
+	 * Bei der Instantziierung eines Clients wird direkt versucht eine Verbindung zum XMPP- und REST-Server herzustellen.
+	 * Die LogIn Daten bekommt der Client aus dem zuvor gestarteten LogIn-Screen.
+	 * Je nach Erfolg der Anmeldung am XMPP-Server gibt der Client an die Kommandozeile eine Nachricht aus.
+	 * REST-Client und XMPP-Client werden instanziiert, um später Anfragen von der GUI zu deligieren.
+	 * Startet außerdem optional (auskommentierte Zeile) den Smack-Debugger.
 	 */
 	public PartyClient()
 	{
@@ -58,22 +59,26 @@ public class PartyClient {
 			System.err.println("\nLogin fehlgeschlagen.");
 		}
 		
-		this.rc = new RestClient();
-		this.xc = new XmppClient();
+		rc = new RestClient();
+		xc = new XmppClient();
 	}
 	
+	/**
+	 * Beendet den REST-Server und trennt die Verbindung zum XMPP-Server.
+	 * Gibt anschließend eine Bestätigungs-Meldung aus.
+	 */
 	public void logout()
 	{
 		rc.disconnectRestSrv();
 		con.disconnect();
 		System.out.println( Login.getUser() + " ausgeloggt." );
 	}
-
-/**
- * Holt die IDs über die zugehörigen Namen
- * @param name 
- * @return gibt die ID zum passenden Namen zurück
- */
+	
+	/**
+	 * Holt die ID eines Topics anhand des Names.
+	 * @param name Name des Topics
+	 * @return ID des Topics
+	 */
 	public String getIDByName(String name)
 	{
 		String id = "";
@@ -89,11 +94,12 @@ public class PartyClient {
 		
 		return id;
 	}
-/**
- * Holt die Namen der Ressourcen über die IDs
- * @param id der Ressource
- * @return gitb den Namen der Ressource zurück
- */
+	
+	/**
+	 * Holt den Namen des Topics anhand der ID.
+	 * @param id ID des Topics
+	 * @return Name des Topics
+	 */
 	public String getNameByID(String id)
 	{
 		String name = "";
@@ -110,11 +116,11 @@ public class PartyClient {
 	}
 	
 	/**
-	 * Prüft, um welchen Titel es sich handelt
-	 * Holt den Titel der entsprechenden Ressource 
-	 * @param id der Ressource
-	 * @return gibt passende id, den dazugehörigen string zurück,
-	 * 			
+	 * Holt den Titel eines Topics anhand dessen ID.
+	 * Dabei besteht der Titel aus der vorangestellten ID und dem Namen des Topcis.
+	 * Prüft dabei vorher, ob es sich um ein Genre, eine Kategorie oder ein Theme handelt.
+	 * @param id ID des Topics
+	 * @return gibt passende id, den dazugehörigen string zurück,			
 	 */
 	public String getTitle(String id)
 	{
@@ -126,9 +132,9 @@ public class PartyClient {
 	}
 	
 	/**
-	 * Holt den Titel des Genre, greift dabei auf den RESTclient zu
-	 * @param g_id GenreID
-	 * @return gibt den Titel des Genres aus
+	 * Holt den Titel des Genre.
+	 * @param g_id ID des Genres
+	 * @return Titel des Genre
 	 */
 	public String getGenreTitel(String g_id)
 	{
@@ -136,15 +142,16 @@ public class PartyClient {
 	}
 	
 	/**
-	 * Holt den Titel der Kategorie, greift dabei auf den RESTclient zu
-	 * @param g_id GenreID
-	 * @param k_id ist abhängig von der GenreID
-	 * @return gibt den Titel der Kategorie aus
+	 * Holt den Titel der Kategorie.
+	 * @param g_id ID des Genre
+	 * @param k_id ID der Lategorie
+	 * @return Titel der Kategorie
 	 */
 	public String getKategorieTitel(String g_id, String k_id)
 	{
 		return rc.getKategorie(g_id, k_id).getKategorieTitel();
 	}
+	
 	/**
 	 * Holt den Titel eines Themes, greift dabei auf den RESTclient zu
 	 * @param t_id ThemeID
@@ -154,32 +161,35 @@ public class PartyClient {
 	{
 		return rc.getTheme(t_id).getAllgemeines().getThemeTitel().toString();
 	}
+	
 	/**
- 	* Prüft ob eingegebene ID ein Genre ist
- 	* @param id
- 	* @return Wenn ja, true
+ 	* Prüft ob das Topic mit der übergebenen ID ein Genre ist.
+ 	* @param id zu prüfende ID
+ 	* @return true, falls es sich um ein Genre handelt/ false, falls nicht
  	*/
 	public boolean isGenre(String id)
 	{
-		if ( id.substring(0,1).equals("g"))
+		if ( id.substring(0,1).equals("g") )
 			return true;
 		return false;
 	}
+	
 	/**
-	 * Prüft ob eingegebene ID eine Kategorie ist
-	 * @param id
-	 * @return
+	 * Prüft ob das Topic mit der übergebenen ID eine Kategorie ist.
+	 * @param id zu prüfende ID
+	 * @return true, falls es sich um eine Kategorie handelt/ false, falls nicht
 	 */
 	public boolean isKategorie(String id)
 	{
-		if ( id.substring(0,1).equals("k"))
+		if ( id.substring(0,1).equals("k") )
 			return true;
 		return false;
 	}
+	
 	/**
-	 * Prüft, ob eingebene ID ein Theme ist.
-	 * @param id
-	 * @return
+	 * Prüft, ob das Topic mit der übergebenen ID ein Theme ist.
+	 * @param id zu prüfende ID
+	 * @return true, falls es sich um ein Theme handelt/ false, falls nicht
 	 */
 	public boolean isTheme(String id)
 	{
@@ -187,10 +197,11 @@ public class PartyClient {
 			return true;
 		return false;
 	}
+	
 	/**
-	 * Legt einen neuen Vektor an, indem die Titel hinzugefügt werden
-	 * @param ids
-	 * @return gibt Titel
+	 * Holt eine Liste von Titeln. Ob von Genres, Kategorien oder Themes ist unbekannt.
+	 * @param ids Liste der ID's von denen die Titel ermittelt werden sollen.
+	 * @return Liste mit den verlangten Titel
 	 */
 	public Vector<String> getTitles(Vector<String> ids)
 	{
@@ -199,9 +210,10 @@ public class PartyClient {
 			names.add( getTitle(id) );
 		return names;
 	}
+	
  	/**
- 	 * Legt einen neuen Vektor an, holt über RESTclient die Titel der Genres, fügt diese hinzu
- 	 * @return gibt GenreTitel aus
+ 	 * Holt eine Liste der Titel aller Genres.
+ 	 * @return Liste der Titel aller Genres
  	 */
 	public Vector<String> getGenresTitles()
 	{
@@ -210,11 +222,11 @@ public class PartyClient {
 			genres_liste.add( g.getGenreId() + " " + g.getGenreTitel() );
 		return genres_liste;
 	}
+	
 	/**
-	 * Legt einen neuen Vektor an, holt über RESTclient die Titel der Kategorien, 
-	 * fügt diese hinzu
-	 * @param g_id
-	 * @return Liste der Kategorien wird ausgegeben
+	 * Holt eine Liste der Titel aller Kategorien.
+	 * @param g_id zur Kategorie zugehörige Genre-ID
+	 * @return Liste der Titel aller Kategorien
 	 */
 	public Vector<String> getKategorienTitles(String g_id)
 	{
@@ -223,23 +235,21 @@ public class PartyClient {
 			kategorien_liste.add( k.getKategorieId() + " " + k.getKategorieTitel() );
 		return kategorien_liste;
 	}
+	
 	/**
-	 * Legt einen neuen Vektor an, holt über RESTclient die Themes Titel
-	 * Prüft, ob die IDs aus den Listen übereinstimmen
-	 * oder ob überhaupt Themes überhaupt vorhanden sind
-	 * @param g_id GenreID
-	 * @param k_id KategorienID
-	 * @return gibt liste aller themes zurück
+	 * Holt eine Liste der Titel aller Themes.
+	 * @param g_id zum Theme zugehörige Genre-ID
+	 * @param k_id zum Theme zugehörige Kategorie-ID
+	 * @return Liste der Titel aller Themes
 	 */
 	public Vector<String> getThemesTitles( String g_id, String k_id )
 	{
 		Vector<String> theme_liste = new Vector<String>();
-		for (Theme t : rc.getThemes().getTheme())
+		for ( Theme t : rc.getThemes().getTheme() )
 		{
-			System.out.println( t.getAllgemeines().getThemeId().substring(6));
 			if ( t.getAllgemeines().getThemeId().substring(6).equals(g_id) )
 			{
-				if (t.getAllgemeines().getThemeId().substring(3).equals(k_id) )
+				if ( t.getAllgemeines().getThemeId().substring(3).equals(k_id) )
 					theme_liste.add( t.getAllgemeines().getThemeId() + " " + t.getAllgemeines().getThemeTitel() );
 			}		
 		}
@@ -248,30 +258,31 @@ public class PartyClient {
 			
 		return theme_liste;
 	}
+	
 	/**
-	 * Prüft ob Benachrichtigungen vorhanden sind, greift auf XMPP client zu
-	 * wenn nicht vorhanden wird ein neuer Vektor zum speichern von Benachrichtigungen
-	 * angelegt.
-	 * @return Vektor wird erstellt
+	 * Holt die Liste der Benachrichtigungen.
+	 * Falls keine vorhanden ist, wird eine leere Liste zurückgegeben.
+	 * @return Liste der Benachrichtigungen
 	 */
 	public Vector<String> getBenachrichtigungen()
 	{
-		if( !xc.benachrichtigungen.isEmpty() )
-			return xc.benachrichtigungen;
+		if( !XmppClient.benachrichtigungen.isEmpty() )
+			return XmppClient.benachrichtigungen;
 		else
 			return new Vector<String>();	
 	}
+	
 	/**
-	 * löscht Benachrichtigungen
+	 * Löscht alle Benachrichtigungen.
 	 */
 	public void deleteBenachrichtigungen()
 	{
-		xc.benachrichtigungen = new Vector<String>();
+		XmppClient.benachrichtigungen = new Vector<String>();
 	}
 	
 	/**
-	 * Greift auf den XMPP Client zu undgibt alle subcriptions aus
-	 * @return
+	 * Holt alle Abonnements des eingeloggten Users.
+	 * @return Lister der Abonnements
 	 */
 	public Vector<String> getMySubscriptions()
 	{
@@ -279,75 +290,89 @@ public class PartyClient {
 	}
 	
 	/**
-	 * Erstellt topicID aus Genre und Kategorien ID
-	 * @param g_id genre ID
-	 * @param k_id KategorienID
-	 * @return gitb TopicID zurück
+	 * Erstellt eine ID für ein neu angelegtes Theme.
+	 * Die ID ist abhängig vom zugehörigem Genre und von der zugehörigen Kategorie.
+	 * @param g_id zum Theme zugehörige Genre-ID
+	 * @param k_id zum Theme zugehörige Kategorie-ID
+	 * @return ID für das neue Theme
 	 */
-	public String createTID(String g_id, String k_id)
+	public String createTID(String k_id)
 	{
-		return "t" + ( xc.anz_t++ ) + "_" + k_id + g_id;
+		return "t"+ (XmppClient.anz_t++) + "_" + k_id;
 	}
 	
+	/**
+	 * Verändert die Daten eines Themes.
+	 * Erstellt neue JAXB Elemente und fügt diese einem vorhandenem Theme an.
+	 * @param t_id ID des Themes
+	 * @param deko Dekorations-Daten an das Theme
+	 * @param cate Catering-Daten an das Theme
+	 * @param music Musik-Daten an das Theme
+	 * @param outfits Outfits-Daten an das Theme
+	 * @param loca Location-Daten an das Theme
+	 * @return true, falls Theme geändert werden konnte
+	 */
 	public boolean putTheme(String t_id, String deko, String cate, String music, String outfits, String loca)
 	{
 		Theme t = rc.getTheme(t_id);
 		
-		List<Beschreibung> d_list = t.getModule().getDekoration().getDekorationElement();
-		for ( Beschreibung b : t.getModule().getDekoration().getDekorationElement())
-			t.getModule().getDekoration().getDekorationElement().remove(b);
 		Beschreibung b_D = new Beschreibung();
-		b_D.setText(new Text ()); // !!! FEHLER
+		b_D.setText(new Text ());
+		b_D.getText().getSchritt().add(deko);
 		b_D.setTitel(deko);
 		t.getModule().getDekoration().getDekorationElement().add(b_D);
 		
-		List<Rezept> r_list = t.getModule().getCatering().getGericht();
-		for (Rezept r : r_list)
-			t.getModule().getCatering().getGericht().remove(r);
 		Rezept r1 = new Rezept();
 		r1.setRezeptname(cate);
 		r1.setRezeptLink("www.chefkoch.de");
 		t.getModule().getCatering().getGericht().add(r1);
 		
-		List<Song> m_list = t.getModule().getMusik().getSong();
-		for (Song s : m_list)
-			t.getModule().getMusik().getSong().remove(s);
 		Song s1 = new Song();
 		s1.setLink("www.youtube.de");
 		s1.setSongInterpret("Interpret");
 		s1.setSongTitel(music);
 		t.getModule().getMusik().getSong().add(s1);
 		
-		List<Beschreibung> o_list = t.getModule().getOutfits().getOutfit();
-		for (Beschreibung b : o_list)
-			 t.getModule().getOutfits().getOutfit().remove(b);
 		Beschreibung b_O = new Beschreibung();
-		b_O.setText(new Text());// !!! FEHLER
+		b_O.setText(new Text());
+		b_O.getText().getSchritt().add(outfits);
 		b_O.setTitel(outfits);	
 		t.getModule().getOutfits().getOutfit().add(b_O);
 		
-		List<Beschreibung> l_list = t.getModule().getLocations().getLocation();
-		for (Beschreibung b : l_list)
-			t.getModule().getLocations().getLocation().remove(b);
 		Beschreibung b_L = new Beschreibung();
-		b_L.setText(new Text());// !!! FEHLER
+		b_L.setText(new Text());
+		b_L.getText().getSchritt().add(loca);
 		b_L.setTitel(loca);
 		t.getModule().getLocations().getLocation().add(b_L);
+		
+		rc.putTheme(t, t_id);
 		
 		return true;
 	}
 	
-	public String postTheme(String g_id, String k_id, String titel, String deko, String cate, String music, String outfits, String loca)
+	/**
+	 * Erstellt anhand übergebener Daten ein neues Theme.
+	 * Ein erstelltes Theme wird automatisch auch abonniert.
+	 * @param k_id zum Theme zugehörige Kategorie, die notwendig ist um eine neue ID zu erstellen.
+	 * @param titel Titel des neuen Themes
+	 * @param deko Dekorations-Daten an das Theme
+	 * @param cate cate Catering-Daten an das Theme
+	 * @param music music Musik-Daten an das Theme
+	 * @param outfits outfits Outfits-Daten an das Theme
+	 * @param loca loca Location-Daten an das Theme
+	 * @return ID des neuen Themes
+	 */
+	public String postTheme(String k_id, String titel, String deko, String cate, String music, String outfits, String loca)
 	{
-		String id = createTID( g_id, k_id );
+		String id = createTID( k_id );
 		Theme t = new Theme();
 		
 		t.setAllgemeines(new Allgemeines());
 		t.getAllgemeines().setBewertung(0);
 		t.getAllgemeines().setGenres(new Genres());
-		t.getAllgemeines().getGenres().getGenre().get(0).setValue(g_id);  // Fehler im Schema! können keine Werte übergeben!
+//		t.getAllgemeines().getGenres().getGenre().get(0).setValue(g_id);  // Fehler im Schema! können keine Werte übergeben!
 		t.getAllgemeines().setKategorien(new Kategorien());
-		t.getAllgemeines().getKategorien().getKategorie().get(0).setValue(k_id); // Fehler im Schema! können keine Werte übergeben!
+//		t.getAllgemeines().getKategorien().getKategorie().get(0).setValue(k_id); // Fehler im Schema! können keine Werte übergeben!
 		t.getAllgemeines().setThemeId(id);
 		t.getAllgemeines().setThemeTitel(titel);
 		
@@ -361,6 +386,7 @@ public class PartyClient {
 		t.getModule().setDekoration(new Dekoration());
 		Beschreibung b = new Beschreibung();
 		b.setText( new Text() ); // Fehler im Schema! können keine Werte übergeben!
+		b.getText().getSchritt().add(deko);
 		b.setTitel(deko);
 		t.getModule().getDekoration().getDekorationElement().add(b);
 		
@@ -381,7 +407,9 @@ public class PartyClient {
 		
 		rc.postTheme(t);
 		
+		xc.createTopic(id);
+		xc.subscribe(id);
+		
 		return id;
 	}
 }
-	

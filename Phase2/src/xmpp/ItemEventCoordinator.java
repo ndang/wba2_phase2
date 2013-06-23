@@ -22,9 +22,7 @@ public class ItemEventCoordinator implements ItemEventListener<Item>
 		for ( int i=0; i<itemlist.size(); i++ )
 		{	
 			pi = (PayloadItem<SimplePayload>) itemlist.get(i);			
-			System.out.println(  );
-			for (String s :  items.getSubscriptions() )
-				System.out.println(s + " hi");
+			System.out.println("New Item.");
 			
 			String text = pi.getPayload().toString().substring(52);
 			XmppClient.benachrichtigungen.add( items.getPublishedDate() + ", " + items.getNodeId()+": " + text);

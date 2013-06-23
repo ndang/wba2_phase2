@@ -1,27 +1,26 @@
 package GUI;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import javax.tools.JavaFileManager.Location;
 
-import app.Beschreibung;
-import app.Theme;
-import app.Theme.Module.Musik.Song;
+import jaxb.Beschreibung;
+import jaxb.Theme;
+import jaxb.Theme.Module.Musik.Song;
 import client.PartyClient;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
+@SuppressWarnings("serial")
 public class ThemeInfo extends JFrame {
 
 	private JPanel contentPane;
@@ -43,6 +42,10 @@ public class ThemeInfo extends JFrame {
 		});
 	}
 
+	/**
+	 * Greift auf Partyclient zu, der wiederrum auf den RESTclient zugreift
+	 * um das Theme zu laden
+	 */
 	public ThemeInfo()
 	{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -118,70 +121,60 @@ public class ThemeInfo extends JFrame {
 		JLabel lblOutfits = new JLabel("Outfits");
 		JLabel lblGenre = new JLabel("Genre");
 		JLabel lblKategorie = new JLabel("Kategorie");
+		JLabel lblBewertung = new JLabel("Bewertung");
 		
-		// TODO: richtigen Daten
-		/**
-		 * Greift auf Partyclient zu, der wiederrum auf den RESTclient zugreift
-		 * um das Theme zu laden
-		 */
 		t = PartyClient.rc.getTheme(theme_id);
 		
 		JLabel lblThemeTitel = new JLabel( t.getAllgemeines().getThemeTitel().toString() );
-		JLabel lblBewertung = new JLabel("Bewertung");
-		contentPane.add(lblThemeTitel, "2, 2");
-		contentPane.add(lblBewertung, "2, 4");
-		JLabel lblBewertungangabe = new JLabel ( String.valueOf(t.getAllgemeines().getBewertung()) ) ;	
-		contentPane.add(lblBewertungangabe, "6, 4");
-		contentPane.add(lblDekoration, "2, 8");
-		JLabel lblKeineAngaben_deko = new JLabel( getDeko(t) );
-		contentPane.add(lblKeineAngaben_deko, "6, 8");
-		contentPane.add(lblCatering, "2, 10");
-		JLabel lblKeineAngaben_cate = new JLabel( getCatering(t) );
-		contentPane.add(lblKeineAngaben_cate, "6, 10");
-		contentPane.add(lblMusik, "2, 12");	
+		JLabel lblBewertungangabe = new JLabel ( String.valueOf(t.getAllgemeines().getBewertung()) ) ;
 		JLabel lblKeineAngaben_music = new JLabel( getMusic(t) );
-		contentPane.add(lblKeineAngaben_music, "6, 12");
-		contentPane.add(lblLocation, "2, 14");
+		JLabel lblKeineAngaben_cate = new JLabel( getCatering(t) );
+		JLabel lblKeineAngaben_deko = new JLabel( getDeko(t) );
 		JLabel lblKeineAngaben_loca = new JLabel( getLoca(t) );
-		contentPane.add(lblKeineAngaben_loca, "6, 14");
-		contentPane.add(lblOutfits, "2, 16");	
 		JLabel lblKeineAngaben_outfit = new JLabel( getOutfit(t) );
-		contentPane.add(lblKeineAngaben_outfit, "6, 16");	
-		contentPane.add(lblGenre, "2, 20");	
-		JLabel lblGenrename = new JLabel( t.getAllgemeines().getGenres().getGenre().get(0).getValue() );
-		contentPane.add(lblGenrename, "6, 20");
-		contentPane.add(lblKategorie, "2, 22");
-		JLabel lblKategorienamen = new JLabel( t.getAllgemeines().getKategorien().getKategorie().get(0).getValue());
-		contentPane.add(lblKategorienamen, "6, 22");
+//		JLabel lblGenrename = new JLabel( t.getAllgemeines().getGenres().getGenre().get(0).getValue() ); 
+		JLabel lblGenrename = new JLabel(":( Fehler im Schema");
+//		JLabel lblKategorienamen = new JLabel( t.getAllgemeines().getKategorien().getKategorie().get(0).getValue());
+		JLabel lblKategorienamen = new JLabel(":( Fehler im Schema");
 		JButton btnOk = new JButton("OK");
-		contentPane.add(btnOk, "6, 26");
 		
 		btnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				close();
 			}
 		});
+		
+		contentPane.add(lblThemeTitel, "2, 2");
+		contentPane.add(lblBewertung, "2, 4");
+		contentPane.add(lblBewertungangabe, "6, 4");
+		contentPane.add(lblDekoration, "2, 8");
+		contentPane.add(lblKeineAngaben_deko, "6, 8");
+		contentPane.add(lblCatering, "2, 10");
+		contentPane.add(lblKeineAngaben_cate, "6, 10");
+		contentPane.add(lblMusik, "2, 12");	
+		contentPane.add(lblKeineAngaben_music, "6, 12");
+		contentPane.add(lblLocation, "2, 14");
+		contentPane.add(lblKeineAngaben_loca, "6, 14");
+		contentPane.add(lblOutfits, "2, 16");	
+		contentPane.add(lblKeineAngaben_outfit, "6, 16");	
+		contentPane.add(lblGenre, "2, 20");
+		contentPane.add(lblGenrename, "6, 20");
+		contentPane.add(lblKategorie, "2, 22");
+		contentPane.add(lblKategorienamen, "6, 22");
+		contentPane.add(btnOk, "6, 26");
 	}
-	/**
-	 * Holt Modul aus Theme
-	 * @param t theme
-	 * @return gibt entsprechend Catering aus
-	 */
+	
 	static protected String getCatering( Theme t )
 	{
 		String catering = "";
-		for (app.Rezept item : t.getModule().getCatering().getGericht())
+		for (jaxb.Rezept item : t.getModule().getCatering().getGericht())
 			catering += item.getRezeptname() + ", " + item.getRezeptLink() + "/ ";
 		
-		for (app.Rezept item : t.getModule().getCatering().getGetraenk())
+		for (jaxb.Rezept item : t.getModule().getCatering().getGetraenk())
 			catering += item.getRezeptname() + ", " + item.getRezeptLink() + "/ ";
 		return catering;
 	}
-	/**
-	 * Holt Modul aus Theme
-	 * @param t theme
-	 * @return gibt Music Modul zurück
-	 */
+	
 	static protected String getMusic( Theme t )
 	{
 		String music = "";
@@ -189,11 +182,7 @@ public class ThemeInfo extends JFrame {
 			music += item.getSongInterpret() + " - " + item.getSongTitel() + ": " + item.getSongTitel() + "   ";
 		return music;
 	}
-	/**
-	 * Holt Modul aus Theme
-	 * @param t theme
-	 * @return gibt Location Modul zurück
-	 */
+	
 	static protected String getLoca( Theme t )
 	{
 		String location = "";
@@ -201,11 +190,7 @@ public class ThemeInfo extends JFrame {
 			location += item.getTitel() + ", " + item.getBild() + ", " + item.getText() + "   ";
 		return location;
 	}
-	/**
-	 * Holt Modul aus Theme
-	 * @param t theme
-	 * @return gibt Outfit Modul zurück
-	 */
+	
 	static protected String getOutfit( Theme t )
 	{
 		String outfit = "";
@@ -213,11 +198,7 @@ public class ThemeInfo extends JFrame {
 			outfit += item.getTitel() + ", " + item.getBild() + ", " + item.getText() + "   ";
 		return outfit;
 	}
-	/**
-	 * Holt Modul aus Theme
-	 * @param t theme
-	 * @return gibt Outfit Modul zurück
-	 */
+	
 	static protected String getDeko( Theme t )
 	{
 		String deko = "";

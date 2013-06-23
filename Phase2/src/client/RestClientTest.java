@@ -1,16 +1,18 @@
 package client;
 
-import app.Genre;
-import app.Genres;
-import app.Kategorie;
-import app.Kategorien;
-import app.Theme;
-import app.Theme.Interaktion.Kommentare;
-import app.Themes;
+import jaxb.Genre;
+import jaxb.Genres;
+import jaxb.Kategorie;
+import jaxb.Kategorien;
+import jaxb.Theme;
+import jaxb.Themes;
 
-
-public class RestClientTest {
-
+/**
+ * Testet jede implementierte HTTP-Methode.
+ * @param args
+ */
+public class RestClientTest
+{
 	public static void main(String[] args)
 	{
 		/********** GET - Methoden ******************/
@@ -18,22 +20,22 @@ public class RestClientTest {
 		RestClient wsc = new RestClient();
 		
 		Genres gs = wsc.getGenres();
-		System.out.println(gs.getGenre().size());
+		System.out.println( "Genre-Anzahl: " + gs.getGenre().size());
+
+		Kategorien ks = wsc.getKategorien("g0");
+		System.out.println( "Kategorie-Anzahl: " + ks.getKategorie().size());
 		
 		Themes ts = wsc.getThemes();
-		System.out.println("Aktuelle Theme-Anzahl: " + ts.getTheme().size());
+		System.out.println( "Theme-Anzahl: " + ts.getTheme().size());
 		
 		Genre g = wsc.getGenre("g0");
-		System.out.println(g.getGenreId().toString());
-		
-		Kategorien ks = wsc.getKategorien("g0");
-		System.out.println(ks.getKategorie().size());
+		System.out.println( "Irgendeine Genre-ID: " + g.getGenreId().toString());
 		
 		Kategorie k = wsc.getKategorie("g0", "k0_g0");
-		System.out.println(k.getKategorieId().toString());
+		System.out.println( "Irgendeine Kategorie-ID: " + k.getKategorieId().toString());
 		
 		Theme t = wsc.getTheme("t0_k0_g0");
-		System.out.println(t.getAllgemeines().getThemeId().toString());
+		System.out.println( "Irgendeine Theme-ID: " + t.getAllgemeines().getThemeId().toString());
 		
 //		Kommentare kos = wsc.getKommentare("t0_k0_g0");
 //		System.out.println(kos.getKommentar().size());
@@ -62,6 +64,7 @@ public class RestClientTest {
 			if ( t_items.equals(newT) )
 				truuuuth = 1;
 		}
+		
 		System.out.println(truuuuth);
 	}
 
